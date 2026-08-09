@@ -1,7 +1,7 @@
-# jtviegas-fda_faers
+# tgedr-fdafaers
 
 ![Coverage](./coverage.svg)
-[![PyPI](https://img.shields.io/pypi/v/jtviegas-fda_faers)](https://pypi.org/project/jtviegas-fda_faers/)
+[![PyPI](https://img.shields.io/pypi/v/tgedr-fdafaers)](https://pypi.org/project/tgedr-fdafaers/)
 
 
 

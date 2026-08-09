@@ -1,5 +1,5 @@
 [project]
-name = "jtviegas-fda_faers"
+name = "tgedr-fdafaers"
 version = "0.0.1"
 description = "this is a template for a python package"
 authors = [
@@ -39,7 +39,7 @@ requires = ["uv-build>=0.6,<1.0"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
-module-name = "tgedr_fda_faers"
+module-name = "tgedr_fdafaers"
 
 [tool.coverage.paths]
 source = ["src/"]

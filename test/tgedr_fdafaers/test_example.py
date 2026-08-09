@@ -1,5 +1,5 @@
 """Module with example function unit test for description purposes."""
-from tgedr_fda_faers.example import dict2pd
+from tgedr_fdafaers.example import dict2pd
 
 
 def test_example() -> None:

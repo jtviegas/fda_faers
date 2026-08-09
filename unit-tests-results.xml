@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="0.942" timestamp="2026-08-09T22:48:42.210611+02:00" hostname="jtv"><testcase classname="test.tgedr_fdafaers.test_example" name="test_example" time="0.002" /></testsuite></testsuites>
