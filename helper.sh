@@ -190,7 +190,15 @@ export TEST_DIR=${TEST_DIR:-"${this_folder}/test"}
 
 reqs(){
   info "[reqs|in]"
-  _pwd=`pwd`
+
+  which uv
+  if [ ! "$?" -eq "0" ]; then 
+    info "[reqs] uv is not installed. Installing now...";
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    [ ! "$?" -eq "0" ] && err "[reqs] failed to install uv" && exit 1
+  fi
+
+  _pwd=$(pwd)
   cd "$this_folder"
 
   uv sync --group dev
