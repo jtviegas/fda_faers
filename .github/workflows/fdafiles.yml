@@ -10,6 +10,8 @@ env:
 jobs:
   execute_pipeline:
     runs-on: ubuntu-24.04
+    outputs:
+      output: ${{ steps.py-step.outputs.run_next }}
     permissions:
       contents: write
     steps:
@@ -21,7 +23,7 @@ jobs:
     - name: 'setup python env'
       run: |
         uv venv .venv --python 3.11
-    - name: 'install datasets library'
+    - name: 'install library'
       run: uv pip install --python .venv/bin/python tgedr-datasets
     - name: 'get new prices'
       run: |
