@@ -20,9 +20,6 @@ jobs:
         fetch-depth: '0'
     - name: 'install uv'
       run: curl -LsSf https://astral.sh/uv/install.sh | sh
-    - name: 'setup python env'
-      run: |
-        uv venv .venv --python ${{ env.PYTHON_VERSION }}
     - name: 'install library'
       run: uv pip install --python .venv/bin/python tgedr-fdafaers
     - name: 'find periods to process'
