@@ -73,7 +73,6 @@ skip_empty = false
 # bdd_features_base_dir = "documentation/features"
 pythonpath = "."
 
-
 [tool.ruff]
 exclude = [
     ".bzr",

@@ -3,8 +3,9 @@
 import logging
 import urllib.request
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 from urllib.error import HTTPError
+from urllib.parse import urlparse
 
 from tgedr_dataops_abs.source import Source, SourceException
 
@@ -20,6 +21,7 @@ class FaersFileSource(Source):
     CONTEXT_KEY_OUTPUT_URL = "output_url"
     CONTEXT_KEY_PERIOD = "period"
     OUTPUT_FILE_PATTERN = "{year}q{quarter}.zip"
+    __ALLOWED_SCHEMES: ClassVar[set[str]] = {"http", "https", "dbfs"}
 
     def __get_period_url(self, context: dict[str, Any]) -> tuple[FaersPeriod, str]:
         """Extract and validate the period from *context*, returning it and the resolved download URL."""
@@ -62,8 +64,12 @@ class FaersFileSource(Source):
         )
         logger.info(f"[get] retrieving file: {target_url} from url: {url} ")
 
+        scheme = urlparse(target_url).scheme
+        if scheme not in self.__ALLOWED_SCHEMES:
+            raise SourceException(f"[get] unsupported URL scheme: {scheme} - {target_url}")
+
         try:
-            urllib.request.urlretrieve(url, target_url)
+            urllib.request.urlretrieve(url, target_url)   # nosec B310
         except HTTPError as x:
             if 404 != x.code:
                 raise SourceException(f"[get] failed request to: {url}") from x
