@@ -28,7 +28,7 @@ jobs:
     - name: 'find periods to process'
       id: find_periods
       run: |
-        uv run python --module tgedr_fdafaers.etl.periods_to_process \
+        uv run run --module tgedr_fdafaers.etl.periods_to_process \
           --classname Periods2Process \
           --callable run \
           --classparams "{\"configuration\": {\"bronze_dataset\": \"${{ env.HF_DATASET_BRONZE }}\"}}"
