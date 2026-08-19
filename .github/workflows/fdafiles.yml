@@ -4,16 +4,16 @@ on:
   workflow_dispatch:
 
 env:
-  HF_DS_TICKERS: "jtviegas/ticker_analysis_tickers"
-  HF_DS_PRICES: "jtviegas/ticker_analysis_prices"
+  PYTHON_VERSION: "3.12.3"
+  HF_DATASET_BRONZE: "jtviegas/faers_bronze"
 
 jobs:
   execute_pipeline:
     runs-on: ubuntu-24.04
-    outputs:
-      output: ${{ steps.py-step.outputs.run_next }}
+    # outputs:
+    #   output: ${{ steps.py-step.outputs.run_next }}
     permissions:
-      contents: write
+      contents: read
     steps:
     - uses: actions/checkout@v4
       with:
@@ -22,14 +22,18 @@ jobs:
       run: curl -LsSf https://astral.sh/uv/install.sh | sh
     - name: 'setup python env'
       run: |
-        uv venv .venv --python 3.11
+        uv venv .venv --python ${{ env.PYTHON_VERSION }}
     - name: 'install library'
-      run: uv pip install --python .venv/bin/python tgedr-datasets
-    - name: 'get new prices'
+      run: uv pip install --python .venv/bin/python tgedr-fdafaers
+    - name: 'find periods to process'
+      id: find_periods
       run: |
-        .venv/bin/run --module tgedr_datasets.prices.etl \
-          --classname PricesEtl \
+        .venv/bin/run --module tgedr_fdafaers.etl.periods_to_process \
+          --classname Periods2Process \
           --callable run \
-          --classparams "{\"configuration\": {\"tickers_dataset\": \"${{ env.HF_DS_TICKERS }}\", \"target_dataset\": \"${{ env.HF_DS_PRICES }}\"}}"
+          --classparams "{\"configuration\": {\"bronze_dataset\": \"${{ env.HF_DATASET_BRONZE }}\"}}"
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
+    - name: 'set output'
+      run: |
+        echo "Periods: ${{ steps.find_periods.outputs.result }}"

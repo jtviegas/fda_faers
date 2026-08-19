@@ -1,23 +1,23 @@
 """FAERS period representation and period-range utilities."""
 
+import logging
+import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import List, Optional
-import re
-import logging
-
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class FaersPeriod:
-    """
-    data class depicting the concept of an FAERS period
-    """
+    """Data class depicting the concept of an FAERS period."""
 
     year: int
     quarter: int
+
+    def __hash__(self) -> int:
+        """Return the hash of this period."""
+        return hash((self.year, self.quarter))
 
     def __lt__(self, other):
         """Return True if this period is strictly before *other*."""
@@ -49,23 +49,20 @@ class FaersPeriod:
 
     @staticmethod
     def from_str(period: str) -> "FaersPeriod":
-        """
-        converts an FaersPeriod from its string representation back to its structured representation
-        """
+        """Converts an FaersPeriod from its string representation back to its structured representation."""
         elements = period.split("q")
         # DISCLAIMER: we assume this code will fail in 75 years from now
         # --->>> RUN UNIT TESTS and it will surface ( ...as if... :-) )
-        year = int(("20" + elements[0]))
+        year = int("20" + elements[0])
         quarter = int(elements[1])
-
         return FaersPeriod(year, quarter)
 
-
-class FaersPeriods:
+class UtilsFaersPeriod:
     """
     handy class comprising static methods for FaersPeriod operations
     """
 
+    __URL_FILE_PATTERN = "https://fis.fda.gov/content/Exports/{faers_prefix}_ascii_{year}{quarter_midfix}{quarter}.zip"
     AERS_END_PERIOD = FaersPeriod(2012, 3)
     AERS_START_PERIOD = FaersPeriod(2004, 1)
 
@@ -75,7 +72,7 @@ class FaersPeriods:
         returns the current FAERS period based on the current UTC date
         """
         logger.debug("[get_current_period|in]")
-        now = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc)  # noqa: UP017
         result = FaersPeriod(now.year, (int((now.month - 1) / 3) + 1) - 1)
         logger.debug(f"[get_current_period|out] => {result}")
         return result
@@ -123,60 +120,60 @@ class FaersPeriods:
         in the last quarter of 2012, back then the files were called `aers` and become `faers`.
 
         """
-        logger.debug(f"[is_faers_processing|in] ({period})")
-        result = period > FaersPeriods.AERS_END_PERIOD
-        logger.debug(f"[is_faers_processing|out] => {result}")
+        logger.debug(f"[is_faers_period|in] ({period})")
+        result = period > UtilsFaersPeriod.AERS_END_PERIOD
+        logger.debug(f"[is_faers_period|out] => {result}")
         return result
 
     @staticmethod
-    def get_all_faers_periods() -> List[FaersPeriod]:
+    def get_all_faers_periods() -> list[FaersPeriod]:
         """
         computes the overall list of periods since ever
         """
         logger.debug("[get_all_faers_periods|in]")
-        result = FaersPeriods.get_faers_periods() + FaersPeriods.get_aers_periods()
+        result = UtilsFaersPeriod.get_faers_periods() + UtilsFaersPeriod.get_aers_periods()
         logger.debug(f"[get_all_faers_periods|out] => {result}")
         return result
 
     @staticmethod
-    def get_faers_periods() -> List[FaersPeriod]:
+    def get_faers_periods() -> list[FaersPeriod]:
         """
         computes the overall list of periods since the beginning of FAERS data format availability
         """
         logger.debug("[get_faers_periods|in]")
 
-        current_period: FaersPeriod = FaersPeriods.get_current_period()
+        current_period: FaersPeriod = UtilsFaersPeriod.get_current_period()
 
-        period = FaersPeriods.next_period(FaersPeriods.AERS_END_PERIOD)
+        period = UtilsFaersPeriod.next_period(UtilsFaersPeriod.AERS_END_PERIOD)
 
         result = []
         while period < current_period:
             result.append(period)
-            period = FaersPeriods.next_period(period)
+            period = UtilsFaersPeriod.next_period(period)
 
         logger.debug(f"[get_faers_periods|out] => {result}")
         return result
 
     @staticmethod
-    def get_aers_periods() -> List[FaersPeriod]:
+    def get_aers_periods() -> list[FaersPeriod]:
         """
         computes the overall list of periods since the beginning of AERS data format availability
         until the beginning of FAERS data format availability
         """
         logger.debug("[get_aers_periods|in]")
 
-        period = FaersPeriods.AERS_START_PERIOD
+        period = UtilsFaersPeriod.AERS_START_PERIOD
 
         result = []
-        while period <= FaersPeriods.AERS_END_PERIOD:
+        while period <= UtilsFaersPeriod.AERS_END_PERIOD:
             result.append(period)
-            period = FaersPeriods.next_period(period)
+            period = UtilsFaersPeriod.next_period(period)
 
         logger.debug(f"[get_aers_periods|out] => {result}")
         return result
 
     @staticmethod
-    def resolve_period(basename: str) -> Optional[FaersPeriod]:
+    def resolve_period(basename: str) -> FaersPeriod | None:
         """
         Extracts a FaersPeriod from a filename basename.
 
@@ -190,3 +187,28 @@ class FaersPeriods:
         year = int(match.group(1))
         quarter = int(match.group(2))
         return FaersPeriod(year, quarter)
+
+    @staticmethod
+    def get_url(period: FaersPeriod) -> str:
+        """Based on the period, FAERS file names have a different format.
+
+        As there were changes in the last quarter of 2012, back then the files were called `aers`
+        and became `faers`, so we need to derive the file names differently depending on the period.
+        """
+        logger.info(f"[get_url|in] ({period})")
+
+        faers_prefix = "aers"
+        quarter_midfix = "q"
+        if UtilsFaersPeriod.is_faers_period(period):
+            faers_prefix = "faers"
+            quarter_midfix = "Q"
+
+        result = UtilsFaersPeriod.__URL_FILE_PATTERN.format(
+            faers_prefix=faers_prefix,
+            year=period.year,
+            quarter_midfix=quarter_midfix,
+            quarter=period.quarter,
+        )
+
+        logger.info(f"[get_url|out] =>{result}")
+        return result

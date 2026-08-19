@@ -10,8 +10,8 @@ readme = "README.md"
 requires-python = ">=3.12,<3.13"
 
 dependencies = [
-    "pandas>=2.3.0,<3.0.0",
-    "tgedr-pycommons>=1.2.1",
+    "tgedr-pycommons>=1.2.3",
+    "tgedr-dataops-ext>=1.0.8",
 ]
 [dependency-groups]
 dev = [
@@ -103,7 +103,8 @@ exclude = [
     "site-packages",
     "venv",
     "test/",
-    "typings/"
+    "typings/",
+    "deprecated/"
 ]
 
 line-length = 120
@@ -111,9 +112,11 @@ indent-width = 4
 
 [tool.ruff.lint]
 select = ["ALL"]
-ignore = ["D203", "S101", "D104", "INP001", "D213", "COM812", "I001", 
-    "D401", "D407", "RET504", "PLR2004", "FA102", "E501", "EXE002", "PLR0913", 
-    "PLR0912", "C901", "PLR0911", "G004", "D413"]
+ignore = ["D203", "S101", "D104", "INP001", "D213", "COM812", "I001",
+    "D401", "D407", "RET504", "PLR2004", "FA102", "E501", "EXE002", "PLR0913",
+    "PLR0912", "C901", "PLR0911", "G004", "D413", "CPY001", "SIM300", "TC002",
+    "EM102", "TRY003", "S310", "D403", "D212", "D400", "D205", "D415", "D200",
+    "ANN003", "ANN001", "ANN204", "ANN401", "EM101"]
 fixable = ["ALL"]
 unfixable = []
 # Allow unused variables when underscore-prefixed.
