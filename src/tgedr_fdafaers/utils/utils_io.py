@@ -23,7 +23,7 @@ class UtilsIO:
         result: bool = False
 
         scheme = urlparse(url).scheme
-        if scheme not in UtilsIO.__ALLOWED_SCHEMES:
+        if 0 < len(scheme) and scheme not in UtilsIO.__ALLOWED_SCHEMES:
             raise UtilsIOError(f"[resource_exists] unsupported URL scheme: {scheme} - {url}")
 
         try:

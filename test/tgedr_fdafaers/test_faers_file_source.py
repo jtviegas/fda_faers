@@ -127,3 +127,11 @@ def test_get_wraps_generic_exceptions(
 
     with pytest.raises(SourceException, match="failed request"):
         source.get({"period": "24q3", "output_url": str(tmp_path)})
+
+
+def test_get_raises_on_unsupported_output_url_scheme(tmp_path: Path) -> None:
+    """Get should reject output URLs with unsupported schemes."""
+    source = FaersFileSource()
+
+    with pytest.raises(SourceException, match="unsupported URL scheme"):
+        source.get({"period": "24q1", "output_url": "ftp://remote/path"})

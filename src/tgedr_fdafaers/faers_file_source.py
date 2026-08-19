@@ -65,7 +65,7 @@ class FaersFileSource(Source):
         logger.info(f"[get] retrieving file: {target_url} from url: {url} ")
 
         scheme = urlparse(target_url).scheme
-        if scheme not in self.__ALLOWED_SCHEMES:
+        if 0 < len(scheme) and scheme not in self.__ALLOWED_SCHEMES:
             raise SourceException(f"[get] unsupported URL scheme: {scheme} - {target_url}")
 
         try:

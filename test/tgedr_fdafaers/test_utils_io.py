@@ -50,3 +50,9 @@ def test_resource_exists_wraps_http_errors(monkeypatch: pytest.MonkeyPatch) -> N
 
     with pytest.raises(UtilsIOError, match="failed request"):
         UtilsIO.resource_exists("https://example.com/data.zip")
+
+
+def test_resource_exists_raises_on_unsupported_scheme() -> None:
+    """An unsupported URL scheme should raise UtilsIOError."""
+    with pytest.raises(UtilsIOError, match="unsupported URL scheme"):
+        UtilsIO.resource_exists("ftp://example.com/data.zip")
