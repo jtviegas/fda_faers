@@ -18,22 +18,24 @@ class FetchPeriodFiles(Etl4GH):
         """Initialise the ETL with runtime configuration."""
         super().__init__(configuration=configuration)
         self._tmp_dir: str = UtilsIO.tmp_dir()
-        self._files_fetched: dict[str, str] = {}
+        self._files_fetched: list[str] = []
 
     @Etl4GH.inject_configuration
-    def extract(self, periods: str, max_periods: int) -> Any:
+    def extract(self, periods: str, max_periods: int) -> None:
         """Fetch source files for the requested periods."""
         logger.info(f"[extract|in] (periods={periods}, max_periods={max_periods})")
         periods_to_fetch: list[str] = [p.strip() for p in periods.split(",")][:max_periods]
         source: FaersFileSource = FaersFileSource()
         for period in periods_to_fetch:
-            self._files_fetched[period] = source.get(context={
+            self._files_fetched.append(
+                source.get(context={
                 FaersFileSource.CONTEXT_KEY_OUTPUT_URL: self._tmp_dir,
                 FaersFileSource.CONTEXT_KEY_PERIOD: period
                 })
+            )
         logger.info(f"[extract|out] files fetched: {self._files_fetched}")
 
-    def transform(self) -> Any:
+    def transform(self) -> None:
         """Transform nothing."""
         logger.info("[transform|in]")
         logger.info("[transform|out]")
