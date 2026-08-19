@@ -20,12 +20,15 @@ jobs:
         fetch-depth: '0'
     - name: 'install uv'
       run: curl -LsSf https://astral.sh/uv/install.sh | sh
+    - name: 'setup python env'
+      run: |
+        uv venv .venv --python ${{ env.PYTHON_VERSION }}
     - name: 'install library'
       run: uv pip install --python .venv/bin/python tgedr-fdafaers
     - name: 'find periods to process'
       id: find_periods
       run: |
-        .venv/bin/run --module tgedr_fdafaers.etl.periods_to_process \
+        uv run python --module tgedr_fdafaers.etl.periods_to_process \
           --classname Periods2Process \
           --callable run \
           --classparams "{\"configuration\": {\"bronze_dataset\": \"${{ env.HF_DATASET_BRONZE }}\"}}"
