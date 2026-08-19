@@ -27,7 +27,10 @@ class FetchPeriodFiles(Etl4GH):
         periods_to_fetch: list[str] = [p.strip() for p in periods.split(",")][:max_periods]
         source: FaersFileSource = FaersFileSource()
         for period in periods_to_fetch:
-            self._files_fetched[period] = source.get(context={FaersFileSource.CONTEXT_KEY_OUTPUT_URL: self._tmp_dir})
+            self._files_fetched[period] = source.get(context={
+                FaersFileSource.CONTEXT_KEY_OUTPUT_URL: self._tmp_dir,
+                FaersFileSource.CONTEXT_KEY_PERIOD: period
+                })
         logger.info(f"[extract|out] files fetched: {self._files_fetched}")
 
     def transform(self) -> Any:
