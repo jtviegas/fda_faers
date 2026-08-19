@@ -41,7 +41,7 @@ jobs:
         uv run run --module tgedr_fdafaers.etl.fetch_period_files \
           --classname FetchPeriodFiles \
           --callable run \
-          --classparams "{\"configuration\": {\"periods\": \"${{ steps.find_periods.outputs.result }}\", \"max_periods_to_process\": ${{ env.MAX_PERIODS_TO_PROCESS }}}}"
+          --classparams "{\"configuration\": {\"periods\": \"${{ steps.find_periods.outputs.result }}\", \"max_periods\": ${{ env.MAX_PERIODS_TO_PROCESS }}}}"
     - name: 'set output'
       run: |
         echo "Periods: ${{ steps.fetch_period_files.outputs.result }}"
