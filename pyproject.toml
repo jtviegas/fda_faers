@@ -1,6 +1,6 @@
 [project]
 name = "tgedr-fdafaers"
-version = "0.0.1"
+version = "0.0.2"
 description = "this is a template for a python package"
 authors = [
     {name = "developer",email = "developer@email.com"}
@@ -31,8 +31,8 @@ dev = [
     "python-dotenv>=1.2.2",
 ]
 
-# [project.scripts]
-# run = "tgedr_pycommons.cicd.entrypoint:entrypoint" 
+[project.scripts]
+run = "tgedr_pycommons.cicd.entrypoint:entrypoint" 
 
 [build-system]
 requires = ["uv-build>=0.6,<1.0"]
