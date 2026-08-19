@@ -1,6 +1,8 @@
 """I/O utility helpers."""
 
 import logging
+from pathlib import Path
+import tempfile
 from typing import ClassVar
 import urllib.request
 from urllib.error import HTTPError
@@ -15,6 +17,15 @@ class UtilsIO:
     """Utility methods for I/O-related operations."""
 
     __ALLOWED_SCHEMES: ClassVar[set[str]] = {"http", "https", "dbfs"}
+
+    @staticmethod
+    def tmp_dir() -> str:
+        """Create and return the path to a temporary directory."""
+        _folder = tempfile.TemporaryDirectory("+wb").name
+        _path = Path(_folder)
+        if not _path.exists():
+            _path.mkdir(parents=True)
+        return _folder
 
     @staticmethod
     def resource_exists(url: str) -> bool:

@@ -6,6 +6,7 @@ on:
 env:
   PYTHON_VERSION: "3.12.3"
   HF_DATASET_BRONZE: "jtviegas/faers_bronze"
+  MAX_PERIODS_TO_PROCESS: 3
 
 jobs:
   execute_pipeline:
@@ -34,6 +35,13 @@ jobs:
           --classparams "{\"configuration\": {\"bronze_dataset\": \"${{ env.HF_DATASET_BRONZE }}\"}}"
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
+    - name: 'fetch period files to process'
+      id: fetch_period_files
+      run: |
+        uv run run --module tgedr_fdafaers.etl.fetch_period_files \
+          --classname FetchPeriodFiles \
+          --callable run \
+          --classparams "{\"configuration\": {\"periods\": \"${{ steps.find_periods.outputs.result }}\", \"max_periods_to_process\": ${{ env.MAX_PERIODS_TO_PROCESS }}}}"
     - name: 'set output'
       run: |
-        echo "Periods: ${{ steps.find_periods.outputs.result }}"
+        echo "Periods: ${{ steps.fetch_period_files.outputs.result }}"
