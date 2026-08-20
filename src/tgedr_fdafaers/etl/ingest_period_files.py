@@ -57,6 +57,7 @@ class IngestPeriodFiles(Etl4GH):
         logger.info("[transform|in]")
         logger.info("[transform|out]")
 
+    @Etl4GH.inject_configuration
     def load(self, dataset_prefix: str) -> str:
         """Return the corrected file paths as a comma-separated string."""
         logger.info(f"[load|in] ({dataset_prefix})")
