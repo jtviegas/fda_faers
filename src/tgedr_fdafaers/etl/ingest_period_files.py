@@ -74,7 +74,7 @@ class IngestPeriodFiles(Etl4GH):
                     append=True,
                 )
             except NoStoreException as e:
-                logger.warning(f"could not update dataset {dataset_name}: {e}. Attempting to create new dataset.")
+                logger.warning(f"could not update dataset {dataset_name}: {e}. Attempting to create new dataset.")   #nosec B608
                 store.save(
                     df=dfs,
                     key=dataset_name
