@@ -466,7 +466,7 @@ class FaersFilesCorrections(Processor):
                     corrections_applied += 1
 
         if table in self.__COLUMN_RENAMES:
-            df = df.rename(columns=self.__COLUMN_RENAMES[table])  # noqa: PD901
+            df = df.rename(columns=self.__COLUMN_RENAMES[table])
             logger.debug(f"[dataframe_processing] table {table} columns renamed")
             corrections_applied += 1
 

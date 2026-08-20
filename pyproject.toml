@@ -1,6 +1,6 @@
 [project]
 name = "tgedr-fdafaers"
-version = "0.0.6"
+version = "0.0.7"
 description = "this is a template for a python package"
 authors = [
     {name = "developer",email = "developer@email.com"}
@@ -11,7 +11,7 @@ requires-python = ">=3.12,<3.13"
 
 dependencies = [
     "tgedr-pycommons>=1.2.3",
-    "tgedr-dataops-ext>=1.0.8",
+    "tgedr-dataops-ext>=1.0.9",
 ]
 [dependency-groups]
 dev = [
@@ -32,7 +32,7 @@ dev = [
 ]
 
 [project.scripts]
-run = "tgedr_pycommons.cicd.entrypoint:entrypoint" 
+run = "tgedr_pycommons.cicd.entrypoint:entrypoint"
 
 [build-system]
 requires = ["uv-build>=0.6,<1.0"]
@@ -115,7 +115,7 @@ ignore = ["D203", "S101", "D104", "INP001", "D213", "COM812", "I001",
     "D401", "D407", "RET504", "PLR2004", "FA102", "E501", "EXE002", "PLR0913",
     "PLR0912", "C901", "PLR0911", "G004", "D413", "CPY001", "SIM300", "TC002",
     "EM102", "TRY003", "S310", "D403", "D212", "D400", "D205", "D415", "D200",
-    "ANN003", "ANN001", "ANN204", "ANN401", "EM101"]
+    "ANN003", "ANN001", "ANN204", "ANN401", "EM101", "PD901"]
 fixable = ["ALL"]
 unfixable = []
 # Allow unused variables when underscore-prefixed.

@@ -5,7 +5,8 @@ on:
 
 env:
   PYTHON_VERSION: "3.12.3"
-  HF_DATASET_BRONZE: "jtviegas/faers_bronze"
+  HF_DATASET_BRONZE_PREFIX: "jtviegas/faers_bronze_"
+  HF_DATASET_BRONZE_DEMO: "jtviegas/faers_bronze_demo"
   MAX_PERIODS_TO_PROCESS: 3
 
 jobs:
@@ -32,7 +33,7 @@ jobs:
         uv run run --module tgedr_fdafaers.etl.periods_to_process \
           --classname Periods2Process \
           --callable run \
-          --classparams "{\"configuration\": {\"bronze_dataset\": \"${{ env.HF_DATASET_BRONZE }}\"}}"
+          --classparams "{\"configuration\": {\"bronze_dataset\": \"${{ env.HF_DATASET_BRONZE_DEMO }}\"}}"
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
     - name: 'fetch period files to process'
@@ -51,6 +52,16 @@ jobs:
           --classname ProcessPeriodFiles \
           --callable run \
           --classparams "{\"configuration\": {\"files\": \"${{ steps.fetch_period_files.outputs.result }}\"}}"
+    - name: 'ingest period files'
+      if: steps.process_period_files.outputs.result != ''
+      id: ingest_period_files
+      run: |
+        uv run run --module tgedr_fdafaers.etl.ingest_period_files \
+          --classname IngestPeriodFiles \
+          --callable run \
+          --classparams "{\"configuration\": {\"files\": \"${{ steps.process_period_files.outputs.result }}\", \"dataset_prefix\": \"${{ env.HF_DATASET_BRONZE_PREFIX }}\"}}"
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
     - name: 'check output'
       run: |
-        echo "Files: ${{ steps.process_period_files.outputs.result }}"
+        echo "Files: ${{ steps.ingest_period_files.outputs.result }}"
