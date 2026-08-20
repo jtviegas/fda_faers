@@ -36,12 +36,21 @@ jobs:
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
     - name: 'fetch period files to process'
+      if: steps.find_periods.outputs.result != ''
       id: fetch_period_files
       run: |
         uv run run --module tgedr_fdafaers.etl.fetch_period_files \
           --classname FetchPeriodFiles \
           --callable run \
           --classparams "{\"configuration\": {\"periods\": \"${{ steps.find_periods.outputs.result }}\", \"max_periods\": ${{ env.MAX_PERIODS_TO_PROCESS }}}}"
-    - name: 'set output'
+    - name: 'process period files'
+      if: steps.fetch_period_files.outputs.result != ''
+      id: process_period_files
       run: |
-        echo "Periods: ${{ steps.fetch_period_files.outputs.result }}"
+        uv run run --module tgedr_fdafaers.etl.process_period_files \
+          --classname ProcessPeriodFiles \
+          --callable run \
+          --classparams "{\"configuration\": {\"files\": \"${{ steps.fetch_period_files.outputs.result }}\"}}"
+    - name: 'check output'
+      run: |
+        echo "Files: ${{ steps.process_period_files.outputs.result }}"

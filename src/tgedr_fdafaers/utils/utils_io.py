@@ -1,12 +1,15 @@
 """I/O utility helpers."""
 
+from collections.abc import Callable
 import logging
 from pathlib import Path
 import tempfile
+import shutil
 from typing import ClassVar
 import urllib.request
 from urllib.error import HTTPError
 from urllib.parse import urlparse
+import zipfile
 
 logger = logging.getLogger(__name__)
 
@@ -46,4 +49,32 @@ class UtilsIO:
 
         logger.info(f"[resource_exists|out] => {result}")
 
+        return result
+
+    @staticmethod
+    def deflate_zip(file: str, target_folder: str, file_filter: Callable[[str], bool] = lambda f: True,  # noqa: ARG005
+                    lower_filename: bool = False) -> list[str]:  # noqa: FBT001, FBT002
+        """
+        helper function to deflate a zip file
+        """
+        logger.debug(f"[deflate_zip|in] ({file}, {target_folder})")
+        result: list[str] = []
+
+        zipdata = zipfile.ZipFile(file)
+        zipinfos = zipdata.infolist()
+
+        # iterate through each file in the zip archive
+        for zipinfo in zipinfos:
+            zipfile_name = Path(zipinfo.filename).name
+            if file_filter(zipfile_name):
+                zipdata.extract(zipinfo.filename, path=target_folder)
+                end_file = str(Path(target_folder) / zipinfo.filename)
+                if lower_filename:
+                    zipfile_folder = Path(zipinfo.filename).parent
+                    end_file_normalized = str(Path(target_folder) / zipfile_folder / zipfile_name.lower())
+                    shutil.move(end_file, end_file_normalized)
+                    end_file = end_file_normalized
+                result.append(end_file)
+
+        logger.debug(f"[deflate_zip|out] => {result}")
         return result
