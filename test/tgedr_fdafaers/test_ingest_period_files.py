@@ -115,13 +115,13 @@ def test_load_uploads_data_and_returns_periods(mock_store_cls) -> None:
     mock_store = MagicMock()
     mock_store_cls.return_value = mock_store
 
-    etl = IngestPeriodFiles()
+    etl = IngestPeriodFiles(configuration={"dataset_prefix": "org/faers"})
     etl._data = {
         "reac": pd.DataFrame({"primaryid": [1, 2], "period": ["24q2", "24q1"]}),
         "drug": pd.DataFrame({"primaryid": [3], "period": ["24q1"]}),
     }
 
-    result = etl.load(dataset_prefix="org/faers")
+    result = etl.load()
 
     assert result == "24q1,24q2"
     assert mock_store.update.call_count == 2
@@ -133,10 +133,10 @@ def test_load_returns_empty_string_when_no_data(mock_store_cls) -> None:
     mock_store = MagicMock()
     mock_store_cls.return_value = mock_store
 
-    etl = IngestPeriodFiles()
+    etl = IngestPeriodFiles(configuration={"dataset_prefix": "org/faers"})
     etl._data = {}
 
-    result = etl.load(dataset_prefix="org/faers")
+    result = etl.load()
 
     assert result == ""
 
@@ -150,12 +150,12 @@ def test_load_creates_dataset_on_no_store_exception(mock_store_cls) -> None:
     mock_store_cls.return_value = mock_store
     mock_store.update.side_effect = NoStoreException("not found")
 
-    etl = IngestPeriodFiles()
+    etl = IngestPeriodFiles(configuration={"dataset_prefix": "org/faers"})
     etl._data = {
         "reac": pd.DataFrame({"primaryid": [1], "period": ["24q1"]}),
     }
 
-    result = etl.load(dataset_prefix="org/faers")
+    result = etl.load()
 
     mock_store.save.assert_called_once()
     assert result == "24q1"
@@ -163,16 +163,16 @@ def test_load_creates_dataset_on_no_store_exception(mock_store_cls) -> None:
 
 @patch("tgedr_fdafaers.etl.ingest_period_files.HuggingFaceDatasetStore")
 def test_load_uses_correct_dataset_name(mock_store_cls) -> None:
-    """load should construct dataset names as '{prefix}_{table}'."""
+    """load should construct dataset names as '{prefix}{table}'."""
     mock_store = MagicMock()
     mock_store_cls.return_value = mock_store
 
-    etl = IngestPeriodFiles()
+    etl = IngestPeriodFiles(configuration={"dataset_prefix": "org/faers"})
     etl._data = {
         "reac": pd.DataFrame({"primaryid": [1], "period": ["24q1"]}),
     }
 
-    etl.load(dataset_prefix="org/faers")
+    etl.load()
 
     update_call = mock_store.update.call_args
     assert update_call.kwargs["key"] == "org/faersreac"
@@ -197,10 +197,10 @@ def test_full_etl_pipeline(mock_read_csv, mock_ingestion_cls, mock_store_cls) ->
     mock_read_csv.return_value = df
     mock_ingestion.process.return_value = df
 
-    etl = IngestPeriodFiles(configuration={"files": "/data/reac24q1.txt"})
+    etl = IngestPeriodFiles(configuration={"files": "/data/reac24q1.txt", "dataset_prefix": "org/faers"})
     etl.extract()
     etl.transform()
-    result = etl.load(dataset_prefix="org/faers")
+    result = etl.load()
 
     assert result == "24q1"
     mock_store.update.assert_called_once()
