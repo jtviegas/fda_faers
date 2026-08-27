@@ -9,6 +9,7 @@ from tgedr_dataops_abs.etl4gh import Etl4GH
 from tgedr_fdafaers.constants import Constants
 from tgedr_dataops.store.hf_dataset import DataFrameSplits, HuggingFaceDatasetStore, NoStoreException
 from tgedr_fdafaers.raw_data_ingestion import RawDataIngestion
+from tgedr_observability.metrics import Metrics
 
 
 logger = logging.getLogger(__name__)
@@ -80,6 +81,8 @@ class IngestPeriodFiles(Etl4GH):
                     df=dfs,
                     key=dataset_name
                 )
+            Metrics.instance().add_to_gauge("fda_faers.ingest_period_files.new_rows", df.shape[0], {"table": table}) # pyright: ignore[reportOptionalMemberAccess]
+
         result = ",".join(sorted(periods)) if periods else ""
         logger.info(f"[load|out] => {result}")
         return result
