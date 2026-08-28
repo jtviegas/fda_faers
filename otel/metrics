@@ -100,3 +100,105 @@
         }
     ]
 }
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.44.0",
+                    "service.instance.id": "9211358e-ad56-4cfd-9a54-68490508551e",
+                    "service.name": "fdafaers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.ingest_period_files",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "new_rows",
+                            "description": "Gauge metric for fda_faers.ingest_period_files.new_rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "table": "outc"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1787933836538302956,
+                                        "value": 261971,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "ther"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1787933836538302956,
+                                        "value": 370490,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "demo"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1787933836538302956,
+                                        "value": 268158,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "indi"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1787933836538302956,
+                                        "value": 407609,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "drug"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1787933836538302956,
+                                        "value": 960786,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "reac"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1787933836538302956,
+                                        "value": 913476,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "rpsr"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1787933836538302956,
+                                        "value": 156520,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
