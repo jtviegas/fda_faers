@@ -1,6 +1,6 @@
 [project]
 name = "tgedr-fdafaers"
-version = "0.0.11"
+version = "0.0.12"
 description = "this is a template for a python package"
 authors = [
     {name = "developer",email = "developer@email.com"}
