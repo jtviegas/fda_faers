@@ -64,11 +64,15 @@ jobs:
           --classparams "{\"configuration\": {\"files\": \"${{ steps.process_period_files.outputs.result }}\", \"dataset_prefix\": \"${{ env.HF_DATASET_BRONZE_PREFIX }}\"}}"
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
+    - name: 'plot metrics'
+      run: |
+        uv run python -c "from tgedr_observability.plot import plot_metric; plot_metric('./otel/metrics','new_rows', 'table', save_path='./plots/new_rows.png')"
     - name: 'commit and push metrics'
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         git add otel/
+        git add plots/
         git diff --cached --quiet || git commit -m "auto: update otel [skip ci]"
         git push
     - name: 'check output'

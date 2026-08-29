@@ -4,6 +4,11 @@
 [![PyPI](https://img.shields.io/pypi/v/tgedr-fdafaers)](https://pypi.org/project/tgedr-fdafaers/)
 
 
+## data pipeline metrics
+
+### new_rows
+
+![new_rows](./plots/new_rows.png)
 
 ## development
 - main requirements:

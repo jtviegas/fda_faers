@@ -12,7 +12,7 @@ requires-python = ">=3.12,<3.13"
 dependencies = [
     "tgedr-pycommons>=1.2.3",
     "tgedr-dataops-ext>=1.0.9",
-    "tgedr-observability>=0.0.5",
+    "tgedr-observability>=0.0.6",
 ]
 [dependency-groups]
 dev = [
