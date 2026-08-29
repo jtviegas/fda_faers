@@ -202,3 +202,144 @@
         }
     ]
 }
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.44.0",
+                    "service.instance.id": "6a989878-3777-4f58-b979-232a1f8ead5c",
+                    "service.name": "fdafaers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.ingest_period_files",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "new_rows",
+                            "description": "Gauge metric for fda_faers.ingest_period_files.new_rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "table": "rpsr"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1788023020218989887,
+                                        "value": 138469,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "reac"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1788023020218989887,
+                                        "value": 1134675,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "drug"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1788023020218989887,
+                                        "value": 1123161,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "indi"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1788023020218989887,
+                                        "value": 530072,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.44.0",
+                    "service.instance.id": "6a989878-3777-4f58-b979-232a1f8ead5c",
+                    "service.name": "fdafaers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.ingest_period_files",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "new_rows",
+                            "description": "Gauge metric for fda_faers.ingest_period_files.new_rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "table": "demo"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1788023044564113268,
+                                        "value": 320752,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "outc"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1788023044564113268,
+                                        "value": 289037,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "ther"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1788023044564113268,
+                                        "value": 459108,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
