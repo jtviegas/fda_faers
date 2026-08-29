@@ -122,6 +122,8 @@ def plot_rows_by_period(
     ax.set_title(f"{metric_name} per period")
     ax.set_xlabel("period")
     ax.set_ylabel(metric_name)
+    ax.set_xticks(all_periods)
+    ax.set_xticklabels(all_periods, rotation=45, ha="right", rotation_mode="anchor")
     ax.legend(title="table")
     ax.grid(visible=True, linestyle="--", alpha=0.4)
     fig.tight_layout()
