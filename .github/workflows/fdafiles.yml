@@ -64,9 +64,24 @@ jobs:
           --classparams "{\"configuration\": {\"files\": \"${{ steps.process_period_files.outputs.result }}\", \"dataset_prefix\": \"${{ env.HF_DATASET_BRONZE_PREFIX }}\"}}"
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
+    - name: 'compute rows metrics'
+      if: steps.ingest_period_files.outputs.result != ''
+      run: |
+        uv run run --module tgedr_fdafaers.etl.compute_rows_metrics \
+          --classname ComputeRowsMetrics \
+          --callable run \
+          --classparams "{\"configuration\": {\"dataset_prefix\": \"${{ env.HF_DATASET_BRONZE_PREFIX }}\"}}"
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
     - name: 'plot metrics'
       run: |
         uv run python -c "from tgedr_observability.plot import plot_metric; plot_metric('./otel/metrics','new_rows', 'table', save_path='./plots/new_rows.png')"
+        uv run python -c "from tgedr_fdafaers.utils.metrics_plot import plot_rows_by_period; \
+          import sys; \
+          try: \
+            plot_rows_by_period('./otel/metrics', 'rows', save_path='./plots/rows_by_period.png') \
+          except ValueError as e: \
+            print('no rows metric to plot yet:', e)"
     - name: 'commit and push metrics'
       run: |
         git config user.name "github-actions[bot]"

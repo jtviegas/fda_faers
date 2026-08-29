@@ -10,6 +10,10 @@
 
 ![new_rows](./plots/new_rows.png)
 
+### rows_by_period
+
+![rows_by_period](./plots/rows_by_period.png)
+
 ## development
 - main requirements:
   - _uv_  
