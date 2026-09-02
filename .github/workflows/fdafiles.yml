@@ -82,10 +82,9 @@ jobs:
     - name: 'plot metrics'
       run: |
         uv run python -c "from tgedr_observability.plot import plot_metric; \
-          plot_metric('./otel/metrics','new_rows', 'table', save_path='./plots/new_rows.png')"
-        uv run python -c "from tgedr_fdafaers.utils.metrics_plot import plot_rows_by_period; \
-          import sys; \
-          plot_rows_by_period('./otel/metrics', 'rows', save_path='./plots/rows_by_period.png')"
+          plot_metric(path='./otel/metrics',metric_name='new_rows', attr_key='table', save_path='./plots/new_rows.png')" && \
+        uv run python -c "from tgedr_observability.plot import plot_metric; \
+          plot_metric(path='./otel/metrics', metric_name='rows', attr_key='table', save_path='/plots/rows_by_period.png', x_attr_key='period', latest_only=True)"
     - name: 'commit and push updated metrics and plots'
       run: |
         git config user.name "github-actions[bot]"
