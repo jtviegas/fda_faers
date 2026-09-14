@@ -2569,7 +2569,7 @@ wheels = [
 
 [[package]]
 name = "tgedr-fdafaers"
-version = "0.0.16"
+version = "0.0.17"
 source = { editable = "." }
 dependencies = [
     { name = "tgedr-dataops" },
@@ -2598,7 +2598,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "tgedr-dataops", specifier = ">=1.2.1" },
-    { name = "tgedr-observability", specifier = ">=0.0.8" },
+    { name = "tgedr-observability", specifier = ">=0.0.9" },
     { name = "tgedr-pycommons", specifier = ">=1.2.3" },
 ]
 
@@ -2622,7 +2622,7 @@ dev = [
 
 [[package]]
 name = "tgedr-observability"
-version = "0.0.8"
+version = "0.0.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "matplotlib" },
@@ -2632,9 +2632,9 @@ dependencies = [
     { name = "pandas" },
     { name = "tgedr-pycommons" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/4b/0f/79c85892bc83288270c69bcbb2dced38161da02dff3aa0cc8686748cf8e5/tgedr_observability-0.0.8.tar.gz", hash = "sha256:792b68529a3a14d24900c9563fe8d8344965b5080bb4062a2b00bd1cbd04409d", size = 14438, upload-time = "2026-09-02T19:07:22.484Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a8/bb/f76bc83a1489521b4b439141026242e87a502cb9cc7b2d3d0d4099c3ce6f/tgedr_observability-0.0.9.tar.gz", hash = "sha256:53cb660e71e1f01ef2b29afba958273fa625cef196aba3e330d557570da18322", size = 14364, upload-time = "2026-09-14T23:49:52.363Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/76/b3/975016cb7cce52467fd6270ca85b46466ffdc4892bcd41846412abb7ee46/tgedr_observability-0.0.8-py3-none-any.whl", hash = "sha256:559c59b081a753d395d0bd4a55a97e6a2cb9f3ed3dec47b804b1188fa5e6fd2c", size = 15896, upload-time = "2026-09-02T19:07:21.473Z" },
+    { url = "https://files.pythonhosted.org/packages/25/d6/af02dcb0e43f3c705d1afe8c0ef515eaecfc6cc3df6456536407c8df400b/tgedr_observability-0.0.9-py3-none-any.whl", hash = "sha256:5f10327bb56fe54a5ebd3999f01fb2bd18dd081a1fbaf723961b7173c06d7192", size = 15832, upload-time = "2026-09-14T23:49:51.347Z" },
 ]
 
 [[package]]
