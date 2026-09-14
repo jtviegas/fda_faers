@@ -15,40 +15,76 @@ from tgedr_fdafaers.utils.faers_period import FaersPeriod, UtilsFaersPeriod
 
 @patch("tgedr_fdafaers.etl.periods_to_process.HuggingFaceDatasetStore")
 def test_extract_loads_existing_periods_from_bronze_dataset(mock_store_cls) -> None:
-    """extract should populate _existing_periods from the bronze dataset's 'period' column."""
+    """extract should populate _existing_periods with the intersection of periods across all tables."""
     mock_store = MagicMock()
     mock_store_cls.return_value = mock_store
 
+    # All tables share the same periods -> intersection is the full set
     df = pd.DataFrame({"period": ["12q4", "13q1", "13q2"]})
     mock_result = MagicMock()
     mock_result.train = df
     mock_store.get.return_value = mock_result
 
-    etl = Periods2Process(configuration={"bronze_dataset": "org/dataset"})
+    etl = Periods2Process(configuration={"dataset_prefix": "org/bronze_"})
     etl.extract()
 
-    mock_store.get.assert_called_once_with(key="org/dataset")
-    assert etl._existing_periods == ["12q4", "13q1", "13q2"]
+    assert mock_store.get.call_count == len(("demo", "drug", "indi", "outc", "reac", "rpsr", "ther"))
+    assert sorted(etl._existing_periods) == ["12q4", "13q1", "13q2"]
+
+
+@patch("tgedr_fdafaers.etl.periods_to_process.HuggingFaceDatasetStore")
+def test_extract_intersects_periods_across_tables(mock_store_cls) -> None:
+    """extract should return only periods present in every table."""
+    mock_store = MagicMock()
+    mock_store_cls.return_value = mock_store
+
+    # First table has all periods, second table only has a subset
+    df_all = pd.DataFrame({"period": ["12q4", "13q1", "13q2"]})
+    df_subset = pd.DataFrame({"period": ["12q4", "13q1"]})
+    mock_store.get.side_effect = [
+        MagicMock(train=df_all),  # demo
+        MagicMock(train=df_subset),  # drug
+        MagicMock(train=df_all),  # indi
+        MagicMock(train=df_all),  # outc
+        MagicMock(train=df_all),  # reac
+        MagicMock(train=df_all),  # rpsr
+        MagicMock(train=df_all),  # ther
+    ]
+
+    etl = Periods2Process(configuration={"dataset_prefix": "org/bronze_"})
+    etl.extract()
+
+    assert sorted(etl._existing_periods) == ["12q4", "13q1"]
 
 
 @patch("tgedr_fdafaers.etl.periods_to_process.HuggingFaceDatasetStore")
 def test_extract_handles_missing_dataset_gracefully(mock_store_cls) -> None:
-    """extract should leave _existing_periods empty when the dataset does not exist."""
+    """extract should skip tables that raise NoStoreException."""
     from tgedr_dataops.store.hf_dataset import NoStoreException
 
     mock_store = MagicMock()
     mock_store_cls.return_value = mock_store
-    mock_store.get.side_effect = NoStoreException("not found")
 
-    etl = Periods2Process(configuration={"bronze_dataset": "org/missing"})
+    df = pd.DataFrame({"period": ["12q4", "13q1"]})
+    mock_store.get.side_effect = [
+        NoStoreException("not found"),  # demo missing
+        MagicMock(train=df),  # drug
+        MagicMock(train=df),  # indi
+        MagicMock(train=df),  # outc
+        MagicMock(train=df),  # reac
+        MagicMock(train=df),  # rpsr
+        MagicMock(train=df),  # ther
+    ]
+
+    etl = Periods2Process(configuration={"dataset_prefix": "org/bronze_"})
     etl.extract()
 
-    assert etl._existing_periods == []
+    assert sorted(etl._existing_periods) == ["12q4", "13q1"]
 
 
 @patch("tgedr_fdafaers.etl.periods_to_process.HuggingFaceDatasetStore")
 def test_extract_handles_empty_dataframe(mock_store_cls) -> None:
-    """extract should leave _existing_periods empty when the dataset is empty."""
+    """extract should leave _existing_periods empty when all datasets are empty."""
     mock_store = MagicMock()
     mock_store_cls.return_value = mock_store
 
@@ -56,7 +92,7 @@ def test_extract_handles_empty_dataframe(mock_store_cls) -> None:
     mock_result.train = pd.DataFrame()
     mock_store.get.return_value = mock_result
 
-    etl = Periods2Process(configuration={"bronze_dataset": "org/empty"})
+    etl = Periods2Process(configuration={"dataset_prefix": "org/bronze_"})
     etl.extract()
 
     assert etl._existing_periods == []
@@ -73,10 +109,36 @@ def test_extract_deduplicates_periods(mock_store_cls) -> None:
     mock_result.train = df
     mock_store.get.return_value = mock_result
 
-    etl = Periods2Process(configuration={"bronze_dataset": "org/dataset"})
+    etl = Periods2Process(configuration={"dataset_prefix": "org/bronze_"})
     etl.extract()
 
     assert sorted(etl._existing_periods) == ["12q4", "13q1"]
+
+
+@patch("tgedr_fdafaers.etl.periods_to_process.HuggingFaceDatasetStore")
+def test_extract_uses_dataset_prefix_per_table(mock_store_cls) -> None:
+    """extract should call store.get with '{prefix}{table}' for each table."""
+    mock_store = MagicMock()
+    mock_store_cls.return_value = mock_store
+
+    df = pd.DataFrame({"period": ["12q4"]})
+    mock_result = MagicMock()
+    mock_result.train = df
+    mock_store.get.return_value = mock_result
+
+    etl = Periods2Process(configuration={"dataset_prefix": "org/bronze_"})
+    etl.extract()
+
+    keys = [call.kwargs["key"] for call in mock_store.get.call_args_list]
+    assert keys == [
+        "org/bronze_demo",
+        "org/bronze_drug",
+        "org/bronze_indi",
+        "org/bronze_outc",
+        "org/bronze_reac",
+        "org/bronze_rpsr",
+        "org/bronze_ther",
+    ]
 
 
 # --------------------------------------------------------------------------- #
@@ -190,7 +252,7 @@ def test_full_etl_pipeline(mock_store_cls, mock_get_all) -> None:
         FaersPeriod(2013, 3),
     ]
 
-    etl = Periods2Process(configuration={"bronze_dataset": "org/dataset"})
+    etl = Periods2Process(configuration={"dataset_prefix": "org/bronze_"})
     etl.extract()
     etl.transform()
     result = etl.load()

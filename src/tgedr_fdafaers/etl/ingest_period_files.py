@@ -5,9 +5,9 @@ import pandas as pd
 import logging
 from pathlib import Path
 
+from tgedr_dataops.store.hf_dataset_file_based import HuggingFaceDatasetFileBasedStore
 from tgedr_dataops_abs.etl4gh import Etl4GH
 from tgedr_fdafaers.constants import Constants
-from tgedr_dataops.store.hf_dataset import DataFrameSplits, HuggingFaceDatasetStore, NoStoreException
 from tgedr_fdafaers.raw_data_ingestion import RawDataIngestion
 from tgedr_observability.metrics import Metrics
 
@@ -34,8 +34,8 @@ class IngestPeriodFiles(Etl4GH):
             filepath, delimiter=self._constants.CSV_DELIMITER, index_col=False, low_memory=False
         )
         result: pd.DataFrame = RawDataIngestion().process(
-             context={RawDataIngestion.CONTEXT_KEY_TABLE: table,
-                      RawDataIngestion.CONTEXT_KEY_DATAFRAME: df})
+            context={RawDataIngestion.CONTEXT_KEY_TABLE: table, RawDataIngestion.CONTEXT_KEY_DATAFRAME: df}
+        )
 
         if table not in self._data:
             self._data[table] = result
@@ -64,26 +64,13 @@ class IngestPeriodFiles(Etl4GH):
         logger.info(f"[load|in] ({dataset_prefix})")
 
         periods: set[str] = set()
-        store: HuggingFaceDatasetStore = HuggingFaceDatasetStore()
+        store: HuggingFaceDatasetFileBasedStore = HuggingFaceDatasetFileBasedStore(config={"visibility": "public"})
         for table, df in self._data.items():
             periods.update(df["period"].unique().tolist())
-            dataset_name = f"{dataset_prefix}{table}"
-            dfs: DataFrameSplits = DataFrameSplits(train=df)
-            try:
-                store.update(
-                    df=dfs,
-                    key=dataset_name,
-                    append=True,
-                )
-            except NoStoreException as e:
-                logger.warning(f"could not update dataset {dataset_name}: {e}. Attempting to create new dataset.")   #nosec B608
-                store.save(
-                    df=dfs,
-                    key=dataset_name
-                )
-            Metrics.instance().add_to_gauge("fda_faers.ingest_period_files.new_rows", df.shape[0], {"table": table}) # pyright: ignore[reportOptionalMemberAccess]
+            dataset_table = f"{dataset_prefix}{table}"
+            store.save(df=df, key=dataset_table, split="train", append=True)
+            Metrics.instance().add_to_gauge("fda_faers.ingest_period_files.new_rows", df.shape[0], {"table": table})  # pyright: ignore[reportOptionalMemberAccess]
 
         result = ",".join(sorted(periods)) if periods else ""
         logger.info(f"[load|out] => {result}")
         return result
-

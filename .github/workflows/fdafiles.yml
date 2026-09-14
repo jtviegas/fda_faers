@@ -12,7 +12,6 @@ concurrency:
 env:
   PYTHON_VERSION: "3.12.3"
   HF_DATASET_BRONZE_PREFIX: "jtviegas/faers_bronze_"
-  HF_DATASET_BRONZE_DEMO: "jtviegas/faers_bronze_demo"
   MAX_PERIODS_TO_PROCESS: 3
   TGEDR_OBSERVABILITY_EXPORTER_METRICS_FILE: otel/metrics
   TGEDR_OBSERVABILITY_SERVICE: fdafaers
@@ -41,7 +40,7 @@ jobs:
         uv run run --module tgedr_fdafaers.etl.periods_to_process \
           --classname Periods2Process \
           --callable run \
-          --classparams "{\"configuration\": {\"bronze_dataset\": \"${{ env.HF_DATASET_BRONZE_DEMO }}\"}}"
+          --classparams "{\"configuration\": {\"dataset_prefix\": \"${{ env.HF_DATASET_BRONZE_PREFIX }}\"}}"
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
     - name: 'fetch period files to process'

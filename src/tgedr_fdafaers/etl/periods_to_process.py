@@ -2,11 +2,11 @@
 
 from typing import Any
 import logging
-import pandas as pd
 
 from tgedr_dataops_abs.etl4gh import Etl4GH
 from tgedr_dataops.store.hf_dataset import HuggingFaceDatasetStore, NoStoreException
 
+from tgedr_fdafaers.constants import Constants
 from tgedr_fdafaers.utils.faers_period import UtilsFaersPeriod
 
 
@@ -22,37 +22,43 @@ class Periods2Process(Etl4GH):
         self._existing_periods: list[str] = []
         self._periods_missing: list[str] = []
 
-    def __find_periods_in_bronze_dataset(self, bronze_dataset: str) -> list[str]:
+    def __find_periods_in_bronze_dataset(self, dataset_prefix: str) -> list[str]:
         """List the periods available in the bronze dataset."""
-        logger.info(f"[__find_periods_in_bronze_dataset|in] ({bronze_dataset})")
+        logger.info(f"[__find_periods_in_bronze_dataset|in] ({dataset_prefix})")
+
+        constants: Constants = Constants()
+        store: HuggingFaceDatasetStore = HuggingFaceDatasetStore()
         periods: list[str] = []
 
-        store: HuggingFaceDatasetStore = HuggingFaceDatasetStore()
-
-        df_data: pd.DataFrame | None = None
-        try:
-            df_data = store.get(key=bronze_dataset).train
-        except NoStoreException as e:
-            logger.warning(f"[__find_periods_in_bronze_dataset] failed to get bronze dataset: {bronze_dataset} - {e}")
-
-        if df_data is not None and not df_data.empty:
-            periods = df_data["period"].dropna().unique().tolist()
+        for table in constants.TABLES:
+            dataset_table = f"{dataset_prefix}{table}"
+            try:
+                df_data = store.get(key=dataset_table).train
+                if df_data is not None and not df_data.empty:
+                    data_periods = df_data["period"].dropna().unique().tolist()
+                    periods = data_periods if len(periods) == 0 else list(set(periods).intersection(data_periods))
+            except NoStoreException as e:
+                logger.warning(
+                    f"[__find_periods_in_bronze_dataset] failed to get bronze dataset: {dataset_prefix} - {e}"
+                )
 
         logger.info(f"[__find_periods_in_bronze_dataset|out] => {periods}")
         return periods
 
     @Etl4GH.inject_configuration
-    def extract(self, bronze_dataset: str) -> Any:
+    def extract(self, dataset_prefix: str) -> Any:
         """Fetch the list of periods already present in the bronze HuggingFace dataset."""
-        logger.info(f"[extract|in] ({bronze_dataset})")
-        self._existing_periods = self.__find_periods_in_bronze_dataset(bronze_dataset)
+        logger.info(f"[extract|in] ({dataset_prefix})")
+        self._existing_periods = self.__find_periods_in_bronze_dataset(dataset_prefix)
         logger.info(f"[extract|out] existing periods: {self._existing_periods}")
 
     def transform(self) -> Any:
         """Compute which FAERS periods are missing by comparing all known periods to existing ones."""
         logger.info(f"[transform|in] existing periods: {self._existing_periods}")
 
-        self._periods_missing = [str(x) for x in UtilsFaersPeriod.get_all_faers_periods() if str(x) not in self._existing_periods]
+        self._periods_missing = [
+            str(x) for x in UtilsFaersPeriod.get_all_faers_periods() if str(x) not in self._existing_periods
+        ]
 
         logger.info(f"[transform|out] periods missing: {self._periods_missing}")
 

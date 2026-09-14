@@ -109,11 +109,14 @@ def test_transform_is_noop() -> None:
 # --------------------------------------------------------------------------- #
 
 
-@patch("tgedr_fdafaers.etl.ingest_period_files.HuggingFaceDatasetStore")
-def test_load_uploads_data_and_returns_periods(mock_store_cls) -> None:
+@patch("tgedr_fdafaers.etl.ingest_period_files.Metrics")
+@patch("tgedr_fdafaers.etl.ingest_period_files.HuggingFaceDatasetFileBasedStore")
+def test_load_uploads_data_and_returns_periods(mock_store_cls, mock_metrics_cls) -> None:
     """load should upload each table's data and return unique periods sorted."""
     mock_store = MagicMock()
     mock_store_cls.return_value = mock_store
+    mock_metrics = MagicMock()
+    mock_metrics_cls.instance.return_value = mock_metrics
 
     etl = IngestPeriodFiles(configuration={"dataset_prefix": "org/faers"})
     etl._data = {
@@ -124,14 +127,17 @@ def test_load_uploads_data_and_returns_periods(mock_store_cls) -> None:
     result = etl.load()
 
     assert result == "24q1,24q2"
-    assert mock_store.update.call_count == 2
+    assert mock_store.save.call_count == 2
 
 
-@patch("tgedr_fdafaers.etl.ingest_period_files.HuggingFaceDatasetStore")
-def test_load_returns_empty_string_when_no_data(mock_store_cls) -> None:
+@patch("tgedr_fdafaers.etl.ingest_period_files.Metrics")
+@patch("tgedr_fdafaers.etl.ingest_period_files.HuggingFaceDatasetFileBasedStore")
+def test_load_returns_empty_string_when_no_data(mock_store_cls, mock_metrics_cls) -> None:
     """load should return empty string when _data is empty."""
     mock_store = MagicMock()
     mock_store_cls.return_value = mock_store
+    mock_metrics = MagicMock()
+    mock_metrics_cls.instance.return_value = mock_metrics
 
     etl = IngestPeriodFiles(configuration={"dataset_prefix": "org/faers"})
     etl._data = {}
@@ -139,33 +145,17 @@ def test_load_returns_empty_string_when_no_data(mock_store_cls) -> None:
     result = etl.load()
 
     assert result == ""
+    mock_store.save.assert_not_called()
 
 
-@patch("tgedr_fdafaers.etl.ingest_period_files.HuggingFaceDatasetStore")
-def test_load_creates_dataset_on_no_store_exception(mock_store_cls) -> None:
-    """load should fall back to save when update raises NoStoreException."""
-    from tgedr_dataops.store.hf_dataset import NoStoreException
-
-    mock_store = MagicMock()
-    mock_store_cls.return_value = mock_store
-    mock_store.update.side_effect = NoStoreException("not found")
-
-    etl = IngestPeriodFiles(configuration={"dataset_prefix": "org/faers"})
-    etl._data = {
-        "reac": pd.DataFrame({"primaryid": [1], "period": ["24q1"]}),
-    }
-
-    result = etl.load()
-
-    mock_store.save.assert_called_once()
-    assert result == "24q1"
-
-
-@patch("tgedr_fdafaers.etl.ingest_period_files.HuggingFaceDatasetStore")
-def test_load_uses_correct_dataset_name(mock_store_cls) -> None:
+@patch("tgedr_fdafaers.etl.ingest_period_files.Metrics")
+@patch("tgedr_fdafaers.etl.ingest_period_files.HuggingFaceDatasetFileBasedStore")
+def test_load_uses_correct_dataset_name(mock_store_cls, mock_metrics_cls) -> None:
     """load should construct dataset names as '{prefix}{table}'."""
     mock_store = MagicMock()
     mock_store_cls.return_value = mock_store
+    mock_metrics = MagicMock()
+    mock_metrics_cls.instance.return_value = mock_metrics
 
     etl = IngestPeriodFiles(configuration={"dataset_prefix": "org/faers"})
     etl._data = {
@@ -174,8 +164,69 @@ def test_load_uses_correct_dataset_name(mock_store_cls) -> None:
 
     etl.load()
 
-    update_call = mock_store.update.call_args
-    assert update_call.kwargs["key"] == "org/faersreac"
+    save_call = mock_store.save.call_args
+    assert save_call.kwargs["key"] == "org/faersreac"
+
+
+@patch("tgedr_fdafaers.etl.ingest_period_files.Metrics")
+@patch("tgedr_fdafaers.etl.ingest_period_files.HuggingFaceDatasetFileBasedStore")
+def test_load_saves_with_train_split_and_append(mock_store_cls, mock_metrics_cls) -> None:
+    """load should save each table with split='train' and append=True."""
+    mock_store = MagicMock()
+    mock_store_cls.return_value = mock_store
+    mock_metrics = MagicMock()
+    mock_metrics_cls.instance.return_value = mock_metrics
+
+    etl = IngestPeriodFiles(configuration={"dataset_prefix": "org/faers"})
+    etl._data = {
+        "reac": pd.DataFrame({"primaryid": [1], "period": ["24q1"]}),
+    }
+
+    etl.load()
+
+    save_call = mock_store.save.call_args
+    assert save_call.kwargs["split"] == "train"
+    assert save_call.kwargs["append"] is True
+
+
+@patch("tgedr_fdafaers.etl.ingest_period_files.Metrics")
+@patch("tgedr_fdafaers.etl.ingest_period_files.HuggingFaceDatasetFileBasedStore")
+def test_load_instantiates_store_with_public_visibility(mock_store_cls, mock_metrics_cls) -> None:
+    """load should create the store with visibility=public."""
+    mock_store = MagicMock()
+    mock_store_cls.return_value = mock_store
+    mock_metrics = MagicMock()
+    mock_metrics_cls.instance.return_value = mock_metrics
+
+    etl = IngestPeriodFiles(configuration={"dataset_prefix": "org/faers"})
+    etl._data = {
+        "reac": pd.DataFrame({"primaryid": [1], "period": ["24q1"]}),
+    }
+
+    etl.load()
+
+    mock_store_cls.assert_called_once_with(config={"visibility": "public"})
+
+
+@patch("tgedr_fdafaers.etl.ingest_period_files.Metrics")
+@patch("tgedr_fdafaers.etl.ingest_period_files.HuggingFaceDatasetFileBasedStore")
+def test_load_records_rows_metric_per_table(mock_store_cls, mock_metrics_cls) -> None:
+    """load should record a gauge metric with the number of rows per table."""
+    mock_store = MagicMock()
+    mock_store_cls.return_value = mock_store
+    mock_metrics = MagicMock()
+    mock_metrics_cls.instance.return_value = mock_metrics
+
+    etl = IngestPeriodFiles(configuration={"dataset_prefix": "org/faers"})
+    etl._data = {
+        "reac": pd.DataFrame({"primaryid": [1, 2], "period": ["24q1", "24q1"]}),
+    }
+
+    etl.load()
+
+    mock_metrics.add_to_gauge.assert_called_once_with(
+        "fda_faers.ingest_period_files.new_rows", 2, {"table": "reac"}
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -183,15 +234,18 @@ def test_load_uses_correct_dataset_name(mock_store_cls) -> None:
 # --------------------------------------------------------------------------- #
 
 
-@patch("tgedr_fdafaers.etl.ingest_period_files.HuggingFaceDatasetStore")
+@patch("tgedr_fdafaers.etl.ingest_period_files.Metrics")
+@patch("tgedr_fdafaers.etl.ingest_period_files.HuggingFaceDatasetFileBasedStore")
 @patch("tgedr_fdafaers.etl.ingest_period_files.RawDataIngestion")
 @patch("tgedr_fdafaers.etl.ingest_period_files.pd.read_csv")
-def test_full_etl_pipeline(mock_read_csv, mock_ingestion_cls, mock_store_cls) -> None:
+def test_full_etl_pipeline(mock_read_csv, mock_ingestion_cls, mock_store_cls, mock_metrics_cls) -> None:
     """Full pipeline should extract, transform (noop), and load data."""
     mock_ingestion = MagicMock()
     mock_ingestion_cls.return_value = mock_ingestion
     mock_store = MagicMock()
     mock_store_cls.return_value = mock_store
+    mock_metrics = MagicMock()
+    mock_metrics_cls.instance.return_value = mock_metrics
 
     df = pd.DataFrame({"primaryid": [1], "period": ["24q1"]})
     mock_read_csv.return_value = df
@@ -203,4 +257,4 @@ def test_full_etl_pipeline(mock_read_csv, mock_ingestion_cls, mock_store_cls) ->
     result = etl.load()
 
     assert result == "24q1"
-    mock_store.update.assert_called_once()
+    mock_store.save.assert_called_once()
