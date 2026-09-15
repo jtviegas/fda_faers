@@ -8,6 +8,7 @@ from tgedr_fdafaers.faers_file_source import FaersFileSource
 from tgedr_fdafaers.utils.utils_io import UtilsIO
 
 
+logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
@@ -28,10 +29,12 @@ class FetchPeriodFiles(Etl4GH):
         source: FaersFileSource = FaersFileSource()
         for period in periods_to_fetch:
             self._files_fetched.append(
-                source.get(context={
-                FaersFileSource.CONTEXT_KEY_OUTPUT_URL: self._tmp_dir,
-                FaersFileSource.CONTEXT_KEY_PERIOD: period
-                })
+                source.get(
+                    context={
+                        FaersFileSource.CONTEXT_KEY_OUTPUT_URL: self._tmp_dir,
+                        FaersFileSource.CONTEXT_KEY_PERIOD: period,
+                    }
+                )
             )
         logger.info(f"[extract|out] files fetched: {self._files_fetched}")
 
