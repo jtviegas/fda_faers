@@ -10,6 +10,7 @@ from tgedr_fdafaers.constants import Constants
 from tgedr_fdafaers.utils.faers_period import UtilsFaersPeriod
 
 
+logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 

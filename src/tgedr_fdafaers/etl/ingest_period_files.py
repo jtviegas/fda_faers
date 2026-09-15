@@ -12,6 +12,7 @@ from tgedr_fdafaers.raw_data_ingestion import RawDataIngestion
 from tgedr_observability.metrics import Metrics
 
 
+logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
