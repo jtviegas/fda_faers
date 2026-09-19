@@ -1,6 +1,6 @@
 [project]
 name = "tgedr-fdafaers"
-version = "0.0.18"
+version = "0.0.19"
 description = "this is a template for a python package"
 authors = [
     {name = "developer",email = "developer@email.com"}
@@ -11,7 +11,7 @@ requires-python = ">=3.12,<3.13"
 
 dependencies = [
     "tgedr-pycommons>=1.2.3",
-    "tgedr-dataops>=1.2.1",
+    "tgedr-dataops>=1.3.0",
     "tgedr-observability>=0.0.9",
 ]
 [dependency-groups]
@@ -41,6 +41,7 @@ build-backend = "uv_build"
 
 [tool.uv.build-backend]
 module-name = "tgedr_fdafaers"
+source-include = ["src/tgedr_fdafaers/odcs/*.odcs.yaml"]
 
 [tool.coverage.paths]
 source = ["src/"]

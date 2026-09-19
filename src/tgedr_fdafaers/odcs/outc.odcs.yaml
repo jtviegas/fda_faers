@@ -1,0 +1,95 @@
+apiVersion: v3.1.0
+kind: DataContract
+id: urn:datacontract:tgedr:fdafaers:outc
+name: outc
+version: 1.0.0
+status: active
+description:
+  purpose: Patient outcomes for FAERS adverse event reports (OUTC table).
+  usage: Used for analyzing the seriousness and outcomes of adverse events in FAERS reports.
+  limitations: Data is limited to what is available in the FAERS database.
+
+tags:
+  - healthcare
+  - faers
+  - pharmacovigilance
+
+schema:
+  - name: outc
+    physicalName: outc
+    physicalType: table
+    description: One row per reported patient outcome in a FAERS adverse event report.
+    properties:
+      - name: primaryid
+        primaryKey: true
+        logicalType: integer
+        physicalType: BIGINT
+        required: true
+        unique: false
+        description: Primary identifier for the adverse event report; links back to the demo table.
+      - name: caseid
+        logicalType: integer
+        physicalType: DOUBLE
+        required: false
+        description: Case identifier; groups multiple reports that refer to the same case.
+      - name: outc_cod
+        primaryKey: true
+        logicalType: string
+        physicalType: VARCHAR
+        required: true
+        unique: false
+        description: Outcome code of the adverse event, e.g. DE (death), LT (life threatening), HO (hospitalization), DS (disability), CA (congenital anomaly), RI (required intervention), OT (other).
+        examples:
+          - OT
+          - HO
+          - DE
+      - name: processing_time
+        logicalType: integer
+        physicalType: BIGINT
+        required: true
+        description: Unix epoch timestamp in seconds (UTC) when the row was processed.
+      - name: period
+        logicalType: string
+        physicalType: VARCHAR
+        required: true
+        description: FAERS quarterly reporting period, e.g. 2024Q2.
+        examples:
+          - 2024Q2
+
+customProperties:
+  - property: expectations
+    value:
+      expectation_suite_name: outc_suite
+      expectations:
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: primaryid
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: caseid
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: outc_cod
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: processing_time
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: period
+        - expectation_type: expect_column_values_to_not_be_null
+          kwargs:
+            column: primaryid
+        - expectation_type: expect_column_values_to_not_be_null
+          kwargs:
+            column: outc_cod
+        - expectation_type: expect_column_values_to_not_be_null
+          kwargs:
+            column: processing_time
+        - expectation_type: expect_column_values_to_not_be_null
+          kwargs:
+            column: period
+        - expectation_type: expect_compound_columns_to_be_unique
+          kwargs:
+            column_list:
+              - primaryid
+              - outc_cod

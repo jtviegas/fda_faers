@@ -11,6 +11,7 @@ from tgedr_observability.metrics import Metrics
 from tgedr_fdafaers.constants import Constants
 
 
+logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 

@@ -1,0 +1,290 @@
+apiVersion: v3.1.0
+kind: DataContract
+id: urn:datacontract:tgedr:fdafaers:demo
+name: demo
+version: 2.0.0
+status: active
+description:
+  purpose: Patient demographics for FAERS adverse event reports (DEMO table).
+  usage: Used for analyzing demographic trends in FAERS data.
+  limitations: Data is limited to what is available in the FAERS database.
+
+tags:
+  - healthcare
+  - faers
+  - pharmacovigilance
+
+schema:
+  - name: demo
+    physicalName: demo
+    physicalType: table
+    description: One row per FAERS adverse event report, demographics file (DEMO).
+    properties:
+      - name: primaryid
+        primaryKey: true
+        logicalType: integer
+        physicalType: BIGINT
+        required: true
+        unique: true
+        description: Primary identifier for the adverse event report; unique per report.
+      - name: caseid
+        logicalType: integer
+        physicalType: DOUBLE
+        required: false
+        description: Case identifier; groups multiple reports that refer to the same case.
+      - name: caseversion
+        logicalType: integer
+        physicalType: DOUBLE
+        required: false
+        description: Version number of the case within the case series.
+      - name: i_f_cod
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: I-F code; I for initial report or F for follow-up report.
+        examples:
+          - I
+          - F
+      - name: event_dt
+        logicalType: integer
+        physicalType: DOUBLE
+        required: false
+        description: Date the adverse event started or occurred, YYYYMMDD.
+        examples:
+          - 20240315
+      - name: mfr_dt
+        logicalType: integer
+        physicalType: DOUBLE
+        required: false
+        description: Date the manufacturer received the report, YYYYMMDD.
+      - name: init_fda_dt
+        logicalType: integer
+        physicalType: DOUBLE
+        required: false
+        description: Date the initial report was received by the FDA, YYYYMMDD.
+      - name: fda_dt
+        logicalType: integer
+        physicalType: BIGINT
+        required: true
+        description: Date the FDA received the report, YYYYMMDD.
+      - name: rept_cod
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Report type code, e.g. EXP (expedited), PER (periodic), DIR (direct).
+        examples:
+          - EXP
+          - PER
+          - DIR
+      - name: auth_num
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Authorization number, e.g. for reports authorized under a licensed application.
+      - name: mfr_num
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Manufacturer control number.
+      - name: mfr_sndr
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Manufacturer sender identifier.
+      - name: lit_ref
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Literature reference for reports sourced from published literature.
+      - name: age
+        logicalType: integer
+        physicalType: DOUBLE
+        required: false
+        description: Patient age at the time of the event.
+      - name: age_cod
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Age unit code, e.g. DEC (decade), YR (year), MO (month), WK (week), DY (day), HR (hour).
+        examples:
+          - YR
+          - MO
+          - DY
+      - name: age_grp
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Standardized age group classification.
+      - name: sex
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Patient sex, M (male), F (female) or U (unknown).
+        examples:
+          - M
+          - F
+          - U
+      - name: e_sub
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: E-submission flag, Y if the report was submitted electronically, N otherwise.
+        examples:
+          - Y
+          - N
+      - name: wt
+        logicalType: number
+        physicalType: DOUBLE
+        required: false
+        description: Patient weight.
+      - name: wt_cod
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Weight unit code, e.g. KG or LBS.
+        examples:
+          - KG
+          - LBS
+      - name: rept_dt
+        logicalType: integer
+        physicalType: DOUBLE
+        required: false
+        description: Date the report was created, YYYYMMDD.
+      - name: to_mfr
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Date the report was sent to the manufacturer, YYYYMMDD.
+      - name: occp_cod
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Reporter occupation code, e.g. MD (physician), RN (nurse), PH (pharmacist).
+        examples:
+          - MD
+          - RN
+          - PH
+      - name: reporter_country
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Country of the reporter.
+      - name: occr_country
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Country where the adverse event occurred.
+      - name: processing_time
+        logicalType: integer
+        physicalType: BIGINT
+        required: true
+        description: Unix epoch timestamp in seconds (UTC) when the row was processed.
+      - name: period
+        logicalType: string
+        physicalType: VARCHAR
+        required: true
+        description: FAERS quarterly reporting period, e.g. 2024Q2.
+        examples:
+          - 2024Q2
+
+customProperties:
+  - property: expectations
+    value:
+      expectation_suite_name: demo_suite
+      expectations:
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: primaryid
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: caseid
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: caseversion
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: i_f_cod
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: event_dt
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: mfr_dt
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: init_fda_dt
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: fda_dt
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: rept_cod
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: auth_num
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: mfr_num
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: mfr_sndr
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: lit_ref
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: age
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: age_cod
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: age_grp
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: sex
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: e_sub
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: wt
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: wt_cod
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: rept_dt
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: to_mfr
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: occp_cod
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: reporter_country
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: occr_country
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: processing_time
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: period
+        - expectation_type: expect_column_values_to_not_be_null
+          kwargs:
+            column: primaryid
+        - expectation_type: expect_column_values_to_not_be_null
+          kwargs:
+            column: fda_dt
+        - expectation_type: expect_column_values_to_not_be_null
+          kwargs:
+            column: processing_time
+        - expectation_type: expect_column_values_to_not_be_null
+          kwargs:
+            column: period
+        - expectation_type: expect_column_values_to_be_unique
+          kwargs:
+            column: primaryid
