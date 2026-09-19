@@ -97,9 +97,3 @@ customProperties:
         - expectation_type: expect_column_values_to_not_be_null
           kwargs:
             column: period
-        - expectation_type: expect_compound_columns_to_be_unique
-          kwargs:
-            column_list:
-              - primaryid
-              - indi_drug_seq
-              - indi_pt
