@@ -1,0 +1,105 @@
+apiVersion: v3.1.0
+kind: DataContract
+id: urn:datacontract:tgedr:fdafaers:indi
+name: indi
+version: 1.0.0
+status: active
+description:
+  purpose: Indications for drug therapy in FAERS adverse event reports (INDI table).
+  usage: Used for analyzing the reasons drugs were prescribed in FAERS reports.
+  limitations: Data is limited to what is available in the FAERS database.
+
+tags:
+  - healthcare
+  - faers
+  - pharmacovigilance
+
+schema:
+  - name: indi
+    physicalName: indi
+    physicalType: table
+    description: One row per reported indication associated with a drug therapy in a FAERS report.
+    properties:
+      - name: primaryid
+        primaryKey: true
+        logicalType: integer
+        physicalType: BIGINT
+        required: true
+        unique: false
+        description: Primary identifier for the adverse event report; links back to the demo table.
+      - name: caseid
+        logicalType: integer
+        physicalType: DOUBLE
+        required: false
+        description: Case identifier; groups multiple reports that refer to the same case.
+      - name: indi_drug_seq
+        primaryKey: true
+        logicalType: integer
+        physicalType: BIGINT
+        required: true
+        unique: false
+        description: Sequence number linking the indication to a drug in the drug table.
+      - name: indi_pt
+        logicalType: string
+        physicalType: VARCHAR
+        required: true
+        description: Indication for which the drug was prescribed (MedDRA Preferred Term).
+        examples:
+          - HYPERTENSION
+      - name: processing_time
+        logicalType: integer
+        physicalType: BIGINT
+        required: true
+        description: Unix epoch timestamp in seconds (UTC) when the row was processed.
+      - name: period
+        logicalType: string
+        physicalType: VARCHAR
+        required: true
+        description: FAERS quarterly reporting period, e.g. 2024Q2.
+        examples:
+          - 2024Q2
+
+customProperties:
+  - property: expectations
+    value:
+      expectation_suite_name: indi_suite
+      expectations:
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: primaryid
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: caseid
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: indi_drug_seq
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: indi_pt
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: processing_time
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: period
+        - expectation_type: expect_column_values_to_not_be_null
+          kwargs:
+            column: primaryid
+        - expectation_type: expect_column_values_to_not_be_null
+          kwargs:
+            column: indi_drug_seq
+        - expectation_type: expect_column_values_to_not_be_null
+          kwargs:
+            column: indi_pt
+        - expectation_type: expect_column_values_to_not_be_null
+          kwargs:
+            column: processing_time
+        - expectation_type: expect_column_values_to_not_be_null
+          kwargs:
+            column: period
+        - expectation_type: expect_compound_columns_to_be_unique
+          kwargs:
+            column_list:
+              - primaryid
+              - indi_drug_seq
+              - indi_pt

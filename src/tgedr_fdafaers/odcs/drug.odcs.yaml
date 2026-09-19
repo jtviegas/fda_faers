@@ -1,0 +1,255 @@
+apiVersion: v3.1.0
+kind: DataContract
+id: urn:datacontract:tgedr:fdafaers:drug
+name: drug
+version: 1.0.0
+status: active
+description:
+  purpose: Drug information for FAERS adverse event reports (DRUG table).
+  usage: Used for analyzing drug involvement and role in FAERS reports.
+  limitations: Data is limited to what is available in the FAERS database.
+
+tags:
+  - healthcare
+  - faers
+  - pharmacovigilance
+
+schema:
+  - name: drug
+    physicalName: drug
+    physicalType: table
+    description: One row per drug therapy reported within a FAERS adverse event report.
+    properties:
+      - name: primaryid
+        primaryKey: true
+        logicalType: integer
+        physicalType: BIGINT
+        required: true
+        unique: false
+        description: Primary identifier for the adverse event report; links back to the demo table.
+      - name: caseid
+        logicalType: integer
+        physicalType: DOUBLE
+        required: false
+        description: Case identifier; groups multiple reports that refer to the same case.
+      - name: drug_seq
+        primaryKey: true
+        logicalType: integer
+        physicalType: BIGINT
+        required: true
+        unique: false
+        description: Sequence number identifying the drug within the report.
+      - name: role_cod
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Role of the drug in the report, e.g. PS (primary suspect), SS (secondary suspect), C (concomitant).
+        examples:
+          - PS
+          - SS
+          - C
+      - name: drugname
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Verbatim name of the drug as reported.
+        examples:
+          - MEMANTINE HYDROCHLORIDE
+      - name: prod_ai
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Product active ingredient.
+      - name: val_vbm
+        logicalType: integer
+        physicalType: BIGINT
+        required: true
+        description: Flag indicating whether the product is included in the Veterans' Benefits Medicines (VBM) list, 1 or 2.
+        examples:
+          - 1
+          - 2
+      - name: route
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Route of administration of the drug, e.g. ORAL, INTRAVENOUS.
+        examples:
+          - ORAL
+      - name: dose_vbm
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Verbatim dose information as reported.
+      - name: cum_dose_chr
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Cumulative dose as reported (character format).
+      - name: cum_dose_unit
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Unit of measurement for the cumulative dose.
+      - name: dechal
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Dechallenge code, e.g. Y (dechallenged), N (not dechallenged), D (does not apply), U (unknown).
+        examples:
+          - Y
+          - N
+          - D
+          - U
+      - name: rechal
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Rechallenge code, e.g. Y (rechallenged), N (not rechallenged), D (does not apply), U (unknown).
+        examples:
+          - Y
+          - N
+          - D
+          - U
+      - name: lot_num
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Lot number of the drug product.
+      - name: exp_dt
+        logicalType: integer
+        physicalType: DOUBLE
+        required: false
+        description: Expiration date of the drug product, YYYYMMDD.
+        examples:
+          - 20251231
+      - name: nda_num
+        logicalType: number
+        physicalType: DOUBLE
+        required: false
+        description: New Drug Application (NDA) number.
+      - name: dose_amt
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Amount of drug per dose as reported.
+      - name: dose_unit
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Unit of measurement for the dose amount.
+      - name: dose_form
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Dosage form of the drug, e.g. TABLET, CAPSULE.
+        examples:
+          - TABLET
+      - name: dose_freq
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Frequency of dosing as reported.
+      - name: processing_time
+        logicalType: integer
+        physicalType: BIGINT
+        required: true
+        description: Unix epoch timestamp in seconds (UTC) when the row was processed.
+      - name: period
+        logicalType: string
+        physicalType: VARCHAR
+        required: true
+        description: FAERS quarterly reporting period, e.g. 2024Q2.
+        examples:
+          - 2024Q2
+
+customProperties:
+  - property: expectations
+    value:
+      expectation_suite_name: drug_suite
+      expectations:
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: primaryid
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: caseid
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: drug_seq
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: role_cod
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: drugname
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: prod_ai
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: val_vbm
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: route
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: dose_vbm
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: cum_dose_chr
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: cum_dose_unit
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: dechal
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: rechal
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: lot_num
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: exp_dt
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: nda_num
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: dose_amt
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: dose_unit
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: dose_form
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: dose_freq
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: processing_time
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: period
+        - expectation_type: expect_column_values_to_not_be_null
+          kwargs:
+            column: primaryid
+        - expectation_type: expect_column_values_to_not_be_null
+          kwargs:
+            column: drug_seq
+        - expectation_type: expect_column_values_to_not_be_null
+          kwargs:
+            column: val_vbm
+        - expectation_type: expect_column_values_to_not_be_null
+          kwargs:
+            column: processing_time
+        - expectation_type: expect_column_values_to_not_be_null
+          kwargs:
+            column: period
+        - expectation_type: expect_compound_columns_to_be_unique
+          kwargs:
+            column_list:
+              - primaryid
+              - drug_seq

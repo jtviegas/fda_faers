@@ -5,7 +5,7 @@ import pandas as pd
 import logging
 from pathlib import Path
 
-from tgedr_dataops.store.hf_dataset_file_based import HuggingFaceDatasetFileBasedStore
+from tgedr_dataops.store.contracted_store import ContractedHFDatasetFileBasedStore
 from tgedr_dataops_abs.etl4gh import Etl4GH
 from tgedr_fdafaers.constants import Constants
 from tgedr_fdafaers.raw_data_ingestion import RawDataIngestion
@@ -14,6 +14,13 @@ from tgedr_observability.metrics import Metrics
 
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
+
+ODCS_DIR = Path(__file__).resolve().parents[1] / "odcs"
+
+
+def _contract_path(table: str) -> Path:
+    """Return the path to the ODCS data contract file for ``table``."""
+    return ODCS_DIR / f"{table}.odcs.yaml"
 
 
 class IngestPeriodFiles(Etl4GH):
@@ -65,11 +72,11 @@ class IngestPeriodFiles(Etl4GH):
         logger.info(f"[load|in] ({dataset_prefix})")
 
         periods: set[str] = set()
-        store: HuggingFaceDatasetFileBasedStore = HuggingFaceDatasetFileBasedStore(config={"visibility": "public"})
+        store: ContractedHFDatasetFileBasedStore = ContractedHFDatasetFileBasedStore(config={"visibility": "public"})
         for table, df in self._data.items():
             periods.update(df["period"].unique().tolist())
             dataset_table = f"{dataset_prefix}{table}"
-            store.save(df=df, key=dataset_table, split="train", append=True)
+            store.save(df=df, key=dataset_table, split="train", append=True, data_contract=_contract_path(table))
             Metrics.instance().add_to_gauge("fda_faers.ingest_period_files.new_rows", df.shape[0], {"table": table})  # pyright: ignore[reportOptionalMemberAccess]
 
         result = ",".join(sorted(periods)) if periods else ""

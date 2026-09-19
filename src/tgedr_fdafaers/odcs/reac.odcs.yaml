@@ -1,0 +1,104 @@
+apiVersion: v3.1.0
+kind: DataContract
+id: urn:datacontract:tgedr:fdafaers:reac
+name: reac
+version: 1.0.0
+status: active
+description:
+  purpose: Adverse reactions reported in FAERS (REAC table).
+  usage: Used for analyzing drug-event associations in FAERS reports.
+  limitations: Data is limited to what is available in the FAERS database.
+
+tags:
+  - healthcare
+  - faers
+  - pharmacovigilance
+
+schema:
+  - name: reac
+    physicalName: reac
+    physicalType: table
+    description: One row per reported reaction (MedDRA Preferred Term) in a FAERS adverse event report.
+    properties:
+      - name: primaryid
+        primaryKey: true
+        logicalType: integer
+        physicalType: BIGINT
+        required: true
+        unique: false
+        description: Primary identifier for the adverse event report; links back to the demo table.
+      - name: caseid
+        logicalType: integer
+        physicalType: DOUBLE
+        required: false
+        description: Case identifier; groups multiple reports that refer to the same case.
+      - name: pt
+        primaryKey: true
+        logicalType: string
+        physicalType: VARCHAR
+        required: true
+        unique: false
+        description: Adverse event reaction (MedDRA Preferred Term).
+        examples:
+          - NAUSEA
+      - name: drug_rec_act
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Flag indicating whether the drug was recorded as suspect (1) or not (2) for the reaction.
+        examples:
+          - 1
+          - 2
+      - name: processing_time
+        logicalType: integer
+        physicalType: BIGINT
+        required: true
+        description: Unix epoch timestamp in seconds (UTC) when the row was processed.
+      - name: period
+        logicalType: string
+        physicalType: VARCHAR
+        required: true
+        description: FAERS quarterly reporting period, e.g. 2024Q2.
+        examples:
+          - 2024Q2
+
+customProperties:
+  - property: expectations
+    value:
+      expectation_suite_name: reac_suite
+      expectations:
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: primaryid
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: caseid
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: pt
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: drug_rec_act
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: processing_time
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: period
+        - expectation_type: expect_column_values_to_not_be_null
+          kwargs:
+            column: primaryid
+        - expectation_type: expect_column_values_to_not_be_null
+          kwargs:
+            column: pt
+        - expectation_type: expect_column_values_to_not_be_null
+          kwargs:
+            column: processing_time
+        - expectation_type: expect_column_values_to_not_be_null
+          kwargs:
+            column: period
+        - expectation_type: expect_compound_columns_to_be_unique
+          kwargs:
+            column_list:
+              - primaryid
+              - pt
