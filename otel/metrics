@@ -58939,3 +58939,564 @@
         }
     ]
 }
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.44.0",
+                    "service.instance.id": "dc004f26-7823-4d3c-bc98-404cf322e993",
+                    "service.name": "fdafaers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.ingest_period_files",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "new_rows",
+                            "description": "Gauge metric for fda_faers.ingest_period_files.new_rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "table": "indi"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328790294756380,
+                                        "value": 328049,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "demo"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328790294756380,
+                                        "value": 227074,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "rpsr"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328790294756380,
+                                        "value": 224104,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "ther"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328790294756380,
+                                        "value": 303037,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "outc"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328790294756380,
+                                        "value": 232099,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "drug"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328790294756380,
+                                        "value": 871135,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "reac"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328790294756380,
+                                        "value": 941831,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.44.0",
+                    "service.instance.id": "36558a32-6c94-4e4f-93b5-64cb436e8697",
+                    "service.name": "fdafaers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.ingest_period_files",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.ingest_period_files.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "table": "demo",
+                                            "period": "04q1"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 65902,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "demo",
+                                            "period": "04q2"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 60162,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "demo",
+                                            "period": "04q3"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 75321,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "demo",
+                                            "period": "04q4"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 70632,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "demo",
+                                            "period": "05q1"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 75918,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "demo",
+                                            "period": "05q2"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 80524,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "drug",
+                                            "period": "04q1"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 235361,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "drug",
+                                            "period": "04q2"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 232925,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "drug",
+                                            "period": "04q3"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 271996,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "drug",
+                                            "period": "04q4"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 276197,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "drug",
+                                            "period": "05q1"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 277055,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "drug",
+                                            "period": "05q2"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 317883,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "indi",
+                                            "period": "04q1"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 78639,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "indi",
+                                            "period": "04q2"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 79346,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "indi",
+                                            "period": "04q3"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 95140,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "indi",
+                                            "period": "04q4"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 194148,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "indi",
+                                            "period": "05q1"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 213452,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "indi",
+                                            "period": "05q2"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 248498,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "outc",
+                                            "period": "04q1"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 57592,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "outc",
+                                            "period": "04q2"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 62217,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "outc",
+                                            "period": "04q3"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 66868,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "outc",
+                                            "period": "04q4"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 74040,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "outc",
+                                            "period": "05q1"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 77193,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "outc",
+                                            "period": "05q2"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 80866,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "reac",
+                                            "period": "04q1"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 264410,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "reac",
+                                            "period": "04q2"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 254101,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "reac",
+                                            "period": "04q3"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 290812,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "reac",
+                                            "period": "04q4"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 291641,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "reac",
+                                            "period": "05q1"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 313159,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "reac",
+                                            "period": "05q2"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 337031,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "rpsr",
+                                            "period": "04q1"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 78306,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "rpsr",
+                                            "period": "04q2"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 79231,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "rpsr",
+                                            "period": "04q3"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 87737,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "rpsr",
+                                            "period": "04q4"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 73001,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "rpsr",
+                                            "period": "05q1"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 69159,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "rpsr",
+                                            "period": "05q2"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 81944,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "ther",
+                                            "period": "04q1"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 84964,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "ther",
+                                            "period": "04q2"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 81508,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "ther",
+                                            "period": "04q3"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 94841,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "ther",
+                                            "period": "04q4"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 93008,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "ther",
+                                            "period": "05q1"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 97988,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "table": "ther",
+                                            "period": "05q2"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1790328812489684440,
+                                        "value": 112041,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
