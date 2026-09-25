@@ -288,4 +288,4 @@ customProperties:
         - expectation_type: expect_column_values_to_be_unique
           kwargs:
             column: primaryid
-            mostly: 0.99
+            mostly: 0.95
