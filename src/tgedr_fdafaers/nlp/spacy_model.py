@@ -15,7 +15,7 @@ from tgedr_fdafaers.nlp.model import Model
 
 _SCISPACY_MODELS: MappingProxyType[str, str] = MappingProxyType(
     {
-        "en_core_sci_sm": "https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.4/en_core_sci_md-0.5.4.tar.gz",
+        "en_core_sci_md": "https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.4/en_core_sci_md-0.5.4.tar.gz",
     }
 )
 

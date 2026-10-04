@@ -39,10 +39,10 @@ def test_scispacy_models_is_mapping_proxy() -> None:
     assert isinstance(_SCISPACY_MODELS, MappingProxyType)
 
 
-def test_scispacy_models_contains_en_core_sci_sm() -> None:
-    """_SCISPACY_MODELS should map en_core_sci_sm to a remote URL."""
-    assert "en_core_sci_sm" in _SCISPACY_MODELS
-    assert _SCISPACY_MODELS["en_core_sci_sm"].startswith("https://")
+def test_scispacy_models_contains_en_core_sci_md() -> None:
+    """_SCISPACY_MODELS should map en_core_sci_md to a remote URL."""
+    assert "en_core_sci_md" in _SCISPACY_MODELS
+    assert _SCISPACY_MODELS["en_core_sci_md"].startswith("https://")
 
 
 def test_scispacy_models_is_immutable() -> None:
@@ -61,7 +61,7 @@ def test_load_model_returns_loaded_model(monkeypatch: pytest.MonkeyPatch) -> Non
     fake = _FakeNlp()
     monkeypatch.setattr(spacy_model.spacy, "load", lambda name: fake)
 
-    assert NlpModel._load_model("en_core_sci_sm") is fake
+    assert NlpModel._load_model("en_core_sci_md") is fake
 
 
 def test_load_model_installs_and_reloads_on_oserror(
@@ -85,13 +85,13 @@ def test_load_model_installs_and_reloads_on_oserror(
     monkeypatch.setattr(spacy_model.spacy, "load", fake_load)
     monkeypatch.setattr(spacy_model.subprocess, "check_call", fake_check_call)
 
-    result = NlpModel._load_model("en_core_sci_sm")
+    result = NlpModel._load_model("en_core_sci_md")
 
     assert result is fake
-    assert calls == ["en_core_sci_sm", "en_core_sci_sm"]
+    assert calls == ["en_core_sci_md", "en_core_sci_md"]
     assert len(installed) == 1
     assert installed[0][:4] == [sys.executable, "-m", "pip", "install"]
-    assert installed[0][4] == _SCISPACY_MODELS["en_core_sci_sm"]
+    assert installed[0][4] == _SCISPACY_MODELS["en_core_sci_md"]
 
 
 def test_load_model_raises_on_unknown_model(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -117,7 +117,7 @@ def test_load_model_propagates_check_call_failure(
     monkeypatch.setattr(spacy_model.subprocess, "check_call", fake_check_call)
 
     with pytest.raises(subprocess.CalledProcessError):
-        NlpModel._load_model("en_core_sci_sm")
+        NlpModel._load_model("en_core_sci_md")
 
 
 # --------------------------------------------------------------------------- #
@@ -131,7 +131,7 @@ def test_nlp_model_is_model_subclass() -> None:
 
 
 def test_init_loads_model(monkeypatch: pytest.MonkeyPatch) -> None:
-    """NlpModel.__init__ should load the en_core_sci_sm model."""
+    """NlpModel.__init__ should load the en_core_sci_md model."""
     fake = _FakeNlp()
     monkeypatch.setattr(spacy_model.spacy, "load", lambda name: fake)
 
