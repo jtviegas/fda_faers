@@ -33,7 +33,7 @@ class TermEntityMapping(Etl4GH):
         )
 
     @Etl4GH.inject_configuration
-    def extract(self, bronze_dataset_prefix: str, silver_dataset_prefix: str, sample_size: int = 300000) -> Any:
+    def extract(self, bronze_dataset_prefix: str, silver_dataset_prefix: str, sample_size: int = 100000) -> Any:
         """Extracts terms to map from the bronze dataset, excluding already mapped terms.
 
         Args:
