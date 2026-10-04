@@ -39,7 +39,7 @@ class EntityAtcMapping(Etl4GH):
         )
 
     @Etl4GH.inject_configuration
-    def extract(self, silver_dataset_prefix: str, sample_size: int = 300000) -> Any:
+    def extract(self, silver_dataset_prefix: str, sample_size: int = 50000) -> Any:
         """Extracts unmapped entities from the silver dataset.
 
         Reads the silver ``term_entity`` table, removes entities already present
