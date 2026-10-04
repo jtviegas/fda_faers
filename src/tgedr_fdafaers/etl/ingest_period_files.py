@@ -82,6 +82,7 @@ class IngestPeriodFiles(Etl4GH):
             periods.update(df["period"].unique().tolist())
             dataset_table = f"{dataset_prefix}{table}"
             store.save(df=df, key=dataset_table, split="train", append=True, data_contract=_contract_path(table))
+            logger.info(f"[load] new data on table: {table} | df.shape: {df.shape}")
             Metrics.instance().add_to_gauge("fda_faers.ingest_period_files.new_rows", df.shape[0], {"table": table})  # pyright: ignore[reportOptionalMemberAccess]
 
         result = ",".join(sorted(periods)) if periods else ""
