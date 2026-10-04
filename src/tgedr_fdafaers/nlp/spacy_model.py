@@ -4,7 +4,7 @@ This module provides a singleton class for loading and accessing spaCy language 
 with automatic installation of scispacy models if not already present.
 """
 
-import subprocess
+import subprocess  # nosec B404
 import sys
 from typing import Any
 
@@ -37,7 +37,7 @@ class NlpModel(Model):
             return spacy.load(model_name)
         except OSError:
             url = _SCISPACY_MODELS[model_name]
-            subprocess.check_call([sys.executable, "-m", "pip", "install", url])  # noqa: S603
+            subprocess.check_call([sys.executable, "-m", "pip", "install", url])  # noqa: S603   # nosec B603
             return spacy.load(model_name)
 
     @property
