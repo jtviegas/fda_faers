@@ -1,0 +1,64 @@
+name: fdafiles
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * *'  # daily at 03:00 UTC
+
+concurrency:
+  group: fdafiles
+  cancel-in-progress: false
+
+env:
+  PYTHON_VERSION: "3.12.3"
+  HF_DATASET_BRONZE_PREFIX: "jtviegas/faers_bronze_"
+  HF_DATASET_SILVER_PREFIX: "jtviegas/faers_silver_"
+  TGEDR_OBSERVABILITY_EXPORTER_METRICS_FILE: otel/metrics
+  TGEDR_OBSERVABILITY_SERVICE: fdafaers
+
+jobs:
+  execute_pipeline:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: '0'
+    - name: 'install uv'
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+    - name: 'setup python env'
+      run: |
+        uv venv .venv --python ${{ env.PYTHON_VERSION }}
+    - name: 'install library'
+      run: uv pip install --python .venv/bin/python tgedr-fdafaers
+    - name: 'map drug term entities'
+      id: map_term_entities
+      run: |
+        uv run run --module tgedr_fdafaers.etl.term_entity_mapping \
+          --classname TermEntityMapping \
+          --callable run \
+          --classparams "{\"configuration\": {\"bronze_dataset_prefix\": \"${{ env.HF_DATASET_BRONZE_PREFIX }}\", \"silver_dataset_prefix\": \"${{ env.HF_DATASET_SILVER_PREFIX }}\"}}"
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+    - name: 'map drug entity to ATC codes'
+      id: map_entity_atc
+      run: |
+        uv run run --module tgedr_fdafaers.etl.entity_atc_mapping \
+          --classname EntityAtcMapping \
+          --callable run \
+          --classparams "{\"configuration\": {\"bronze_dataset_prefix\": \"${{ env.HF_DATASET_BRONZE_PREFIX }}\", \"silver_dataset_prefix\": \"${{ env.HF_DATASET_SILVER_PREFIX }}\"}}"
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+    - name: 'plot metrics'
+      run: |
+        uv run python -c "from tgedr_observability.plot import plot_metric; \
+          plot_metric(path='./otel/metrics',metric_name='rows', attr_key='type', save_path='./plots/mapping_rows.png')"
+    - name: 'commit and push updated metrics and plots'
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add otel/
+        git add plots/
+        git diff --cached --quiet || git commit -m "auto: update otel [skip ci]"
+        git push

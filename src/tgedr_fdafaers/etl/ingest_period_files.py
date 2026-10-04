@@ -10,6 +10,7 @@ from tgedr_dataops_abs.etl4gh import Etl4GH
 from tgedr_fdafaers.constants import Constants
 from tgedr_fdafaers.raw_data_ingestion import RawDataIngestion
 from tgedr_observability.metrics import Metrics
+from tgedr_fdafaers.entity_mapping.drug_ingredient_term import DrugIngredientTerm
 
 
 logging.getLogger("httpx").setLevel(logging.WARNING)
@@ -64,6 +65,10 @@ class IngestPeriodFiles(Etl4GH):
     def transform(self) -> Any:
         """Transform step for file status processing workflow."""
         logger.info("[transform|in]")
+
+        o = DrugIngredientTerm()
+        self._data["drug"] = o.process(context={"dataframe": self._data["drug"]})
+
         logger.info("[transform|out]")
 
     @Etl4GH.inject_configuration

@@ -161,6 +161,15 @@ schema:
         description: FAERS quarterly reporting period, e.g. 2024Q2.
         examples:
           - 2024Q2
+      - name: term
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Normalized drug or ingredient term, lowercased with special characters spaced out, forward slashes removed, and whitespace collapsed; derived from prod_ai when present, otherwise from drugname.
+        examples:
+          - cortisone
+          - prednisone.
+          - insulin novulin 70 30
 
 customProperties:
   - property: expectations
@@ -233,6 +242,9 @@ customProperties:
         - expectation_type: expect_column_to_exist
           kwargs:
             column: period
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: term
         - expectation_type: expect_column_values_to_not_be_null
           kwargs:
             column: primaryid

@@ -14,6 +14,10 @@
 
 ![rows_by_period](./plots/rows_by_period.png)
 
+### mapping rows
+
+![mapping_rows](./plots/mapping_rows.png)
+
 ## development
 - main requirements:
   - _uv_  

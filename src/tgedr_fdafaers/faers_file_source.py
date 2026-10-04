@@ -30,8 +30,8 @@ class FaersFileSource(Source):
             msg = f"[__get_period_url] you must provide context for {self.CONTEXT_KEY_PERIOD}"
             raise SourceException(msg)
         period: FaersPeriod = FaersPeriod.from_str(
-                    context[self.CONTEXT_KEY_PERIOD]
-                )  # just to validate the provided period, if not valid it will raise an exception
+            context[self.CONTEXT_KEY_PERIOD]
+        )  # just to validate the provided period, if not valid it will raise an exception
         result = UtilsFaersPeriod.get_url(period)
         logger.info(f"[__get_period_url|out] => {result}")
         return period, result
@@ -42,7 +42,9 @@ class FaersFileSource(Source):
         result: str | None = None
 
         _, url = self.__get_period_url(context)
-        if UtilsIO.resource_exists(url):  # just to validate the provided period, if not valid it will raise an exception
+        if UtilsIO.resource_exists(
+            url
+        ):  # just to validate the provided period, if not valid it will raise an exception
             result = url
 
         logger.info(f"[list|out] => {result}")
@@ -56,6 +58,9 @@ class FaersFileSource(Source):
             msg: str = f"[get] you must provide context for {self.CONTEXT_KEY_OUTPUT_URL}"
             raise SourceException(msg)
         output_url: str = context[self.CONTEXT_KEY_OUTPUT_URL]
+        scheme = urlparse(output_url).scheme
+        if 0 < len(scheme) and scheme not in self.__ALLOWED_SCHEMES:
+            raise SourceException(f"[get] unsupported URL scheme: {scheme} - {output_url}")
         Path(output_url).mkdir(parents=True, exist_ok=True)
 
         period, url = self.__get_period_url(context)
@@ -64,12 +69,8 @@ class FaersFileSource(Source):
         )
         logger.info(f"[get] retrieving file: {target_url} from url: {url} ")
 
-        scheme = urlparse(target_url).scheme
-        if 0 < len(scheme) and scheme not in self.__ALLOWED_SCHEMES:
-            raise SourceException(f"[get] unsupported URL scheme: {scheme} - {target_url}")
-
         try:
-            urllib.request.urlretrieve(url, target_url)   # nosec B310
+            urllib.request.urlretrieve(url, target_url)  # nosec B310
         except HTTPError as x:
             if 404 != x.code:
                 raise SourceException(f"[get] failed request to: {url}") from x

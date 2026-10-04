@@ -94,14 +94,40 @@ def test_extract_uses_dollar_delimiter(mock_read_csv, mock_ingestion_cls) -> Non
 # --------------------------------------------------------------------------- #
 
 
-def test_transform_is_noop() -> None:
-    """transform should not modify state."""
+def test_transform_adds_term_column_to_drug_table() -> None:
+    """transform should decorate the drug table with a normalized term column."""
     etl = IngestPeriodFiles()
-    etl._data = {"reac": pd.DataFrame({"primaryid": [1], "period": ["24q1"]})}
+    etl._data = {
+        "drug": pd.DataFrame(
+            {
+                "primaryid": [1, 2],
+                "period": ["24q1", "24q1"],
+                "drugname": ["PROPOFAN", "ASPIRIN"],
+                "prod_ai": [None, "ACETYLSALICYLIC ACID"],
+            }
+        )
+    }
+
+    etl.transform()
+
+    assert "term" in etl._data["drug"].columns
+    assert etl._data["drug"]["term"].tolist() == ["propofan", "acetylsalicylic acid"]
+
+
+def test_transform_keeps_other_tables_untouched() -> None:
+    """transform should leave tables other than drug unchanged."""
+    etl = IngestPeriodFiles()
+    etl._data = {
+        "reac": pd.DataFrame({"primaryid": [1], "period": ["24q1"]}),
+        "drug": pd.DataFrame(
+            {"primaryid": [1], "period": ["24q1"], "drugname": ["PROPOFAN"], "prod_ai": [None]}
+        ),
+    }
 
     etl.transform()
 
     assert len(etl._data["reac"]) == 1
+    assert "term" in etl._data["drug"].columns
 
 
 # --------------------------------------------------------------------------- #
@@ -265,7 +291,7 @@ def test_load_records_rows_metric_per_table(mock_store_cls, mock_metrics_cls) ->
 @patch("tgedr_fdafaers.etl.ingest_period_files.RawDataIngestion")
 @patch("tgedr_fdafaers.etl.ingest_period_files.pd.read_csv")
 def test_full_etl_pipeline(mock_read_csv, mock_ingestion_cls, mock_store_cls, mock_metrics_cls) -> None:
-    """Full pipeline should extract, transform (noop), and load data."""
+    """Full pipeline should extract, transform (decorate drug table), and load data."""
     mock_ingestion = MagicMock()
     mock_ingestion_cls.return_value = mock_ingestion
     mock_store = MagicMock()
@@ -273,14 +299,20 @@ def test_full_etl_pipeline(mock_read_csv, mock_ingestion_cls, mock_store_cls, mo
     mock_metrics = MagicMock()
     mock_metrics_cls.instance.return_value = mock_metrics
 
-    df = pd.DataFrame({"primaryid": [1], "period": ["24q1"]})
-    mock_read_csv.return_value = df
-    mock_ingestion.process.return_value = df
+    df_reac = pd.DataFrame({"primaryid": [1], "period": ["24q1"]})
+    df_drug = pd.DataFrame(
+        {"primaryid": [1], "period": ["24q1"], "drugname": ["PROPOFAN"], "prod_ai": [None]}
+    )
+    mock_read_csv.side_effect = [df_reac, df_drug]
+    mock_ingestion.process.side_effect = [df_reac, df_drug]
 
-    etl = IngestPeriodFiles(configuration={"files": "/data/reac24q1.txt", "dataset_prefix": "org/faers"})
+    etl = IngestPeriodFiles(
+        configuration={"files": "/data/reac24q1.txt,/data/drug24q1.txt", "dataset_prefix": "org/faers"}
+    )
     etl.extract()
     etl.transform()
     result = etl.load()
 
     assert result == "24q1"
-    mock_store.save.assert_called_once()
+    assert "term" in etl._data["drug"].columns
+    assert mock_store.save.call_count == 2
