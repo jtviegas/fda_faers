@@ -142,7 +142,8 @@ def test_load_saves_result(etl: TermEntityMapping, mock_metrics: MagicMock) -> N
     etl.load()
 
     etl._store.save.assert_called_once_with(
-        df=etl._result, key="s/term_entity", split="train", append=True
+        df=etl._result, key="s/term_entity", split="train", append=True,
+        data_contract=etl.contract_path("term_entity")
     )
     mock_metrics.add_to_gauge.assert_called_once()
 

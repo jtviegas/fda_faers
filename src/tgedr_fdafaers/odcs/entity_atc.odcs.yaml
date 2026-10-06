@@ -1,0 +1,63 @@
+apiVersion: v3.1.0
+kind: DataContract
+id: urn:datacontract:tgedr:fdafaers:entity_atc
+name: entity_atc
+version: 1.0.0
+status: active
+description:
+  purpose: Mapping between parsed entities and their ATC classification codes.
+  usage: Used for analyzing drug entities and their ATC classes in FAERS reports.
+  limitations: Data is limited to what is available in the FAERS database.
+
+tags:
+  - healthcare
+  - faers
+  - pharmacovigilance
+  - atc
+
+schema:
+  - name: entity_atc
+    physicalName: entity_atc
+    physicalType: table
+    description: One row per entity-to-ATC mapping, where each row associates a parsed entity with the list of ATC classes resolved for it.
+    properties:
+      - name: entity
+        logicalType: string
+        physicalType: VARCHAR
+        required: true
+        description: Parsed entity extracted from the term.
+        examples:
+          - aspirin
+          - insulin
+          - xanax
+      - name: atc_codes
+        logicalType: array
+        physicalType: ARRAY<VARCHAR>
+        required: false
+        description: List of ATC classes resolved for the entity via the NLM RxNav API; each item has id, name, and class_type.
+        examples:
+          - id: N05BA
+            name: Benzodiazepine derivatives
+            class_type: 5
+      - name: strategy
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Name of the mapping strategy used to resolve the ATC classes.
+        examples:
+          - NLMMapping
+
+customProperties:
+  - property: expectations
+    value:
+      expectation_suite_name: entity_atc_suite
+      expectations:
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: entity
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: atc_codes
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: strategy

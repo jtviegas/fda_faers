@@ -5,7 +5,7 @@ from unittest.mock import patch, MagicMock, call
 import pandas as pd
 import pytest
 
-from tgedr_fdafaers.etl.ingest_period_files import IngestPeriodFiles, _contract_path
+from tgedr_fdafaers.etl.ingest_period_files import IngestPeriodFiles
 
 
 # --------------------------------------------------------------------------- #
@@ -213,7 +213,7 @@ def test_load_saves_with_train_split_and_append(mock_store_cls, mock_metrics_cls
     save_call = mock_store.save.call_args
     assert save_call.kwargs["split"] == "train"
     assert save_call.kwargs["append"] is True
-    assert save_call.kwargs["data_contract"] == _contract_path("reac")
+    assert save_call.kwargs["data_contract"] == etl.contract_path("reac")
 
 
 @patch("tgedr_fdafaers.etl.ingest_period_files.Metrics")
@@ -236,8 +236,8 @@ def test_load_passes_correct_contract_per_table(mock_store_cls, mock_metrics_cls
     calls = mock_store.save.call_args_list
     contract_paths = {c.kwargs["key"]: c.kwargs["data_contract"] for c in calls}
     assert contract_paths == {
-        "org/faersreac": _contract_path("reac"),
-        "org/faersdrug": _contract_path("drug"),
+        "org/faersreac": etl.contract_path("reac"),
+        "org/faersdrug": etl.contract_path("drug"),
     }
 
 

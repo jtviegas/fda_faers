@@ -1,0 +1,51 @@
+apiVersion: v3.1.0
+kind: DataContract
+id: urn:datacontract:tgedr:fdafaers:term_entity
+name: term_entity
+version: 1.0.0
+status: active
+description:
+  purpose: Mapping between normalized drug terms and their parsed entities.
+  usage: Used for mapping drug terms to entities for ATC classification.
+  limitations: Data is limited to what is available in the FAERS database.
+
+tags:
+  - healthcare
+  - faers
+  - pharmacovigilance
+
+schema:
+  - name: term_entity
+    physicalName: term_entity
+    physicalType: table
+    description: One row per term-to-entity mapping.
+    properties:
+      - name: term
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Normalized drug or ingredient term, lowercased with special characters spaced out, forward slashes removed, and whitespace collapsed; derived from prod_ai when present, otherwise from drugname.
+        examples:
+          - cortisone
+          - prednisone
+          - insulin novulin 70 30
+      - name: entity
+        logicalType: string
+        physicalType: VARCHAR
+        required: false
+        description: Parsed entity extracted from the term.
+        examples:
+          - cortisone
+          - insulin
+
+customProperties:
+  - property: expectations
+    value:
+      expectation_suite_name: term_entity_suite
+      expectations:
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: term
+        - expectation_type: expect_column_to_exist
+          kwargs:
+            column: entity

@@ -13,11 +13,12 @@ from tgedr_dataops_abs.etl4gh import Etl4GH
 from tgedr_dataops.store.contracted_store import ContractedHFDatasetFileBasedStore, NoStoreException
 from tgedr_observability.metrics import Metrics
 from tgedr_fdafaers.atc_mapping.nlm_mapping import NLMMapping
+from tgedr_fdafaers.utils.common_etl import CommonEtl
 
 logger = logging.getLogger(__name__)
 
 
-class EntityAtcMapping(Etl4GH):
+class EntityAtcMapping(CommonEtl):
     """ETL step that maps entities to ATC codes.
 
     Extracts unmapped entities from the silver dataset, maps them to ATC codes
@@ -120,7 +121,13 @@ class EntityAtcMapping(Etl4GH):
         logger.info(f"[load|in] ({silver_dataset_prefix})")
         entity_atc_table = f"{silver_dataset_prefix}entity_atc"
         if (self._result is not None) and (not self._result.empty):
-            self._store.save(df=self._result, key=entity_atc_table, split="train", append=True)
+            self._store.save(
+                df=self._result,
+                key=entity_atc_table,
+                split="train",
+                append=True,
+                data_contract=self.contract_path("entity_atc"),
+            )
             Metrics.instance().add_to_gauge(
                 name="fda_faers.entity_atc_mapping.rows",
                 value=self._result.shape[0],

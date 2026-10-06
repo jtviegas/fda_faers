@@ -184,3 +184,4 @@ CHANGELOG
 .bashutils.last_check
 deprecated/
 test.ipynb
+bashutils.checksum

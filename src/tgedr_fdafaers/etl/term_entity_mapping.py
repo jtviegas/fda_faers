@@ -11,12 +11,13 @@ import logging
 from tgedr_dataops_abs.etl4gh import Etl4GH
 from tgedr_dataops.store.contracted_store import ContractedHFDatasetFileBasedStore, NoStoreException
 from tgedr_fdafaers.entity_mapping.term_entity import TermEntity
+from tgedr_fdafaers.utils.common_etl import CommonEtl
 from tgedr_observability.metrics import Metrics
 
 logger = logging.getLogger(__name__)
 
 
-class TermEntityMapping(Etl4GH):
+class TermEntityMapping(CommonEtl):
     """ETL step that maps drug terms to entities, extracting unmapped terms from bronze and loading mappings into silver."""
 
     def __init__(self, configuration: dict[str, Any] | None = None) -> None:
@@ -110,7 +111,13 @@ class TermEntityMapping(Etl4GH):
         logger.info(f"[load|in] ({silver_dataset_prefix})")
         term_entity_table = f"{silver_dataset_prefix}term_entity"
         if (self._result is not None) and (not self._result.empty):
-            self._store.save(df=self._result, key=term_entity_table, split="train", append=True)
+            self._store.save(
+                df=self._result,
+                key=term_entity_table,
+                split="train",
+                append=True,
+                data_contract=self.contract_path("term_entity"),
+            )
             Metrics.instance().add_to_gauge(
                 name="fda_faers.drug_term_entity_mapping.rows",
                 value=self._result.shape[0],

@@ -1,3 +1,4 @@
+# BASHUTILS VERSION: 5
 ##########################################
 #######  ------- assorted -------  #######
 ##########################################
@@ -6,31 +7,34 @@
 #   name: test_js_lambda
 #   purpose: installs npm dependencies and runs Jest tests for a JavaScript Lambda function
 #   parameters: $1 (path to the Lambda function directory containing package.json)
+#   returns: 0 if install and tests succeed, nonzero otherwise
 #   requires: npm, jest
 ############################
 test_js_lambda(){
   info "[test_js_lambda|in] ({$1})"
 
-  [ -z $1 ] && err "[get_cloudfront_cidr] missing argument FUNCTION_DIR" && exit 1
+  [ -z $1 ] && err "[test_js_lambda] missing argument FUNCTION_DIR" && return 1
   local FUNCTION_DIR="$1"
-  _pwd=`pwd`
-  cd "$FUNCTION_DIR"
+  local _pwd=$(pwd)
+  local result
+  cd "$FUNCTION_DIR" || return 1
 
-  npm install
+  npm install || { result=$?; cd "$_pwd"; return "$result"; }
   jest
-
-  result="$?"
-  cd "$_pwd"
-  [ "$result" -ne "0" ] && err "[test_js_lambda|out]  => ${result}" && exit 1
+  result=$?
+  cd "$_pwd" || return 1
+  [ "$result" -ne "0" ] && err "[test_js_lambda|out]  => ${result}" && return "$result"
   info "[test_js_lambda|out] => ${result}"
 }
 
 ############################
 #   name: zip_js_lambda_function
 #   purpose: packages a JavaScript Lambda function into a zip archive;
-#            installs npm dependencies if package.json is present and removes the bundled aws-sdk
-#            (provided by the Lambda runtime) to reduce bundle size
+#            installs npm dependencies if package.json is present and excludes the bundled aws-sdk
+#            (provided by the Lambda runtime) from the archive without deleting it from source
 #   parameters: $1 (source directory), $2 (output zip file path), $3+ (files/folders to include in the zip)
+#   returns: 0 on success, nonzero if installation or packaging fails
+#   side-effects: runs npm install in the source directory; excludes aws-sdk only from the archive
 #   requires: npm, zip
 ############################
 
@@ -45,20 +49,18 @@ zip_js_lambda_function(){
 
   local src_dir="$1"
   local zip_file="$2"
-  local files="${@:3}"
-  local AWS_SDK_MODULE_PATH=$src_dir/node_modules/aws-sdk
+  local -a files=("${@:3}")
 
-  _pwd=`pwd`
-  cd "$src_dir"
+  local _pwd=$(pwd)
+  cd "$src_dir" || return 1
 
   if [ -f "package.json" ]; then
     npm install &>/dev/null
     if [ ! "$?" -eq "0" ] ; then err "[zip_js_lambda_function] could not install dependencies" && cd "$_pwd" && return 1; fi
-    if [ -d "${AWS_SDK_MODULE_PATH}" ]; then rm -r "$AWS_SDK_MODULE_PATH"; fi
   fi
 
   rm -f "$zip_file"
-  zip -9 -q -r "$zip_file" "$files" &>/dev/null
+  zip -9 -q -r "$zip_file" "${files[@]}" -x 'node_modules/aws-sdk/*' &>/dev/null
   if [ ! "$?" -eq "0" ] ; then err "[zip_js_lambda_function] could not zip it" && cd "$_pwd" && return 1; fi
 
   cd "$_pwd"
@@ -69,6 +71,7 @@ zip_js_lambda_function(){
 #   name: get_function_release
 #   purpose: downloads a named artifact from the latest GitHub release of a repository into this_folder
 #   parameters: $1 (GitHub repository in 'owner/repo' format), $2 (artifact filename to match)
+#   returns: 0 after the download pipeline completes
 #   requires: curl, wget, this_folder
 ############################
 
@@ -80,7 +83,7 @@ get_function_release(){
   local repo="$1"
   local artifact="$2"
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$this_folder"
 
   curl -s "https://api.github.com/repos/${repo}/releases/latest" \
@@ -95,6 +98,7 @@ get_function_release(){
 #   name: download_function
 #   purpose: downloads a named artifact from the latest GitHub release of a repository and saves it to a specific local file
 #   parameters: $1 (GitHub repository in 'owner/repo' format), $2 (artifact filename to match), $3 (local destination file path)
+#   returns: 0 on successful download, 1 if required arguments or the download are invalid
 #   requires: curl, wget
 ############################
 
@@ -120,17 +124,18 @@ download_function(){
 #   purpose: makes an authenticated GET request to a Grafana API endpoint through a proxy/gateway,
 #            passing both an Azure bearer token and a Grafana service account token
 #   parameters: $1 (Azure OAuth2 access token), $2 (Grafana service account API token), $3 (Grafana API URL)
+#   returns: 0 if the request succeeds, 1 if a required argument is missing or curl fails
 #   requires: curl
 ############################
 
 call_grafana_api(){
   info "[call_grafana_api|in] (${1:0:3}, ${2:0:3})"
 
-  [ -z $1 ] && err "[call_grafana_api] missing argument AZURE_ACCESS_TOKEN" && exit 1
+  [ -z $1 ] && err "[call_grafana_api] missing argument AZURE_ACCESS_TOKEN" && return 1
   AZURE_ACCESS_TOKEN="$1"
-  [ -z $2 ] && err "[call_grafana_api] missing argument GRAFANA_API_TOKEN" && exit 1
+  [ -z $2 ] && err "[call_grafana_api] missing argument GRAFANA_API_TOKEN" && return 1
   GRAFANA_API_TOKEN="$2"
-  [ -z $3 ] && err "[call_grafana_api] missing argument GRAFANA_API_URL" && exit 1
+  [ -z $3 ] && err "[call_grafana_api] missing argument GRAFANA_API_URL" && return 1
   GRAFANA_API_URL="$3"
 
   local response=$(curl -s -X GET "$GRAFANA_API_URL"  \
@@ -138,10 +143,135 @@ call_grafana_api(){
       -H "X-Bifrost-Grafana-SA: Bearer ${GRAFANA_API_TOKEN}" )
   result="$?"
 
-  [ "$result" -ne "0" ] && err "[call_grafana_api|out]  => ${result}" && exit 1
+  [ "$result" -ne "0" ] && err "[call_grafana_api|out]  => ${result}" && return 1
   info "[call_grafana_api|out] => ${response}"
 }
 
+############################
+#   name: find_local_release
+#   purpose: reads and prints the integer version from the first line of the local bashutils file
+#   parameters: none
+#   returns: 0 and prints the version (or 0 if the file is absent), 1 if the version is not an integer
+#   requires: this_folder, INCLUDE_FILE
+############################
+find_local_release(){
+  local local_file="$this_folder/$INCLUDE_FILE"
+  local local_version=0
+  if [ -f "$local_file" ]; then
+    IFS= read -r version_line < "$local_file"
+    local_version=${version_line##*: }
+    # info "[find_local_release] local version: $local_version"
+    if [[ ! $local_version =~ ^[0-9]+$ ]]; then
+      err "[find_local_release] version is not a valid integer: $local_version"
+      return 1
+    fi
+  fi
+  echo "$local_version"
+}
+
+############################
+#   name: find_latest_release
+#   purpose: retrieves and prints the latest published release tag for a GitHub repository
+#   parameters: $1 (repository in 'owner/repo' format)
+#   returns: 0 and prints the tag, or 1 if the repository is missing or gh fails
+#   requires: gh
+############################
+find_latest_release(){
+  [ -z $1 ] && err "[find_latest_release] missing argument REPO" && return 1
+  local REPO="$1"
+  local latest_release
+  latest_release=$(gh release view --repo "$REPO" --json tagName --jq .tagName) || return 1
+  echo "$latest_release"
+}
+
+############################
+#   name: define_release_to_update
+#   purpose: compares the local integer version with the latest release and prompts before selecting an update
+#   parameters: none
+#   returns: 0 and prints the selected release, -1 if the user cancels, -2 if up-to-date; nonzero on lookup failure
+#   requires: BASHUTILS_REPO, find_local_release, find_latest_release, interactive stdin
+############################
+define_release_to_update(){
+  local local_release
+  local latest_release
+  local_release=$(find_local_release)
+  [ "$?" -ne "0" ] && err "[update_bashutils] failed to find local release" && return 1
+  latest_release=$(find_latest_release "$BASHUTILS_REPO")
+  [ "$?" -ne "0" ] && err "[update_bashutils] failed to find latest release" && return 1
+  local result
+  if (( local_release < latest_release )); then
+    read -r -p "proceed to update? [y/N] " answer
+    case "$answer" in
+      [Yy])
+        result="$latest_release"
+        ;;
+      *)
+        result=-1 # cancelled
+        ;;
+    esac
+  else
+    result=-2 # local release is up-to-date
+  fi
+  echo "$result"
+}
+
+############################
+#   name: update_bashutils
+#   purpose: prompts to update the local bashutils file from the latest release and downloads its release assets
+#   parameters: none
+#   returns: 0 if updated, cancelled, or already current; 1 if updates are disabled or an operation fails
+#   requires: BASHUTILS_AUTO_UPDATE, BASHUTILS_REPO, this_folder, define_release_to_update, curl, python3
+#   side-effects: downloads release assets into this_folder
+############################
+update_bashutils(){
+  info "[update_bashutils|in] ($1)"
+
+  [ -z "$BASHUTILS_AUTO_UPDATE" ] || [ "$BASHUTILS_AUTO_UPDATE" -ne "1" ] && err "[update_bashutils] auto update is disabled" && return 1
+
+  local _pwd=$(pwd)
+  local release
+  local result
+
+  release=$(define_release_to_update)
+  [ "$?" -ne "0" ] && err "[update_bashutils] failed to define the release to update" && return 1
+  [ "$release" -eq "-1" ] && info "[update_bashutils] no update performed, update cancelled" && return 0
+  [ "$release" -eq "-2" ] && info "[update_bashutils] no update performed, local release is up-to-date" && return 0
+
+  # Use assets API with Accept: application/octet-stream to avoid redirect to
+  # objects.githubusercontent.com (which may be blocked by proxies like Zscaler)
+  local release_json
+  release_json=$(eval curl -fsSL "\"https://api.github.com/repos/$BASHUTILS_REPO/releases/tags/$release\"")
+  result="$?"
+  if [ "$result" -ne "0" ]; then
+    err "[update_bashutils] failed to fetch release metadata"
+    cd "$_pwd"
+    return 1
+  fi
+
+  cd "$this_folder" || exit 1
+
+  echo "$release_json" | python3 -c "
+  import sys, json
+  assets = json.load(sys.stdin).get('assets', [])
+  for a in assets:
+      print(a['id'], a['name'])
+  " | while read -r asset_id asset_name; do
+    info "[get_updated_release] downloading asset: $asset_name (id: $asset_id)"
+    eval curl -fsSL -H "\"Accept: application/octet-stream\"" \
+      -o "\"$asset_name\"" \
+      "\"https://api.github.com/repos/$BASHUTILS_REPO/releases/assets/$asset_id\""
+    if [ "$?" -ne "0" ]; then
+      err "[get_updated_release] failed to download asset: $asset_name"
+      cd "$_pwd"
+      return 1
+    fi
+  done
+  result="$?"
+  cd "$_pwd"
+
+  [ "$result" -ne "0" ] && err "[get_updated_release|out] => ${result}" && return 1
+  info "[get_updated_release|out] => ${result}"
+}
 ##########################################
 #######     ------- aws -------    #######
 ##########################################
@@ -156,7 +286,7 @@ call_grafana_api(){
 aws_find_kms_alias(){
   echo "[aws_find_kms_alias|in] ($1)"
 
-  [ -z $1 ] && err "[aws_find_kms_alias] missing argument ALIAS" && exit 1
+  [ -z $1 ] && err "[aws_find_kms_alias] missing argument ALIAS" && return 1
   local ALIAS="$1"
   result=1
 
@@ -174,13 +304,14 @@ aws_find_kms_alias(){
 #   name: aws_get_cloudfront_cidr
 #   purpose: retrieves the CIDR entries from the CloudFront origin-facing managed prefix list and writes them as JSON to a file
 #   parameters: $1 (output file path)
+#   returns: 0 if the JSON file is written, 1 if the output argument is missing or writing fails
 #   requires: aws, jq
 ############################
 
 aws_get_cloudfront_cidr(){
   info "[aws_get_cloudfront_cidr|in] ($1)"
 
-  [ -z $1 ] && err "[aws_get_cloudfront_cidr] missing argument OUTPUT_FILE" && exit 1
+  [ -z $1 ] && err "[aws_get_cloudfront_cidr] missing argument OUTPUT_FILE" && return 1
   local OUTPUT_FILE="$1"
 
   local prefix_list_id=$(aws ec2 describe-managed-prefix-lists | jq -r ".\"PrefixLists\" | .[] | select(.PrefixListName == \"com.amazonaws.global.cloudfront.origin-facing\") | .PrefixListId")
@@ -188,7 +319,7 @@ aws_get_cloudfront_cidr(){
   echo $outputs | jq -r ".\"Entries\"" > "$OUTPUT_FILE"
 
   result="$?"
-  [ "$result" -ne "0" ] && err "[aws_get_cloudfront_cidr|out]  => ${result}" && exit 1
+  [ "$result" -ne "0" ] && err "[aws_get_cloudfront_cidr|out]  => ${result}" && return 1
   info "[aws_get_cloudfront_cidr|out] => ${result}"
 }
 
@@ -197,6 +328,7 @@ aws_get_cloudfront_cidr(){
 #   purpose: configures a named AWS CLI profile with static credentials and region using 'aws configure'
 #   parameters: $1 (profile name), $2 (AWS access key ID), $3 (AWS secret access key),
 #               $4 (AWS region, e.g. eu-west-1), $5 (output format, default: json)
+#   returns: 0 if the profile is configured, 1 if required arguments or an AWS CLI command fails
 #   requires: aws
 ############################
 
@@ -227,7 +359,7 @@ aws_set_profile(){
 
   result="$?"
   cd "$_pwd"
-  [ "$result" -ne "0" ] && err "[aws_set_profile|out]  => ${result}" && exit 1
+  [ "$result" -ne "0" ] && err "[aws_set_profile|out]  => ${result}" && return 1
   info "[aws_set_profile|out] => ${result}"
 }
 
@@ -239,12 +371,15 @@ aws_set_profile(){
 #   name: az_sp_assign_subscription
 #   purpose: grants Contributor role to a service principal on the specified Azure subscription
 #   parameters: none
+#   returns: 0 on success, nonzero if the role assignment fails
 #   requires: APP_ID (service principal app/client ID), ARM_SUBSCRIPTION_ID, az
 ############################
 az_sp_assign_subscription()
 {
   info "[az_sp_assign_subscription|in]"
   az role assignment create --assignee "${APP_ID}" --role "Contributor" --scope "/subscriptions/${ARM_SUBSCRIPTION_ID}"
+  local result=$?
+  [ "$result" -ne 0 ] && err "[az_sp_assign_subscription] role assignment failed" && return "$result"
   info "[az_sp_assign_subscription|out]"
 }
 
@@ -252,13 +387,16 @@ az_sp_assign_subscription()
 #   name: az_sp_login
 #   purpose: authenticates the Azure CLI using service principal credentials (non-interactive)
 #   parameters: none
+#   returns: 0 on success, nonzero if login fails
 #   requires: APP_ID (client ID), ARM_CLIENT_SECRET, ARM_TENANT_ID, az
 ############################
 
 az_sp_login()
 {
   info "[az_sp_login|in]"
-  az login --service-principal -u "${APP_ID}" -p "${ARM_CLIENT_SECRET}" --tenant "${ARM_TENANT_ID}" #--subscription "${ARM_SUBSCRIPTION_ID}"
+  az login --service-principal -u "${APP_ID}" -p "${ARM_CLIENT_SECRET}" --tenant "${ARM_TENANT_ID}"
+  local result=$?
+  [ "$result" -ne 0 ] && err "[az_sp_login] Azure login failed" && return "$result"
   info "[az_sp_login|out]"
 }
 
@@ -266,6 +404,7 @@ az_sp_login()
 #   name: az_login_check
 #   purpose: validates that the current Azure CLI session is active by performing a lightweight read-only API call
 #   parameters: none
+#   returns: 0 if the API call succeeds, nonzero otherwise
 #   requires: az
 ############################
 
@@ -273,6 +412,8 @@ az_login_check()
 {
   info "[az_login_check|in]"
   az vm list-sizes --location westus
+  local result=$?
+  [ "$result" -ne 0 ] && err "[az_login_check] Azure CLI request failed" && return "$result"
   info "[az_login_check|out]"
 }
 
@@ -280,6 +421,7 @@ az_login_check()
 #   name: az_logout
 #   purpose: signs out of the Azure CLI, clearing all cached credentials
 #   parameters: none
+#   returns: 0 on success, nonzero if logout fails
 #   requires: az
 ############################
 
@@ -287,6 +429,8 @@ az_logout()
 {
   info "[az_logout|in]"
   az logout
+  local result=$?
+  [ "$result" -ne 0 ] && err "[az_logout] Azure logout failed" && return "$result"
   info "[az_logout|out]"
 }
 
@@ -294,6 +438,7 @@ az_logout()
 #   name: az_list_sp_roles
 #   purpose: lists all role assignments (principalName, role, scope) for a given service principal
 #   parameters: $1 (service principal app display name or object ID)
+#   returns: 0 on success, nonzero if the query fails
 #   requires: az
 ############################
 
@@ -301,9 +446,11 @@ az_list_sp_roles()
 {
   info "[az_list_sp_roles|in] ($1)"
 
-  [ -z "$1" ] && err "no sp app display name provided" && exit 1
-  sp_app_name="$1"
+  [ -z "$1" ] && err "no sp app display name provided" && return 1
+  local sp_app_name="$1"
   az role assignment list --all --assignee "${sp_app_name}" --output json --query '[].{principalName:principalName, roleDefinitionName:roleDefinitionName, scope:scope}'
+  local result=$?
+  [ "$result" -ne 0 ] && err "[az_list_sp_roles] role query failed" && return "$result"
 
   info "[az_list_sp_roles|out]"
 }
@@ -314,15 +461,17 @@ az_list_sp_roles()
 #            adds permissive CORS if not already configured, and stores the resulting website URL
 #            in the variables file via add_entry_to_variables
 #   parameters: $1 (storage account name), $2 (resource group name)
+#   returns: 0 on success, nonzero if Azure configuration or persistence fails
+#   side-effects: enables static website hosting, may add wildcard CORS, writes WEBSITE_URL
 #   requires: az, add_entry_to_variables
 ############################
 
 az_storage_account_web_config(){
   info "[az_storage_account_web_config|in] ($1, $2)"
 
-  [ -z "$1" ] && err "[az_storage_account_web_config] no STORAGE_ACCOUNT param provided" && exit 1
+  [ -z "$1" ] && err "[az_storage_account_web_config] no STORAGE_ACCOUNT param provided" && return 1
   local STORAGE_ACCOUNT="$1"
-  [ -z "$2" ] && err "[az_storage_account_web_config] no resource group provided" && exit 1
+  [ -z "$2" ] && err "[az_storage_account_web_config] no resource group provided" && return 1
   local RESOURCE_GROUP="$2"
 
   az storage blob service-properties update --account-name "$STORAGE_ACCOUNT" --static-website true \
@@ -330,9 +479,9 @@ az_storage_account_web_config(){
   result="$?"
 
   if [ "$result" -eq "0" ]; then
-    cors_config=$(az storage cors list --account-name pvdi0textmining0website)
+    cors_config=$(az storage cors list --account-name "$STORAGE_ACCOUNT")
     cors_result="$?"
-    info "[az_storage_account_web_config] cors_config result: $?"
+    info "[az_storage_account_web_config] cors_config result: $cors_result"
     info "[az_storage_account_web_config] cors_config: ->$cors_config<-"
 
     if [[ "$cors_result" -eq "0" && "$cors_config" != "[]" ]]; then
@@ -350,7 +499,7 @@ az_storage_account_web_config(){
     result="$?"
   fi
 
-  [ "$result" -ne "0" ] && err "[az_storage_account_web_config|out] could not configure bucket" && exit 1
+  [ "$result" -ne "0" ] && err "[az_storage_account_web_config|out] could not configure bucket" && return 1
 
   info "[az_storage_account_web_config|out] => ${result}"
 }
@@ -359,21 +508,21 @@ az_storage_account_web_config(){
 #   name: az_upload_static_website
 #   purpose: uploads all files from a local folder to the '$web' blob container of an Azure storage account (overwrites existing blobs)
 #   parameters: $1 (storage account name), $2 (local source folder path)
+#   returns: 0 on success, nonzero if upload fails
 #   requires: az
 ############################
 
 az_upload_static_website(){
   info "[az_upload_static_website|in] ($1, $2)"
 
-  [ -z "$1" ] && err "[az_upload_static_website] no STORAGE_ACCOUNT param provided" && exit 1
+  [ -z "$1" ] && err "[az_upload_static_website] no STORAGE_ACCOUNT param provided" && return 1
   local STORAGE_ACCOUNT="$1"
-  [ -z "$2" ] && err "[az_upload_static_website] no SOURCE_FOLDER param provided" && exit 1
+  [ -z "$2" ] && err "[az_upload_static_website] no SOURCE_FOLDER param provided" && return 1
   local SOURCE_FOLDER="$2"
 
-  az storage blob upload-batch --account-name $STORAGE_ACCOUNT --source $SOURCE_FOLDER --destination '$web' --debug --verbose --overwrite
-
+  az storage blob upload-batch --account-name "$STORAGE_ACCOUNT" --source "$SOURCE_FOLDER" --destination '$web' --debug --verbose --overwrite
   result="$?"
-  [ "$result" -ne "0" ] && err "[az_upload_static_website|out] could not configure bucket" && exit 1
+  [ "$result" -ne "0" ] && err "[az_upload_static_website|out] could not upload static website" && return 1
 
   info "[az_upload_static_website|out] => ${result}"
 }
@@ -383,35 +532,44 @@ az_upload_static_website(){
 #   purpose: obtains an OAuth2 access token from Azure AD using client credentials flow
 #            and persists it as AZURE_ACCESS_TOKEN in the secrets file via add_entry_to_secrets
 #   parameters: $1 (Azure tenant ID), $2 (client/app ID), $3 (client secret), $4 (OAuth2 scope, e.g. 'https://management.azure.com/.default')
+#   returns: 0 on success, nonzero if the request, response validation, or secret persistence fails
+#   side-effects: writes AZURE_ACCESS_TOKEN to FILE_SECRETS
 #   requires: curl, jq, add_entry_to_secrets
 ############################
 
 get_azure_access_token(){
-  info "[get_azure_access_token|in] ($1, $2, ${3:0:3}, $4)"
+  info "[get_azure_access_token|in] ($1, $2, [redacted], $4)"
 
-  [ -z $1 ] && err "[get_azure_access_token] missing argument TENANT_ID" && exit 1
-  TENANT_ID="$1"
-  [ -z $2 ] && err "[get_azure_access_token] missing argument BIFROST_CLIENT_ID" && exit 1
-  BIFROST_CLIENT_ID="$2"
-  [ -z $3 ] && err "[get_azure_access_token] missing argument APP_REG_CLIENT_SECRET" && exit 1
-  BIFROST_CLIENT_SECRET="$3"
-  [ -z $4 ] && err "[get_azure_access_token] missing argument SCOPE" && exit 1
-  SCOPE="$4"
+  local tenant_id="$1"
+  local client_id="$2"
+  local client_secret="$3"
+  local scope="$4"
+  [ -z "$tenant_id" ] && err "[get_azure_access_token] missing argument TENANT_ID" && return 1
+  [ -z "$client_id" ] && err "[get_azure_access_token] missing argument CLIENT_ID" && return 1
+  [ -z "$client_secret" ] && err "[get_azure_access_token] missing argument CLIENT_SECRET" && return 1
+  [ -z "$scope" ] && err "[get_azure_access_token] missing argument SCOPE" && return 1
 
-
-  local azure_token_api=https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token
-
-  local response=$(curl -s -X POST "${azure_token_api}" -H "Content-Type: application/x-www-form-urlencoded" \
+  local azure_token_api="https://login.microsoftonline.com/${tenant_id}/oauth2/v2.0/token"
+  local response
+  response=$(curl -fsS -X POST "$azure_token_api" -H "Content-Type: application/x-www-form-urlencoded" \
       --data-urlencode "grant_type=client_credentials" \
-      --data-urlencode "client_id=${BIFROST_CLIENT_ID}" \
-      --data-urlencode "client_secret=${BIFROST_CLIENT_SECRET}" \
-      --data-urlencode "scope=${SCOPE}" )
-  result="$?"
-  access_token=$(echo "$response" | jq -r '.access_token')
-  add_entry_to_secrets "AZURE_ACCESS_TOKEN" "$access_token"
+      --data-urlencode "client_id=${client_id}" \
+      --data-urlencode "client_secret=${client_secret}" \
+      --data-urlencode "scope=${scope}") || {
+    err "[get_azure_access_token] token request failed"
+    return 1
+  }
 
-  [ "$result" -ne "0" ] && err "[get_azure_access_token|out]  => ${result}" && exit 1
-  info "[get_azure_access_token|out] => ${access_token}"
+  local access_token
+  access_token=$(printf '%s' "$response" | jq -er '.access_token | strings | select(length > 0)') || {
+    err "[get_azure_access_token] response contains no access token"
+    return 1
+  }
+  add_entry_to_secrets "AZURE_ACCESS_TOKEN" "$access_token" || {
+    err "[get_azure_access_token] failed to add token to secrets file"
+    return 1
+  }
+  info "[get_azure_access_token|out] token stored"
 }
 
 ##########################################
@@ -449,16 +607,16 @@ verify_prereqs(){
 
 ############################
 #   name: verify_env
-#   purpose: verifies that all required environment variable names are provided as non-empty arguments
-#   parameters: $@ (one or more environment variable names to verify are non-empty)
-#   returns: 0 if all names are non-empty, 1 on first empty name
+#   purpose: verifies that each named environment variable has a non-empty value
+#   parameters: $@ (one or more environment variable names)
+#   returns: 0 if all values are non-empty, 1 if any variable is unset or empty
 ############################
 verify_env(){
   info "[verify_env] ..."
   for arg in "$@"
   do
       debug "[verify_env] ... checking $arg"
-      if [ -z "${!arg}" ]; then err "[verify_env] please define env var: $arg" && exit 1; fi
+      if [ -z "${!arg}" ]; then err "[verify_env] please define env var: $arg" && return 1; fi
   done
   info "[verify_env] ...done."
 }
@@ -467,11 +625,12 @@ verify_env(){
 #   name: package
 #   purpose: creates a bzip2-compressed tar archive from the project root
 #   parameters: none
+#   returns: 0 if the archive is created, 1 if tar fails
 #   requires: TAR_NAME (output archive path), INCLUDE_FILE (file/folder to archive), this_folder (project root)
 ############################
 package(){
   info "[package] ..."
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$this_folder"
 
   tar cjpvf "$TAR_NAME" "$INCLUDE_FILE"
@@ -482,52 +641,27 @@ package(){
 }
 
 ############################
-#   name: create_from_template_and_envvars
-#   purpose: renders a template file by substituting named environment variables using sed, writing the result to a destination file
-#   parameters: $1 (template file path), $2 (destination file path), $3+ (names of environment variables to substitute)
-#   returns: 0 on success, 1 if fewer than 3 arguments are provided or sed fails
-############################
-create_from_template_and_envvars() {
-  info "[create_from_template_and_envvars] ...( $@ )"
-  local usage_msg=$'create_from_template_and_envvars: creates a file from a template substituting env vars:\nusage:\n    create_from_template_and_envvars TEMPLATE DESTINATION [ENVVARS...]'
-
-  if [ -z "$3" ] ; then echo "$usage_msg" && return 1; fi
-
-  local template="$1"
-  local destination="$2"
-  local vars="${@:3}"
-
-  local expression=""
-  for var in $vars
-  do
-    eval val=\${"$var"}
-    #echo "$var: $val"
-    expression="${expression}s/${var}/${val}/g;"
-  done
-
-  #echo "expression: $expression"
-  sed "${expression}" "$template" > "$destination"
-  if [ ! "$?" -eq "0" ]; then err "[create_from_template_and_envvars] sed command was not successful" && return 1; fi
-  info "[create_from_template_and_envvars] ...done."
-}
-
-############################
 #   name: add_entry_to_file
 #   purpose: upserts an 'export VAR=VALUE' entry in a file relative to this_folder;
 #            removes any existing line for the variable before appending the new value;
 #            if $3 is empty the variable entry is deleted without replacement
 #   parameters: $1 (file name, relative to this_folder), $2 (variable name), $3 (variable value, optional)
+#   returns: 0 after updating the file, 1 if required arguments are missing
 #   requires: this_folder (project root)
 ############################
 add_entry_to_file()
 {
-  info "[add_entry_to_file|in] ($1, $2, ${3:0:5})"
+  info "[add_entry_to_file|in] ($1, $2, [redacted])"
   [ -z "$2" ] && err "no parameters provided" && return 1
   local file="$1"
   local file_path="${this_folder}/${file}"
   local var_name="$2"
   local var_value="$3"
 
+  [ -z "$file" ] && err "[add_entry_to_file] no file provided" && return 1
+  if [ ! -f "$file_path" ]; then
+    touch "$file_path"
+  fi
   if [ -f "$file_path" ]; then
     if [[ "$OSTYPE" == "darwin"* ]]; then
       sed -i '' "/export $var_name=/d" "$file_path"
@@ -546,6 +680,7 @@ add_entry_to_file()
 #   name: add_entry_to_variables
 #   purpose: upserts an environment variable entry in the shared variables file (FILE_VARIABLES)
 #   parameters: $1 (variable name), $2 (variable value, optional — omit to delete the entry)
+#   returns: 0 after updating the file, 1 if the variable name is missing
 #   requires: FILE_VARIABLES
 ############################
 add_entry_to_variables()
@@ -563,6 +698,7 @@ add_entry_to_variables()
 #   name: add_entry_to_local_variables
 #   purpose: upserts an environment variable entry in the local variables file (FILE_LOCAL_VARIABLES)
 #   parameters: $1 (variable name), $2 (variable value, optional — omit to delete the entry)
+#   returns: 0 after updating the file, 1 if the variable name is missing
 #   requires: FILE_LOCAL_VARIABLES
 ############################
 add_entry_to_local_variables()
@@ -580,11 +716,12 @@ add_entry_to_local_variables()
 #   name: add_entry_to_secrets
 #   purpose: upserts an environment variable entry in the secrets file (FILE_SECRETS)
 #   parameters: $1 (variable name), $2 (secret value, optional — omit to delete the entry)
+#   returns: 0 after updating the file, 1 if the variable name is missing
 #   requires: FILE_SECRETS
 ############################
 add_entry_to_secrets()
 {
-  info "[add_entry_to_secrets|in] ($1, ${2:0:7})"
+  info "[add_entry_to_secrets|in] ($1, [redacted])"
   [ -z "$1" ] && err "no parameters provided" && return 1
 
   target_file="${FILE_SECRETS}"
@@ -603,14 +740,14 @@ git_tag_and_push()
 {
   info "[git_tag_and_push|in] ($1, ${2:0:7})"
 
-  [ -z "$1" ] && err "must provide parameter VERSION" && exit 1
+  [ -z "$1" ] && err "must provide parameter VERSION" && return 1
   local VERSION="$1"
-  [ -z "$2" ] && err "must provide parameter COMMIT_HASH" && exit 1
+  [ -z "$2" ] && err "must provide parameter COMMIT_HASH" && return 1
   local COMMIT_HASH="$2"
 
   git tag -a "$VERSION" "$COMMIT_HASH" -m "release $VERSION" && git push --tags
   result="$?"
-  [ "$result" -ne "0" ] && err "[git_tag_and_push|out] could not tag and push" && exit 1
+  [ "$result" -ne "0" ] && err "[git_tag_and_push|out] could not tag and push" && return 1
 
   info "[git_tag_and_push|out] => ${result}"
 }
@@ -620,6 +757,7 @@ git_tag_and_push()
 #   name: git_tag_and_push_auto_uv
 #   purpose: reads the project version from pyproject.toml via uv, then creates an annotated git tag on the latest commit and pushes all tags to remote
 #   parameters: none
+#   returns: 0 if the tag is created and pushed, 1 if tagging or pushing fails
 #   requires: uv (with tomllib), git, this_folder
 ############################
 git_tag_and_push_auto_uv()
@@ -633,7 +771,7 @@ git_tag_and_push_auto_uv()
   git tag -a "$version" "$commit_hash" -m "release $version" && git push --tags
   result="$?"
   
-  [ "$result" -ne "0" ] && err "[git_tag_and_push|out] could not tag and push" && exit 1
+  [ "$result" -ne "0" ] && err "[git_tag_and_push|out] could not tag and push" && return 1
 
   info "[git_tag_and_push_auto_uv|out] => ${result}"
 }
@@ -642,6 +780,8 @@ git_tag_and_push_auto_uv()
 #   name: get_latest_tag
 #   purpose: retrieves the latest git tag from the repository
 #   parameters: none
+#   returns: 0 and prints the latest tag, 1 if no tag is available
+#   requires: git
 ############################
 get_latest_tag() {
   info "[get_latest_tag|in]" >&2
@@ -650,7 +790,7 @@ get_latest_tag() {
   latest_tag="$(git describe --tags --abbrev=0 2>/dev/null)"
   if [ -z "$latest_tag" ]; then
     err "[get_latest_tag|out] => 1 (no tags found)" >&2
-    exit 1
+    return 1
   fi
 
   echo "$latest_tag"
@@ -662,6 +802,7 @@ get_latest_tag() {
 #   name: changelog
 #   purpose: generates a CHANGELOG file from git log (format: hash, date, refs, subject)
 #   parameters: $1 (output filename, default: CHANGELOG)
+#   returns: 0 if the changelog is written, 1 if git log fails
 #   requires: this_folder (project root)
 ############################
 
@@ -672,14 +813,14 @@ changelog(){
   [ ! -z $1 ] && FILE="$1"
   info "[changelog] creating file: $FILE"
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$this_folder"
 
   git log --pretty=format:"- %h %as %d %s" > "$FILE"
   result="$?"
 
   cd "$_pwd"
-  [ "$result" -ne "0" ] && err "[changelog|out]  => ${result}" && exit 1
+  [ "$result" -ne "0" ] && err "[changelog|out]  => ${result}" && return 1
   echo "[changelog|out] => $result"
 }
 
@@ -693,6 +834,7 @@ changelog(){
 #               $4 (path segment replacement — target)
 #               $5 (import prefix to replace — origin, e.g. 'old_pkg.')
 #               $6 (import prefix replacement — target, e.g. 'new_pkg.')
+#   returns: 0 when processing completes, 1 if a required argument is missing
 #   requires: this_folder (project root)
 ############################
 
@@ -707,25 +849,27 @@ proj_code_transfer(){
   # export CODE_TRANSFER_IMPORT_REPLACEMENT_ORIGIN="ssds_qsd_dataops."
   # export CODE_TRANSFER_IMPORT_REPLACEMENT_TARGET="tgedr.dataops."
 
-  [ -z $1 ] && err "[proj_code_transfer] missing argument TMP_FOLDER" && exit 1
+  [ -z $1 ] && err "[proj_code_transfer] missing argument TMP_FOLDER" && return 1
   local TMP_FOLDER="$1"
-  [ -z $2 ] && err "[proj_code_transfer] missing argument CODE_TRANSFER_FOLDERS" && exit 1
+  [ -z $2 ] && err "[proj_code_transfer] missing argument CODE_TRANSFER_FOLDERS" && return 1
   local CODE_TRANSFER_FOLDERS="$2"
-  [ -z $3 ] && err "[proj_code_transfer] missing argument CODE_TRANSFER_PATH_REPLACEMENT_ORIGIN" && exit 1
+  [ -z $3 ] && err "[proj_code_transfer] missing argument CODE_TRANSFER_PATH_REPLACEMENT_ORIGIN" && return 1
   local CODE_TRANSFER_PATH_REPLACEMENT_ORIGIN="$3"
-  [ -z $4 ] && err "[proj_code_transfer] missing argument CODE_TRANSFER_PATH_REPLACEMENT_TARGET" && exit 1
+  [ -z $4 ] && err "[proj_code_transfer] missing argument CODE_TRANSFER_PATH_REPLACEMENT_TARGET" && return 1
   local CODE_TRANSFER_PATH_REPLACEMENT_TARGET="$4"
-  [ -z $5 ] && err "[proj_code_transfer] missing argument CODE_TRANSFER_IMPORT_REPLACEMENT_ORIGIN" && exit 1
+  [ -z $5 ] && err "[proj_code_transfer] missing argument CODE_TRANSFER_IMPORT_REPLACEMENT_ORIGIN" && return 1
   local CODE_TRANSFER_IMPORT_REPLACEMENT_ORIGIN="$5"
-  [ -z $6 ] && err "[proj_code_transfer] missing argument CODE_TRANSFER_IMPORT_REPLACEMENT_TARGET" && exit 1
+  [ -z $6 ] && err "[proj_code_transfer] missing argument CODE_TRANSFER_IMPORT_REPLACEMENT_TARGET" && return 1
   local CODE_TRANSFER_IMPORT_REPLACEMENT_TARGET="$6"
+  local -a source_folders
+  read -r -a source_folders <<< "$CODE_TRANSFER_FOLDERS"
 
-   _pwd=`pwd`
+   local _pwd=$(pwd)
   cd "$this_folder"
 
   [[ ! -d "$TMP_FOLDER" ]] && mkdir -p "$TMP_FOLDER"
 
-  for item in "${CODE_TRANSFER_FOLDERS[@]}"; do
+  for item in "${source_folders[@]}"; do
     info "[proj_code_transfer] checking: $item"
     find ./$item -type f | while read -r filepath; do
 
@@ -744,7 +888,7 @@ proj_code_transfer(){
   local result="$?"
   cd "$_pwd"
   local msg="[proj_code_transfer|out] => ${result}"
-  [[ ! "$result" -eq "0" ]] && info "$msg" && exit 1
+  [[ ! "$result" -eq "0" ]] && info "$msg" && return 1
   info "$msg"
 }
 
@@ -752,25 +896,26 @@ proj_code_transfer(){
 #   name: add_pypi_config
 #   purpose: creates ~/.pypirc with a token-based PyPI auth entry if the file does not already exist
 #   parameters: $1 (PyPI API token)
+#   returns: 0 on success, nonzero if the file cannot be created or secured
+#   side-effects: creates or changes permissions on ~/.pypirc
 ############################
 
 add_pypi_config(){
-  info "[add_pypi_config] ..."
+  info "[add_pypi_config|in]"
 
-  [ -z $1 ] && err "[add_pypi_config] missing argument PYPI_TOKEN" && exit 1
+  [ -z $1 ] && err "[add_pypi_config] missing argument PYPI_TOKEN" && return 1
   local PYPI_TOKEN="$1"
   
-  _pwd=`pwd`
-  cd ~/
-
-  if [ ! -f ".pypirc" ]; then
+  local pypirc="$HOME/.pypirc"
+  if [ ! -f "$pypirc" ]; then
     info "[add_pypi_config] no '.pypirc' going to create it"
-    echo "[pypi]" > .pypirc
-    echo "username = __token__" >> .pypirc
-    echo "password = $PYPI_TOKEN" >> .pypirc
+    (umask 077; printf '[pypi]\nusername = __token__\npassword = %s\n' "$PYPI_TOKEN" > "$pypirc") || {
+      err "[add_pypi_config] could not create ~/.pypirc"
+      return 1
+    }
   fi
-  cd "$_pwd"
-  info "[add_pypi_config] ...done."
+  chmod 600 "$pypirc" || { err "[add_pypi_config] could not secure ~/.pypirc"; return 1; }
+  info "[add_pypi_config|out]"
 }
 
 ############################
@@ -778,6 +923,7 @@ add_pypi_config(){
 #   purpose: ensures the 'uv' Python package manager is installed (installs via the official install script if absent);
 #            then runs 'uv init' if no pyproject.toml exists, or 'uv sync' otherwise
 #   parameters: none
+#   returns: 0 if uv initialization or synchronization succeeds, 1 if installation or setup fails
 #   requires: this_folder (project root)
 ############################
 
@@ -787,10 +933,10 @@ assert_uv_config(){
   which uv 1>/dev/null
   if [ "$?" -ne "0" ]; then 
     curl -LsSf https://astral.sh/uv/install.sh | sh
-    [ "$?" -ne "0" ] && err "[assert_uv_config|out] failed" && exit 1
+    [ "$?" -ne "0" ] && err "[assert_uv_config|out] failed" && return 1
   fi
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$this_folder"
   if [ ! -f "$this_folder/pyproject.toml" ]; then
     uv init
@@ -803,7 +949,7 @@ assert_uv_config(){
   fi
   cd "$_pwd"
 
-  [ "$result" -ne "0" ] && err "[assert_uv_config|out]  => ${result}" && exit 1
+  [ "$result" -ne "0" ] && err "[assert_uv_config|out]  => ${result}" && return 1
   info "[assert_uv_config|out]"
 }
 
@@ -811,6 +957,7 @@ assert_uv_config(){
 #   name: print_uuid
 #   purpose: generates and prints a new UUID using uuidgen
 #   parameters: none
+#   returns: 0 after printing the UUID
 #   requires: uuidgen
 ############################
 
@@ -823,17 +970,16 @@ print_uuid(){
   echo "[print_uuid|out]"
 }
 
-
-
 ############################
 #   name: collect_dot_git
 #   purpose: archives the .git directory of the project into a compressed tar archive
 #   parameters: $1 (output archive filename, default: git.tar.gz)
+#   returns: 0 if the archive is created, 1 if tar fails
 #   requires: tar, this_folder
 ############################
 collect_dot_git(){
   info "[collect_dot_git|in] ($1)"
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$this_folder"
 
   local OUTPUT_FILE="${1:-git.tar.gz}"
@@ -842,7 +988,7 @@ collect_dot_git(){
 
   cd "$_pwd"
   local msg="[collect_dot_git|out] => ${result}"
-  [[ ! "$result" -eq "0" ]] && info "$msg" && exit 1
+  [[ ! "$result" -eq "0" ]] && info "$msg" && return 1
   info "$msg"
 }
 
@@ -850,6 +996,7 @@ collect_dot_git(){
 #   name: create_release_documentation
 #   purpose: assembles release documentation artifacts (git archive, PR approval PDF, QA PDF) into a single directory and compresses it into a tar archive
 #   parameters: $1 (git archive tar file path), $2 (PR approvals PDF file path), $3 (QA report PDF file path), $4 (output target directory)
+#   returns: 0 if the release archive is created, 1 if arguments are missing or tar fails
 #   requires: tar, this_folder
 ############################
 create_release_documentation(){
@@ -861,10 +1008,10 @@ create_release_documentation(){
   local TARGET_DIR="$4"
 
   if [ -z "$GIT_TAR" ] || [ -z "$PRS_PDF" ] || [ -z "$QA_PDF" ] || [ -z "$TARGET_DIR" ]; then
-    err "[create_release_documentation] missing required arguments: GIT_TAR, PRS_PDF, QA_PDF, TARGET_DIR" && exit 1
+    err "[create_release_documentation] missing required arguments: GIT_TAR, PRS_PDF, QA_PDF, TARGET_DIR" && return 1
   fi
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$this_folder"
 
   rm -f $TARGET_DIR
@@ -878,7 +1025,7 @@ create_release_documentation(){
   cd "$_pwd"
 
   local msg="[create_release_documentation|out] => ${result}"
-  [[ ! "$result" -eq "0" ]] && info "$msg" && exit 1
+  [[ ! "$result" -eq "0" ]] && info "$msg" && return 1
   info "$msg"
 }
 
@@ -916,6 +1063,7 @@ function_report_wrapper(){
 #   name: generate_pr_approvals_md
 #   purpose: generates a markdown report of PR approvals for a given repository branch using tgedr_pycommons
 #   parameters: $1 (repository name), $2 (branch name), $3 (output markdown file path)
+#   returns: the exit status of the uv command, or 1 if a required argument is missing
 #   requires: uv (with tgedr_pycommons)
 ############################
 generate_pr_approvals_md() {
@@ -924,7 +1072,7 @@ generate_pr_approvals_md() {
   local output_file="$3"
 
   if [ -z "$repo" ] || [ -z "$branch" ] || [ -z "$output_file" ]; then
-    err "[generate_pr_approvals_md] missing required arguments: repo, branch, output_file" && exit 1
+    err "[generate_pr_approvals_md] missing required arguments: repo, branch, output_file" && return 1
   fi
 
   uv run python -c "from tgedr_pycommons.cicd.pr_report_generator import generate_pr_approvals_md; generate_pr_approvals_md('$repo', '$branch', '$output_file')"
@@ -934,6 +1082,7 @@ generate_pr_approvals_md() {
 #   name: generate_pdf_from_md
 #   purpose: converts a markdown file to a PDF using tgedr_pycommons
 #   parameters: $1 (input markdown file path), $2 (output PDF file path)
+#   returns: the exit status of the uv command, or 1 if a required argument is missing
 #   requires: uv (with tgedr_pycommons)
 ############################
 generate_pdf_from_md() {
@@ -946,7 +1095,97 @@ generate_pdf_from_md() {
   uv run python -c "from tgedr_pycommons.cicd.markdown_to_pdf import convert; convert('$input_md', '$output_pdf')"
 }
 
+############################
+#   name: create_github_release
+#   purpose: creates a GitHub release for a given version tag, uploading all files from dist/; supports draft mode via RELEASE_DRAFT env var
+#   parameters: $1 (version tag string)
+#   returns: 0 if the release is created, 1 if the tag is missing, no assets exist, or gh fails
+#   requires: gh CLI, RELEASE_DRAFT (env var, optional)
+############################
+create_github_release(){
+  info "[create_github_release|in] ($1)"
 
+  [ -z "$1" ] && err "[create_github_release] missing argument VERSION" && return 1
+  local VERSION="$1"
+  local dist_dir="dist"
+  local -a release_assets=()
+  local asset
+  for asset in "$dist_dir"/.[!.]* "$dist_dir"/*; do
+    [ -f "$asset" ] && release_assets+=("$asset")
+  done
+  if [ "${#release_assets[@]}" -eq 0 ]; then
+    err "[create_github_release] no release assets found in $dist_dir"
+    return 1
+  fi
+
+  local is_draft="false"
+  if [ "$RELEASE_DRAFT" = "true" ]; then
+    is_draft="true"
+  fi
+  
+  gh release create "$VERSION" "${release_assets[@]}" --title "Release $VERSION" --draft="$is_draft" --notes "check release content for more details"
+  [ "$?" -ne "0" ] && err "[create_github_release] failed to create release" && return 1
+  
+  info "[create_github_release|out]"
+}
+
+############################
+#   name: download_github_release_files
+#   purpose: downloads all release assets from a GitHub release by version tag using the assets API (avoids proxy-blocked redirects); supports optional token authentication
+#   parameters: $1 (repository in owner/repo format), $2 (version tag), $3 (target download directory), $4 (optional GitHub API token)
+#   returns: 0 if all assets download, 1 if arguments, metadata lookup, or a download fails
+#   requires: curl, python3, this_folder
+############################
+download_github_release_files(){
+  info "[download_github_release_files|in] ($1, $2, $3, ${4:0:7})"
+
+  [ -z "$1" ] && err "[download_github_release_files] missing argument REPO" && return 1
+  local REPO="$1"
+  [ -z "$2" ] && err "[download_github_release_files] missing argument VERSION" && return 1
+  local VERSION="$2"
+  [ -z "$3" ] && err "[download_github_release_files] missing argument TARGET_DIR" && return 1
+  local TARGET_DIR="$3"
+  
+  _pwd=$(pwd)
+  cd "$TARGET_DIR"
+
+  local AUTH_HEADER=""
+  [ -n "$4" ] && AUTH_HEADER="-H \"Authorization: token $4\""
+
+  # Use assets API with Accept: application/octet-stream to avoid redirect to
+  # objects.githubusercontent.com (which may be blocked by proxies like Zscaler)
+  local release_json
+  release_json=$(eval curl -fsSL "$AUTH_HEADER" "\"https://api.github.com/repos/$REPO/releases/tags/$VERSION\"")
+  result="$?"
+  if [ "$result" -ne "0" ]; then
+    err "[download_github_release_files] failed to fetch release metadata"
+    cd "$_pwd"
+    return 1
+  fi
+
+  echo "$release_json" | python3 -c "
+import sys, json
+assets = json.load(sys.stdin).get('assets', [])
+for a in assets:
+    print(a['id'], a['name'])
+" | while read -r asset_id asset_name; do
+    info "[download_github_release_files] downloading asset: $asset_name (id: $asset_id)"
+    eval curl -fsSL "$AUTH_HEADER" \
+      -H "\"Accept: application/octet-stream\"" \
+      -o "\"$asset_name\"" \
+      "\"https://api.github.com/repos/$REPO/releases/assets/$asset_id\""
+    if [ "$?" -ne "0" ]; then
+      err "[download_github_release_files] failed to download asset: $asset_name"
+      cd "$_pwd"
+      return 1
+    fi
+  done
+  result="$?"
+  cd "$_pwd"
+
+  [ "$result" -ne "0" ] && err "[download_github_release_files|out] => ${result}" && return 1
+  info "[download_github_release_files|out] => ${result}"
+}
 ##########################################
 #######     ------- cdk -------    #######
 ##########################################
@@ -956,6 +1195,7 @@ generate_pdf_from_md() {
 #   purpose: globally installs all npm packages required for AWS CDK TypeScript development
 #   parameters: $1 (typescript version), $2 (aws-cdk version), $3 (ts-node version),
 #               $4 (@aws-cdk/integ-runner version), $5 (@aws-cdk/integ-tests-alpha version), $6 (jest version)
+#   returns: 0 if packages install, 1 if a required version is missing or npm fails
 #   requires: npm
 ############################
 cdk_global_reqs(){
@@ -978,7 +1218,7 @@ cdk_global_reqs(){
    "@aws-cdk/integ-runner@${INTEG_RUNNER_VERSION}" "@aws-cdk/integ-tests-alpha@${INTEG_TESTS_ALPHA_VERSION}" \
    "jest@${JEST_VERSION}"
   result="$?"
-  [ "$result" -ne "0" ] && err "[cdk_global_reqs|out]  => ${result}" && exit 1
+  [ "$result" -ne "0" ] && err "[cdk_global_reqs|out]  => ${result}" && return 1
   info "[cdk_global_reqs|out] => ${result}"
 }
 
@@ -986,23 +1226,24 @@ cdk_global_reqs(){
 #   name: cdk_scaffolding
 #   purpose: initialises a new AWS CDK TypeScript app in the given directory using 'cdk init app'
 #   parameters: $1 (path to the target infrastructure directory)
+#   returns: 0 if the app is initialized, 1 if the directory is missing or cdk fails
 #   requires: cdk
 ############################
 
 cdk_scaffolding(){
   info "[cdk_scaffolding|in] ($1)"
 
-  [ -z $1 ] && err "[cdk_scaffolding] missing argument INFRA_DIR" && exit 1
+  [ -z $1 ] && err "[cdk_scaffolding] missing argument INFRA_DIR" && return 1
   local INFRA_DIR="$1"
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$INFRA_DIR"
 
   cdk init app --language typescript
 
   result="$?"
   cd "$_pwd"
-  [ "$result" -ne "0" ] && err "[cdk_scaffolding|out]  => ${result}" && exit 1
+  [ "$result" -ne "0" ] && err "[cdk_scaffolding|out]  => ${result}" && return 1
   info "[cdk_scaffolding|out] => ${result}"
 }
 
@@ -1012,6 +1253,7 @@ cdk_scaffolding(){
 #   parameters: $1 (typescript version), $2 (aws-cdk version), $3 (ts-node version),
 #               $4 (@aws-cdk/integ-runner version), $5 (@aws-cdk/integ-tests-alpha version),
 #               $6 (jest version), $7 (path to infrastructure directory)
+#   returns: 0 if dependencies install and scaffolding succeeds, 1 if either step fails
 #   requires: npm, cdk
 ############################
 
@@ -1037,7 +1279,7 @@ cdk_infra_bootstrap(){
     "$INTEG_TESTS_ALPHA_VERSION" "$JEST_VERSION"  && cdk_scaffolding "$INFRA_DIR"
 
   result="$?"
-  [ "$result" -ne "0" ] && err "[cdk_infra_bootstrap|out]  => ${result}" && exit 1
+  [ "$result" -ne "0" ] && err "[cdk_infra_bootstrap|out]  => ${result}" && return 1
   info "[cdk_infra_bootstrap|out] => ${result}"
 }
 
@@ -1050,6 +1292,7 @@ cdk_infra_bootstrap(){
 #   parameters: $1 (operation: on | off | bootstrap),
 #               $2 (infrastructure folder, default: infrastructure),
 #               $3 (stacks selector, default: --all)
+#   returns: 0 if the requested operation succeeds, 1 if a CDK command fails
 #   requires: cdk
 ############################
 
@@ -1080,20 +1323,20 @@ cdk_infra()
     local stacks="--all"
   fi
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$tf_dir"
 
   if [ "$operation" == "on" ]; then
     cdk synth "$stacks"
-    [ "$?" -ne "0" ] && err "[infra] couldn't synth" && cd "$_pwd" && exit 1
+    [ "$?" -ne "0" ] && err "[infra] couldn't synth" && cd "$_pwd" && return 1
     cdk deploy "$stacks" --require-approval=never -v --debug
-    [ "$?" -ne "0" ] && err "[infra] couldn't deploy" && cd "$_pwd" && exit 1
+    [ "$?" -ne "0" ] && err "[infra] couldn't deploy" && cd "$_pwd" && return 1
   elif [ "$operation" == "off" ]; then
     cdk destroy "$stacks" --force
-    [ "$?" -ne "0" ] && err "[infra] couldn't destroy" && cd "$_pwd" && exit 1
+    [ "$?" -ne "0" ] && err "[infra] couldn't destroy" && cd "$_pwd" && return 1
   elif [ "$operation" == "bootstrap" ]; then
     cdk bootstrap --force --termination-protection false
-    [ "$?" -ne "0" ] && err "[infra] couldn't bootstrap" && cd "$_pwd" && exit 1
+    [ "$?" -ne "0" ] && err "[infra] couldn't bootstrap" && cd "$_pwd" && return 1
   fi
 
   cd "$_pwd"
@@ -1104,6 +1347,7 @@ cdk_infra()
 #   name: cdk_setup
 #   purpose: runs 'npm install' in the CDK infrastructure directory to install project dependencies
 #   parameters: $1 (infrastructure folder path, default: infrastructure)
+#   returns: 0 if dependencies install, 1 if npm fails
 #   requires: npm
 ############################
 
@@ -1118,12 +1362,12 @@ cdk_setup()
     else
       info "[cdk_setup] assuming default infra folder: ${DEFAULT_INFRA_DIR}"
     fi
-    _pwd=`pwd`
+    local _pwd=$(pwd)
     cd "$tf_dir"
     npm install
     result="$?"
     cd "$_pwd"
-    [ "$result" -ne "0" ] && err "[cdk_setup|out]  => ${result}" && exit 1
+    [ "$result" -ne "0" ] && err "[cdk_setup|out]  => ${result}" && return 1
     info "[cdk_setup|out] => ${result}"
 }
 
@@ -1136,6 +1380,7 @@ cdk_setup()
 #   purpose: prints a quick-reference cheat sheet of commonly used commands covering:
 #            Python virtualenv/Jupyter, AWS CDK (TypeScript), AWS CLI, and git configuration
 #   parameters: none
+#   returns: 0 after printing the command reference
 ############################
 commands() {
   cat <<EOM
@@ -1174,6 +1419,7 @@ EOM
 #   purpose: authenticates interactively with Azure, retrieves a Databricks access token,
 #            and persists DATABRICKS_HOST and DATABRICKS_TOKEN via add_entry_to_variables/add_entry_to_secrets
 #   parameters: $1 (Databricks workspace URL, e.g. https://<workspace>.azuredatabricks.net), $2 (Azure subscription ID)
+#   returns: 0 after storing the workspace host and access token, 1 if a required argument is missing
 #   requires: az, add_entry_to_variables, add_entry_to_secrets
 ############################
 databricks_set_cli_access()
@@ -1196,21 +1442,22 @@ databricks_set_cli_access()
 #   name: databricks_bundle_deploy
 #   purpose: validates and deploys a Databricks Asset Bundle to the specified target environment
 #   parameters: $1 (path to the bundle folder containing databricks.yml), $2 (deployment target: local | main, default: local)
+#   returns: 0 if validation and deployment succeed, 1 if arguments are invalid or a command fails
 #   requires: databricks
 ############################
 
 databricks_bundle_deploy(){
   info "[databricks_bundle_deploy|in]"
 
-  [ -z $1 ] && err "[databricks_bundle_deploy] missing argument BUNDLE_FOLDER" && exit 1
+  [ -z $1 ] && err "[databricks_bundle_deploy] missing argument BUNDLE_FOLDER" && return 1
   local BUNDLE_FOLDER="$1"
   local BUNDLE_TARGET="local"
   [ ! -z $2 ] && BUNDLE_TARGET="$2"
 
-  [ "main" != "$BUNDLE_TARGET" ] && [ "local" != "$BUNDLE_TARGET" ] && err "[databricks_bundle_deploy] wrong argument BUNDLE_TARGET: $BUNDLE_TARGET" && exit 1
+  [ "main" != "$BUNDLE_TARGET" ] && [ "local" != "$BUNDLE_TARGET" ] && err "[databricks_bundle_deploy] wrong argument BUNDLE_TARGET: $BUNDLE_TARGET" && return 1
   info "[databricks_bundle_deploy] BUNDLE_FOLDER: $BUNDLE_FOLDER   BUNDLE_TARGET: $BUNDLE_TARGET"
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$BUNDLE_FOLDER"
 
   databricks bundle validate --target "$BUNDLE_TARGET" --debug && \
@@ -1218,7 +1465,7 @@ databricks_bundle_deploy(){
 
   result="$?"
   cd "$_pwd"
-  [ "$result" -ne "0" ] && err "[databricks_bundle_deploy|out]  => ${result}" && exit 1
+  [ "$result" -ne "0" ] && err "[databricks_bundle_deploy|out]  => ${result}" && return 1
   info "[databricks_bundle_deploy|out] => ${result}"
 }
 
@@ -1226,28 +1473,29 @@ databricks_bundle_deploy(){
 #   name: databricks_bundle_destroy
 #   purpose: destroys all resources managed by a Databricks Asset Bundle in the specified target environment
 #   parameters: $1 (path to the bundle folder containing databricks.yml), $2 (deployment target: local | main, default: local)
+#   returns: 0 if destruction succeeds, 1 if arguments are invalid or databricks fails
 #   requires: databricks
 ############################
 
 databricks_bundle_destroy(){
   info "[databricks_bundle_destroy|in]"
 
-  [ -z $1 ] && err "[databricks_bundle_destroy] missing argument BUNDLE_FOLDER" && exit 1
+  [ -z $1 ] && err "[databricks_bundle_destroy] missing argument BUNDLE_FOLDER" && return 1
   local BUNDLE_FOLDER="$1"
   local BUNDLE_TARGET="local"
   [ ! -z $2 ] && BUNDLE_TARGET="$2"
 
-  [ "main" != "$BUNDLE_TARGET" ] && [ "local" != "$BUNDLE_TARGET" ] && err "[databricks_bundle_destroy] wrong argument BUNDLE_TARGET: $BUNDLE_TARGET" && exit 1
+  [ "main" != "$BUNDLE_TARGET" ] && [ "local" != "$BUNDLE_TARGET" ] && err "[databricks_bundle_destroy] wrong argument BUNDLE_TARGET: $BUNDLE_TARGET" && return 1
   info "[databricks_bundle_destroy] BUNDLE_FOLDER: $BUNDLE_FOLDER   BUNDLE_TARGET: $BUNDLE_TARGET"
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$BUNDLE_FOLDER"
 
   databricks bundle destroy --target "$BUNDLE_TARGET" --auto-approve --force-lock --debug
 
   result="$?"
   cd "$_pwd"
-  [ "$result" -ne "0" ] && err "[databricks_bundle_destroy|out]  => ${result}" && exit 1
+  [ "$result" -ne "0" ] && err "[databricks_bundle_destroy|out]  => ${result}" && return 1
   info "[databricks_bundle_destroy|out] => ${result}"
 }
 
@@ -1255,21 +1503,22 @@ databricks_bundle_destroy(){
 #   name: databricks_delete_secret
 #   purpose: removes a secret key from a Databricks secret scope
 #   parameters: $1 (secret key name), $2 (secret scope name)
+#   returns: 0 if the secret is deleted, 1 if arguments are missing or databricks fails
 #   requires: databricks
 ############################
 
 databricks_delete_secret(){
   info "[databricks_delete_secret|in] ($1, $2)"
 
-  [ -z $1 ] && err "[databricks_delete_secret] missing argument SECRET_KEY" && exit 1
+  [ -z $1 ] && err "[databricks_delete_secret] missing argument SECRET_KEY" && return 1
   local SECRET_KEY="$1"
-  [ -z $2 ] && err "[databricks_delete_secret] missing argument SECRET_SCOPE" && exit 1
+  [ -z $2 ] && err "[databricks_delete_secret] missing argument SECRET_SCOPE" && return 1
   local SECRET_SCOPE="$2"
 
   databricks secrets delete-secret $SECRET_SCOPE $SECRET_KEY
   result="$?"
 
-  [ "$result" -ne "0" ] && err "[databricks_delete_secret|out] could not delete the secret" && exit 1
+  [ "$result" -ne "0" ] && err "[databricks_delete_secret|out] could not delete the secret" && return 1
   info "[databricks_delete_secret|out] => ${result}"
 }
 
@@ -1277,17 +1526,18 @@ databricks_delete_secret(){
 #   name: databricks_set_secret
 #   purpose: creates a secret in a Databricks secret scope if it does not already exist; warns if already present
 #   parameters: $1 (secret key name), $2 (secret scope name), $3 (secret string value)
+#   returns: 0 if the secret exists or is created, 1 if arguments are missing or creation fails
 #   requires: databricks
 ############################
 
 databricks_set_secret(){
   info "[databricks_set_secret|in] ($1, $2, ${3:0:3})"
 
-  [ -z $1 ] && err "[databricks_set_secret] missing argument SECRET_KEY" && exit 1
+  [ -z $1 ] && err "[databricks_set_secret] missing argument SECRET_KEY" && return 1
   local SECRET_KEY="$1"
-  [ -z $2 ] && err "[databricks_set_secret] missing argument SECRET_SCOPE" && exit 1
+  [ -z $2 ] && err "[databricks_set_secret] missing argument SECRET_SCOPE" && return 1
   local SECRET_SCOPE="$2"
-  [ -z $3 ] && err "[databricks_set_secret] missing argument SECRET_VALUE" && exit 1
+  [ -z $3 ] && err "[databricks_set_secret] missing argument SECRET_VALUE" && return 1
   local SECRET_VALUE="$3"
 
   query=$(databricks secrets get-secret $SECRET_SCOPE $SECRET_KEY)
@@ -1298,7 +1548,7 @@ databricks_set_secret(){
     warn "[databricks_set_secret] secret is already there"
   fi
   result="$?"
-  [ "$result" -ne "0" ] && err "[databricks_set_secret|out]  => ${result}" && exit 1
+  [ "$result" -ne "0" ] && err "[databricks_set_secret|out]  => ${result}" && return 1
   info "[databricks_set_secret|out] => ${result}"
 }
 
@@ -1308,19 +1558,20 @@ databricks_set_secret(){
 #   purpose: downloads a universal package from an Azure DevOps artifacts feed using the Azure CLI
 #   parameters: $1 (Azure DevOps organization URL), $2 (feed name), $3 (package name),
 #               $4 (package version), $5 (local download path, default: current directory)
+#   returns: 0 if the package downloads, 1 if arguments are missing or az fails
 #   requires: az (with azure-devops extension)
 ############################
 
 get_azure_artifact(){
   info "[get_azure_artifact|in] ($1, $2, $3, $4, $5)"
 
-  [ -z "$1" ] && err "[get_azure_artifact] missing argument ORGANIZATION" && exit 1
+  [ -z "$1" ] && err "[get_azure_artifact] missing argument ORGANIZATION" && return 1
   local ORGANIZATION="$1"
-  [ -z "$2" ] && err "[get_azure_artifact] missing argument FEED" && exit 1
+  [ -z "$2" ] && err "[get_azure_artifact] missing argument FEED" && return 1
   local FEED="$2"
-  [ -z "$3" ] && err "[get_azure_artifact] missing argument NAME" && exit 1
+  [ -z "$3" ] && err "[get_azure_artifact] missing argument NAME" && return 1
   local NAME="$3"
-  [ -z "$4" ] && err "[get_azure_artifact] missing argument VERSION" && exit 1
+  [ -z "$4" ] && err "[get_azure_artifact] missing argument VERSION" && return 1
   local VERSION="$4"
 
   local TARGET="."
@@ -1330,7 +1581,7 @@ get_azure_artifact(){
   az artifacts universal download --organization "$ORGANIZATION" --feed "$FEED" --name "$NAME" --version "$VERSION" --path "$TARGET"
   result="$?"
 
-  [ "$result" -ne "0" ] && err "[get_azure_artifact|out] => ${result}" && exit 1
+  [ "$result" -ne "0" ] && err "[get_azure_artifact|out] => ${result}" && return 1
   info "[get_azure_artifact|out] => ${result}"
 }
 
@@ -1342,22 +1593,23 @@ get_azure_artifact(){
 #   name: npm_deps
 #   purpose: runs 'npm install' in the specified project directory
 #   parameters: $1 (path to the directory containing package.json)
+#   returns: 0 if dependencies install, 1 if the directory is missing or npm fails
 #   requires: npm
 ############################
 npm_deps(){
   info "[npm_deps|in] ($1)"
 
-  [ -z $1 ] && err "[npm_deps] missing argument INFRA_DIR" && exit 1
+  [ -z $1 ] && err "[npm_deps] missing argument INFRA_DIR" && return 1
   local INFRA_DIR="$1"
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$INFRA_DIR"
 
   npm install
 
   result="$?"
   cd "$_pwd"
-  [ "$result" -ne "0" ] && err "[npm_deps|out]  => ${result}" && exit 1
+  [ "$result" -ne "0" ] && err "[npm_deps|out]  => ${result}" && return 1
   info "[npm_deps|out] => ${result}"
 }
 
@@ -1365,6 +1617,7 @@ npm_deps(){
 #   name: npm_publish
 #   purpose: authenticates against a private npm registry and publishes the package as public
 #   parameters: $1 (registry hostname, e.g. npm.pkg.github.com), $2 (auth token), $3 (path to package folder)
+#   returns: 0 if npm publishes successfully, 1 if arguments or publishing fail
 #   requires: npm
 ############################
 
@@ -1378,7 +1631,7 @@ npm_publish(){
   [ -z $3 ] && err "[npm_publish] missing argument FOLDER" && return 1
   local folder="$3"
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$folder"
   npm config set "//${registry}/:_authToken" "${token}"
   npm publish . --access="public"
@@ -1396,13 +1649,14 @@ npm_publish(){
 #   purpose: prepends an '--extra-index-url' directive to a pip requirements file,
 #            preserving the existing content (creates a backup with _old suffix)
 #   parameters: $1 (extra index URL), $2 (path to requirements file)
+#   returns: 0 if the file is updated, 1 if required arguments or file operations fail
 ############################
 python_add_pip_index_to_requirements(){
   info "[python_add_pip_index_to_requirements|in] ($1, $2)"
 
-  [ -z $1 ] && err "[python_add_pip_index_to_requirements] missing argument EXTRA_INDEX_URL" && exit 1
+  [ -z $1 ] && err "[python_add_pip_index_to_requirements] missing argument EXTRA_INDEX_URL" && return 1
   local EXTRA_INDEX_URL="$1"
-  [ -z $2 ] && err "[python_add_pip_index_to_requirements] missing argument REQS_FILE" && exit 1
+  [ -z $2 ] && err "[python_add_pip_index_to_requirements] missing argument REQS_FILE" && return 1
   local REQS_FILE="$2"
   local OLD_REQS_FILE="${REQS_FILE}_old"
 
@@ -1411,7 +1665,7 @@ python_add_pip_index_to_requirements(){
   cat "$OLD_REQS_FILE" >> "$REQS_FILE"
   result="$?"
 
-  [ "$result" -ne "0" ] && err "[python_add_pip_index_to_requirements|out] could not add the line" && exit 1
+  [ "$result" -ne "0" ] && err "[python_add_pip_index_to_requirements|out] could not add the line" && return 1
   info "[python_add_pip_index_to_requirements|out] => ${result}"
 }
 
@@ -1419,18 +1673,19 @@ python_add_pip_index_to_requirements(){
 #   name: python_build
 #   purpose: builds a Python package (sdist + wheel) using 'python -m build' after cleaning the dist/ directory
 #   parameters: none
+#   returns: 0 if the package builds, 1 if the build command fails
 #   requires: python3 (with build package installed), this_folder
 ############################
 
 python_build(){
   info "[python_build] ..."
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$this_folder"
 
   rm -rf dist
   python3 -m build -n
-  [ "$?" -ne "0" ] && err "[python_build] ooppss" && exit 1
+  [ "$?" -ne "0" ] && err "[python_build] ooppss" && cd "$_pwd" && return 1
 
   cd "$_pwd"
   echo "[python_build] ...done."
@@ -1440,6 +1695,7 @@ python_build(){
 #   name: python_pypi_publish
 #   purpose: uploads all built distributions in dist/ to PyPI using twine
 #   parameters: $1 (PyPI username, use '__token__' for token auth), $2 (PyPI password or API token)
+#   returns: 0 if upload succeeds, 1 if credentials are missing or twine fails
 #   requires: twine, this_folder
 ############################
 
@@ -1451,11 +1707,11 @@ python_pypi_publish(){
   user="$1"
   token="$2"
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$this_folder"
 
   twine upload -u $user -p $token dist/*
-  [ "$?" -ne "0" ] && err "[python_pypi_publish] ooppss" && exit 1
+  [ "$?" -ne "0" ] && err "[python_pypi_publish] ooppss" && cd "$_pwd" && return 1
 
   cd "$_pwd"
   echo "[python_pypi_publish|out]"
@@ -1465,6 +1721,7 @@ python_pypi_publish(){
 #   name: python_twine_publish
 #   purpose: uploads built wheel(s) from dist/ to PyPI or a custom repository using twine
 #   parameters: $1 (username), $2 (password or token), $3 (custom repository URL, optional — omit for PyPI)
+#   returns: 0 if upload succeeds, 1 if credentials are missing or twine fails
 #   requires: twine, this_folder
 ############################
 
@@ -1475,7 +1732,7 @@ python_twine_publish(){
   user="$1"
   pswd="$2"
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$this_folder"
 
   if [ ! -z "$3" ]; then
@@ -1487,7 +1744,7 @@ python_twine_publish(){
 
   result=$?
   cd "$_pwd"
-  [ "$result" -ne "0" ] && err "[python_twine_publish|out]  => ${result}" && exit 1
+  [ "$result" -ne "0" ] && err "[python_twine_publish|out]  => ${result}" && return 1
   info "[python_twine_publish|out] => ${result}"
 }
 
@@ -1495,6 +1752,7 @@ python_twine_publish(){
 #   name: python_code_lint
 #   purpose: auto-formats Python source code in-place: sorts imports (isort), removes unused imports (autoflake), then reformats (black)
 #   parameters: $1 (space-separated source folders, default: 'src test')
+#   returns: 0 if all formatting tools succeed, 1 if a tool reports failure
 #   requires: isort, autoflake, black
 ############################
 
@@ -1523,7 +1781,7 @@ python_code_lint()
       return_value=$?
       info "[python_code_lint] ... black...$return_value"
     fi
-    [ "$return_value" -ne "0" ] && exit 1
+    [ "$return_value" -ne "0" ] && return 1
     info "[python_code_lint|out] => ${return_value}"
     return ${return_value}
 }
@@ -1534,6 +1792,7 @@ python_code_lint()
 #            stops at the first tool that reports issues
 #   parameters: $1 (space-separated source folders for isort/autoflake/black/pylint, default: 'src test'),
 #               $2 (source folder for bandit recursive scan, default: 'src')
+#   returns: 0 if all checks pass, 1 if a check reports failure
 #   requires: isort, autoflake, black, pylint, bandit
 ############################
 
@@ -1582,7 +1841,7 @@ python_code_check()
       info "[python_code_check] ... bandit...$return_value"
     fi
    
-    [ "$return_value" -ne "0" ] && exit 1
+    [ "$return_value" -ne "0" ] && return 1
     info "[python_code_check|out] => ${return_value}"
     return ${return_value}
 }
@@ -1591,6 +1850,7 @@ python_code_check()
 #   name: python_print_coverage
 #   purpose: prints a terminal coverage report with missing lines using 'coverage report -m'
 #   parameters: none
+#   returns: 0 if the report is generated, 1 if coverage fails
 #   requires: coverage
 ############################
 
@@ -1599,15 +1859,16 @@ python_print_coverage()
   info "[python_print_coverage|in]"
   coverage report -m
   result="$?"
-  [ "$result" -ne "0" ] && exit 1
+  [ "$result" -ne "0" ] && return 1
   info "[python_print_coverage|out] => $result"
   return ${result}
 }
 
 ############################
 #   name: python_check_coverage
-#   purpose: asserts that the total test coverage percentage meets a minimum threshold; exits with error if below
+#   purpose: asserts that the total test coverage percentage meets a minimum threshold; returns with error if below
 #   parameters: $1 (minimum coverage percentage, integer, e.g. 80)
+#   returns: 0 if the report meets the threshold, 1 if the threshold is missing, coverage fails, or coverage is too low
 #   requires: coverage (with a .coverage data file already generated)
 ############################
 
@@ -1615,23 +1876,99 @@ python_check_coverage()
 {
   info "[python_check_coverage|in] ($1)"
 
-  [ -z "$1" ] && usage
+  [ -z "$1" ] && err "[python_check_coverage] missing argument THRESHOLD" && return 1
 
-  local threshold=$1
-  score=$(coverage report | awk '$1 == "TOTAL" {print $NF+0}')
-   result="$?"
-  [ "$result" -ne "0" ] && exit 1
+  local threshold
+  threshold=$1
+  local coverage_report
+  local score
+  local result
+
+  coverage_report=$(coverage report)
+  result="$?"
+  [ "$result" -ne "0" ] && return 1
+  score=$(echo "$coverage_report" | awk '$1 == "TOTAL" {print $NF+0}')
+  result="$?"
+  [ "$result" -ne "0" ] && return 1
   if (( $threshold > $score )); then
     err "[python_check_coverage] $score doesn't meet $threshold"
-    exit 1
+    return 1
   fi
   info "[python_check_coverage|out] => $score"
+}
+
+############################
+#   name: python_poetry_check_coverage
+#   purpose: asserts that the total coverage percentage from 'poetry run coverage report' meets a minimum threshold; exits with error if below
+#   parameters: $1 (minimum coverage percentage, integer, e.g. 80)
+#   returns: 0 if the report meets the threshold, 1 if coverage fails or is too low
+#   requires: poetry (with coverage, and a .coverage data file already generated)
+############################
+
+python_poetry_check_coverage()
+{
+  info "[python_poetry_check_coverage|in] ($1)"
+  [ -z "$1" ] && usage
+
+  local threshold
+  threshold=$1
+  local coverage_report
+  local score
+  local result
+
+  coverage_report=$(poetry run coverage report)
+  result="$?"
+  [ "$result" -ne "0" ] && return 1
+  score=$(echo "$coverage_report" | awk '$1 == "TOTAL" {print $NF+0}')
+  result="$?"
+  [ "$result" -ne "0" ] && return 1
+  if (( $threshold > $score )); then
+    err "[python_poetry_check_coverage] $score doesn't meet $threshold"
+    return 1
+  fi
+  info "[python_poetry_check_coverage|out] => $score"
+}
+
+############################
+#   name: test_coverage_check_uv
+#   purpose: asserts that total coverage meets a minimum threshold via uv; generates a coverage badge SVG; returns nonzero if below threshold
+#   parameters: $1 (minimum coverage percentage, integer, e.g. 80)
+#   returns: 0 if the threshold and badge generation succeed, nonzero otherwise
+#   requires: uv (with coverage, genbadge, and a .coverage data file already generated)
+############################
+test_coverage_check_uv()
+{
+  info "[test_coverage_check_uv|in] ($1)"
+  [ -z "$1" ] && usage
+
+  local threshold
+  threshold=$1
+  local coverage_report
+  local score
+  local result
+  coverage_report=$(uv run coverage report)
+  result="$?"
+  [ "$result" -ne "0" ] && return 1
+  score=$(echo "$coverage_report" | awk '$1 == "TOTAL" {print $NF+0}')
+  result="$?"
+  [ "$result" -ne "0" ] && return 1
+  if (( $threshold > $score )); then
+    err "[test_coverage_check_uv] $score doesn't meet $threshold"
+    return 1
+  fi
+  uv run genbadge coverage -i coverage.xml -o coverage.svg || {
+    result=$?
+    err "[test_coverage_check_uv] failed to generate coverage badge"
+    return "$result"
+  }
+  info "[test_coverage_check_uv|out] => $score"
 }
 
 ############################
 #   name: python_test
 #   purpose: runs pytest with verbose output, coverage for the src/ directory, and generates JUnit XML + HTML + XML coverage reports
 #   parameters: $1 (test path or file, optional — omit to run all tests)
+#   returns: 0 if tests pass, 1 if pytest fails
 #   requires: pytest, pytest-cov
 ############################
 
@@ -1640,7 +1977,7 @@ python_test()
     info "[python_test|in] ($1)"
     python -m pytest -x -s -vv --durations=0 --cov=src --junitxml=tests-results.xml --cov-report=xml --cov-report=html "$1"
     return_value="$?"
-    [ "$return_value" -ne "0" ] && exit 1
+    [ "$return_value" -ne "0" ] && return 1
     info "[python_test|out] => ${return_value}"
     return ${return_value}
 }
@@ -1649,6 +1986,7 @@ python_test()
 #   name: python_reqs
 #   purpose: installs Python dependencies from a requirements file using pip
 #   parameters: $1 (requirements file path, default: requirements.txt)
+#   returns: 0 if dependencies install, 1 if pip fails
 #   requires: pip
 ############################
 
@@ -1662,7 +2000,7 @@ python_reqs()
     fi
 
     pip install -r "$REQS_FILE"
-    [ "$?" -ne "0" ] && exit 1
+    [ "$?" -ne "0" ] && return 1
     info "[python_reqs|out]"
 }
 
@@ -1670,6 +2008,7 @@ python_reqs()
 #   name: python_hatch_build
 #   purpose: cleans dist/ and builds a Python package using 'hatch build'
 #   parameters: $1 (project root directory, default: this_folder)
+#   returns: 0 if the package builds, 1 if hatch fails
 #   requires: hatch
 ############################
 
@@ -1681,12 +2020,12 @@ python_hatch_build(){
     ROOT_DIR="$1"
   fi
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$ROOT_DIR"
 
   rm -rf dist
   hatch build
-  if [ ! "$?" -eq "0" ] ; then echo "[python_hatch_build] could not build" && cd "$_pwd" && exit 1; fi
+  if [ ! "$?" -eq "0" ] ; then echo "[python_hatch_build] could not build" && cd "$_pwd" && return 1; fi
 
   cd "$_pwd"
   echo "[python_hatch_build] ...done."
@@ -1696,6 +2035,7 @@ python_hatch_build(){
 #   name: python_hatch_publish
 #   purpose: publishes the built distributions in dist/ to PyPI using 'hatch publish'
 #   parameters: $1 (project root directory, default: this_folder)
+#   returns: 0 if publishing succeeds, 1 if hatch fails
 #   requires: hatch
 ############################
 
@@ -1707,11 +2047,11 @@ python_hatch_publish(){
     ROOT_DIR="$1"
   fi
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$ROOT_DIR"
 
   hatch publish -n dist
-  if [ ! "$?" -eq "0" ] ; then echo "[python_hatch_publish] could not publish" && cd "$_pwd" && exit 1; fi
+  if [ ! "$?" -eq "0" ] ; then echo "[python_hatch_publish] could not publish" && cd "$_pwd" && return 1; fi
 
   cd "$_pwd"
   echo "[python_hatch_publish] ...done."
@@ -1721,19 +2061,20 @@ python_hatch_publish(){
 #   name: build_cookiecutter_template
 #   purpose: packages a cookiecutter template directory into a cookiecutter.zip archive placed inside the template folder itself
 #   parameters: $1 (path to the cookiecutter template folder)
+#   returns: 0 if the archive is created, 1 if the path is invalid or zip/move fails
 #   requires: zip
 ############################
 
 build_cookiecutter_template(){
   info "[build_cookiecutter_template|in] ($1)"
-  [[ -z "$1" ]] && err "[build_cookiecutter_template] must provide TEMPLATE_LOCATION folder" && exit 1
+  [[ -z "$1" ]] && err "[build_cookiecutter_template] must provide TEMPLATE_LOCATION folder" && return 1
   local TEMPLATE_LOCATION="$1"
 
-  [[ ! -d "$TEMPLATE_LOCATION" ]] && err "[build_cookiecutter_template] TEMPLATE_LOCATION folder not found" && exit 1
+  [[ ! -d "$TEMPLATE_LOCATION" ]] && err "[build_cookiecutter_template] TEMPLATE_LOCATION folder not found" && return 1
   local TEMPLATE_NAME=$(basename "$TEMPLATE_LOCATION")
   info "[build_cookiecutter_template|in] template name: $TEMPLATE_NAME"
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$TEMPLATE_LOCATION/.."
   local zipname="cookiecutter.zip"
   local finalzipfile="$TEMPLATE_LOCATION/$zipname"
@@ -1741,7 +2082,7 @@ build_cookiecutter_template(){
   zip -r "$zipname" "$TEMPLATE_NAME" --quiet && mv $zipname $finalzipfile
   result="$?"
   cd "$_pwd"
-  [ "$result" -ne "0" ] && err "[build_cookiecutter_template|out]  => ${result}" && exit 1
+  [ "$result" -ne "0" ] && err "[build_cookiecutter_template|out]  => ${result}" && return 1
   info "[build_cookiecutter_template|out] => ${result}"
 }
 
@@ -1750,28 +2091,29 @@ build_cookiecutter_template(){
 #   purpose: generates a project from a cookiecutter template with default values into a test directory,
 #            then opens the generated project in VS Code
 #   parameters: $1 (path to the cookiecutter template folder), $2 (path to the test output directory)
+#   returns: 0 if generation succeeds, 1 if required arguments or cookiecutter fail
 #   requires: pipx (with cookiecutter), code
 ############################
 
 test_cookiecutter_template(){
   info "[test_cookiecutter_template|in] ($1, $2)"
 
-  [[ -z "$1" ]] && err "[test_cookiecutter_template] must provide TEMPLATE_LOCATION folder" && exit 1
+  [[ -z "$1" ]] && err "[test_cookiecutter_template] must provide TEMPLATE_LOCATION folder" && return 1
   local TEMPLATE_LOCATION="$1"
 
   local TEMPLATE_NAME=$(basename "$TEMPLATE_LOCATION")
   info "[test_cookiecutter_template|in] template name: $TEMPLATE_NAME"
 
-  [[ -z "$2" ]] && err "[test_cookiecutter_template] must provide TEST_LOCATION folder" && exit 1
+  [[ -z "$2" ]] && err "[test_cookiecutter_template] must provide TEST_LOCATION folder" && return 1
   local TEST_LOCATION="$2"
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$TEST_LOCATION" && pipx run cookiecutter --no-input "$TEMPLATE_LOCATION"
   result="$?"
   cd "$_pwd"
   info "[test_cookiecutter_template] trying to open vscode on test project: $TEST_LOCATION/$TEMPLATE_NAME"
   code "$TEST_LOCATION/$TEMPLATE_NAME" &
-  [ "$result" -ne "0" ] && err "[test_cookiecutter_template|out]  => ${result}" && exit 1
+  [ "$result" -ne "0" ] && err "[test_cookiecutter_template|out]  => ${result}" && return 1
   info "[test_cookiecutter_template|out] => ${result}"
 }
 
@@ -1779,12 +2121,13 @@ test_cookiecutter_template(){
 #   name: poetry_reqs
 #   purpose: installs all project + dev dependencies with poetry and sets up pre-commit hooks
 #   parameters: none
+#   returns: 0 if dependencies and hooks install, 1 if poetry or pre-commit fails
 #   requires: poetry, pre-commit, this_folder
 ############################
 
 poetry_reqs(){
   info "[poetry_reqs|in]"
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$this_folder"
 
   poetry install --with dev && poetry run pre-commit install --install-hooks
@@ -1794,7 +2137,7 @@ poetry_reqs(){
   cd "$_pwd"
 
   local msg="[poetry_reqs|out] => ${result}"
-  [[ ! "$result" -eq "0" ]] && info "$msg" && exit 1
+  [[ ! "$result" -eq "0" ]] && info "$msg" && return 1
   info "$msg"
 }
 
@@ -1802,12 +2145,13 @@ poetry_reqs(){
 #   name: lint_check_ruff
 #   purpose: runs ruff linter in check mode (no auto-fix) on the project
 #   parameters: none
+#   returns: 0 if ruff reports no issues, 1 if ruff fails or reports issues
 #   requires: poetry (with ruff), this_folder
 ############################
 
 lint_check_ruff(){
   info "[lint_check_ruff|in]"
-  _pwd=`pwd`
+  local _pwd=$(pwd)
 
   cd "$this_folder"
 
@@ -1818,7 +2162,7 @@ lint_check_ruff(){
   cd "$_pwd"
 
   local msg="[lint_check_ruff|out] => ${result}"
-  [[ ! "$result" -eq "0" ]] && info "$msg" && exit 1
+  [[ ! "$result" -eq "0" ]] && info "$msg" && return 1
   info "$msg"
 }
 
@@ -1826,11 +2170,12 @@ lint_check_ruff(){
 #   name: lint_check_ruff_uv
 #   purpose: runs ruff linter in check mode (no auto-fix) on the project using uv
 #   parameters: none
+#   returns: 0 if ruff reports no issues, 1 if ruff fails or reports issues
 #   requires: uv (with ruff), this_folder
 ############################
 lint_check_ruff_uv(){
   info "[lint_check_ruff_uv|in]"
-  _pwd=`pwd`
+  local _pwd=$(pwd)
 
   cd "$this_folder"
 
@@ -1841,7 +2186,7 @@ lint_check_ruff_uv(){
   cd "$_pwd"
 
   local msg="[lint_check_ruff_uv|out] => ${result}"
-  [[ ! "$result" -eq "0" ]] && info "$msg" && exit 1
+  [[ ! "$result" -eq "0" ]] && info "$msg" && return 1
   info "$msg"
 }
 
@@ -1849,19 +2194,20 @@ lint_check_ruff_uv(){
 #   name: poetry_pytest_unit
 #   purpose: runs pytest unit tests via poetry with coverage reporting (term-missing, html, xml) and JUnit XML output
 #   parameters: $1 (test folder path), $2 (source folder for coverage, default: this_folder/src)
+#   returns: 0 if tests pass, 1 if arguments are missing or pytest fails
 #   requires: poetry (with pytest, pytest-cov), this_folder
 ############################
 
 poetry_pytest_unit(){
   info "[poetry_pytest_unit|in] ($1, $2)"
 
-  [[ -z "$1" ]] && err "[poetry_pytest_unit] must provide TEST_FOLDER" && exit 1
+  [[ -z "$1" ]] && err "[poetry_pytest_unit] must provide TEST_FOLDER" && return 1
   local TEST_FOLDER="$1"
   local SRC_FOLDER="$this_folder/src"
   [[ ! -z "$2" ]] && SRC_FOLDER="$2"
 
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$this_folder"
 
   poetry run pytest "$TEST_FOLDER" -x -s -vv --durations=0 \
@@ -1876,7 +2222,7 @@ poetry_pytest_unit(){
   cd "$_pwd"
 
   local msg="[poetry_pytest_unit|out] => ${result}"
-  [[ ! "$result" -eq "0" ]] && info "$msg" && exit 1
+  [[ ! "$result" -eq "0" ]] && info "$msg" && return 1
   info "$msg"
 }
 
@@ -1884,6 +2230,7 @@ poetry_pytest_unit(){
 #   name: pytest_uv
 #   purpose: runs pytest unit tests via uv with coverage reporting (term-missing, html, xml) and JUnit XML output
 #   parameters: $1 (test directory, default: test), $2 (source directory for coverage, default: src)
+#   returns: 0 if tests pass, 1 if pytest fails
 #   requires: uv (with pytest, pytest-cov), this_folder
 ############################
 pytest_uv(){
@@ -1892,7 +2239,7 @@ pytest_uv(){
   local TEST_DIR="${1:-test}"
   local SRC_DIR="${2:-src}"
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$this_folder"
 
   uv run pytest "$TEST_DIR" -x -s -vv --durations=0 \
@@ -1906,7 +2253,7 @@ pytest_uv(){
   cd "$_pwd"
 
   local msg="[pytest_uv|out] => ${result}"
-  [[ ! "$result" -eq "0" ]] && info "$msg" && exit 1
+  [[ ! "$result" -eq "0" ]] && info "$msg" && return 1
   info "$msg"
 }
 
@@ -1914,18 +2261,19 @@ pytest_uv(){
 #   name: poetry_pytest_bdd
 #   purpose: erases previous coverage data then runs pytest BDD tests via poetry with coverage reporting and JUnit XML output
 #   parameters: $1 (BDD test folder path), $2 (source folder for coverage, default: this_folder/src)
+#   returns: 0 if tests pass, 1 if the test folder is missing or pytest fails
 #   requires: poetry (with pytest, pytest-cov, pytest-bdd), this_folder
 ############################
 
 poetry_pytest_bdd(){
   info "[poetry_pytest_bdd|in] ($1)"
 
-  [[ -z "$1" ]] && err "[poetry_pytest_bdd] must provide TEST_FOLDER" && exit 1
+  [[ -z "$1" ]] && err "[poetry_pytest_bdd] must provide TEST_FOLDER" && return 1
   local TEST_FOLDER="$1"
   local SRC_FOLDER="$this_folder/src"
   [[ ! -z "$2" ]] && SRC_FOLDER="$2"
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$this_folder"
   # Clear existing coverage and run BDD tests
   poetry run coverage erase
@@ -1941,7 +2289,7 @@ poetry_pytest_bdd(){
   cd "$_pwd"
 
   local msg="[poetry_pytest_bdd|out] => ${result}"
-  [[ ! "$result" -eq "0" ]] && info "$msg" && exit 1
+  [[ ! "$result" -eq "0" ]] && info "$msg" && return 1
   info "$msg"
 }
 
@@ -1949,97 +2297,50 @@ poetry_pytest_bdd(){
 #   name: python_poetry_print_coverage
 #   purpose: prints a coverage report with missing lines and generates html + xml reports via poetry
 #   parameters: none
+#   returns: 0 if all reports are generated, nonzero if a coverage command fails
 #   requires: poetry (with coverage)
 ############################
 
 python_poetry_print_coverage()
 {
   info "[python_poetry_print_coverage|in]"
-  
-  poetry run coverage report --show-missing
-  poetry run coverage html
-  poetry run coverage xml
-  result="$?"
-  [ "$result" -ne "0" ] && exit 1
-  info "[python_poetry_print_coverage|out] => $result"
-  return ${result}
+
+  poetry run coverage report --show-missing || return $?
+  poetry run coverage html || return $?
+  poetry run coverage xml || return $?
+  info "[python_poetry_print_coverage|out] => 0"
+  return 0
 }
 
 ############################
 #   name: test_print_coverage_uv
 #   purpose: prints a coverage report with missing lines and generates html + xml reports via uv
 #   parameters: none
+#   returns: 0 if all reports are generated, nonzero if a coverage command fails
 #   requires: uv (with coverage, and a .coverage data file already generated)
 ############################
 test_print_coverage_uv()
 {
   info "[test_print_coverage_uv|in]"
-  
-  uv run coverage report --show-missing
-  uv run coverage html
-  uv run coverage xml
-  result="$?"
-  [ "$result" -ne "0" ] && exit 1
-  info "[test_print_coverage_uv|out] => $result"
-  return ${result}
-}
 
-############################
-#   name: python_poetry_check_coverage
-#   purpose: asserts that the total coverage percentage from 'poetry run coverage report' meets a minimum threshold; exits with error if below
-#   parameters: $1 (minimum coverage percentage, integer, e.g. 80)
-#   requires: poetry (with coverage, and a .coverage data file already generated)
-############################
-
-python_poetry_check_coverage()
-{
-  info "[python_poetry_check_coverage|in] ($1)"
-  [ -z "$1" ] && usage
-
-  local threshold=$1
-  score=$(poetry run coverage report | awk '$1 == "TOTAL" {print $NF+0}')
-  result="$?"
-  [ "$result" -ne "0" ] && exit 1
-  if (( $threshold > $score )); then
-    err "[python_poetry_check_coverage] $score doesn't meet $threshold"
-    exit 1
-  fi
-  info "[python_poetry_check_coverage|out] => $score"
-}
-
-############################
-#   name: test_coverage_check_uv
-#   purpose: asserts that total coverage meets a minimum threshold via uv; generates a coverage badge SVG; exits with error if below threshold
-#   parameters: $1 (minimum coverage percentage, integer, e.g. 80)
-#   requires: uv (with coverage, genbadge, and a .coverage data file already generated)
-############################
-test_coverage_check_uv()
-{
-  info "[test_coverage_check_uv|in] ($1)"
-  [ -z "$1" ] && usage
-
-  local threshold=$1
-  score=$(uv run coverage report | awk '$1 == "TOTAL" {print $NF+0}')
-  result="$?"
-  [ "$result" -ne "0" ] && exit 1
-  if (( $threshold > $score )); then
-    err "[test_coverage_check_uv] $score doesn't meet $threshold"
-    exit 1
-  fi
-  uv run genbadge coverage -i coverage.xml -o coverage.svg
-  info "[test_coverage_check_uv|out] => $score"
+  uv run coverage report --show-missing || return $?
+  uv run coverage html || return $?
+  uv run coverage xml || return $?
+  info "[test_print_coverage_uv|out] => 0"
+  return 0
 }
 
 ############################
 #   name: poetry_build
 #   purpose: generates a CHANGELOG, cleans dist/ and builds the package using 'poetry build'
 #   parameters: none
+#   returns: 0 if the package builds, 1 if poetry fails
 #   requires: poetry, changelog function, this_folder
 ############################
 
 poetry_build(){
   info "[poetry_build|in]"
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$this_folder"
   changelog
   rm -rf dist/*
@@ -2049,7 +2350,7 @@ poetry_build(){
 
   cd "$_pwd"
   local msg="[poetry_build|out] => ${result}"
-  [[ ! "$result" -eq "0" ]] && info "$msg" && exit 1
+  [[ ! "$result" -eq "0" ]] && info "$msg" && return 1
   info "$msg"
 }
 
@@ -2057,12 +2358,13 @@ poetry_build(){
 #   name: build_uv
 #   purpose: cleans dist/ and builds the Python package using 'uv build'
 #   parameters: none
+#   returns: 0 if the package builds, 1 if uv fails
 #   requires: uv, this_folder
 ############################
 build_uv(){
   info "[build_uv|in]"
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$this_folder"
   # changelog
   rm -rf dist/*
@@ -2072,7 +2374,7 @@ build_uv(){
 
   cd "$_pwd"
   local msg="[build_uv|out] => ${result}"
-  [[ ! "$result" -eq "0" ]] && info "$msg" && exit 1
+  [[ ! "$result" -eq "0" ]] && info "$msg" && return 1
   info "$msg"
 }
 
@@ -2080,22 +2382,23 @@ build_uv(){
 #   name: poetry_publish_az
 #   purpose: configures a private Azure DevOps PyPI feed in poetry and publishes the package to it
 #   parameters: $1 (Azure DevOps feed URL), $2 (poetry repository name/alias), $3 (feed username), $4 (feed password/token)
+#   returns: 0 if publishing succeeds, 1 if an argument or poetry command fails
 #   requires: poetry, this_folder
 ############################
 
 poetry_publish_az(){
   info "[poetry_publish_az|in]"
 
-  [ -z $1 ] && err "[poetry_publish_az] missing argument REPO_URL" && exit 1
+  [ -z $1 ] && err "[poetry_publish_az] missing argument REPO_URL" && return 1
   local REPO_URL="$1"
-  [ -z $2 ] && err "[poetry_publish_az] missing argument REPO_NAME" && exit 1
+  [ -z $2 ] && err "[poetry_publish_az] missing argument REPO_NAME" && return 1
   local REPO_NAME="$2"
-  [ -z $3 ] && err "[poetry_publish_az] missing argument REPO_USER" && exit 1
+  [ -z $3 ] && err "[poetry_publish_az] missing argument REPO_USER" && return 1
   local REPO_USER="$3"
-  [ -z $4 ] && err "[poetry_publish_az] missing argument REPO_PSWD" && exit 1
+  [ -z $4 ] && err "[poetry_publish_az] missing argument REPO_PSWD" && return 1
   local REPO_PSWD="$4"
   
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$this_folder"
 
   poetry config "repositories.${REPO_NAME}" "$REPO_URL"
@@ -2106,7 +2409,7 @@ poetry_publish_az(){
 
   cd "$_pwd"
   local msg="[poetry_publish_az|out] => ${result}"
-  [[ ! "$result" -eq "0" ]] && info "$msg" && exit 1
+  [[ ! "$result" -eq "0" ]] && info "$msg" && return 1
   info "$msg"
 }
 
@@ -2114,15 +2417,16 @@ poetry_publish_az(){
 #   name: publish_pypi_uv
 #   purpose: publishes the built package distributions to PyPI using 'uv publish' with a token
 #   parameters: $1 (PyPI API token)
+#   returns: 0 if publishing succeeds, 1 if the token is missing or uv fails
 #   requires: uv, this_folder
 ############################
 publish_pypi_uv(){
   info "[publish_pypi_uv|in] (${1:0:7})"
 
-  [ -z $1 ] && err "[publish_pypi_uv] missing argument PYPI_TOKEN" && exit 1
+  [ -z $1 ] && err "[publish_pypi_uv] missing argument PYPI_TOKEN" && return 1
   local PYPI_TOKEN="$1"
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$this_folder"
 
   uv publish --token "$PYPI_TOKEN"
@@ -2131,7 +2435,7 @@ publish_pypi_uv(){
 
   cd "$_pwd"
   local msg="[publish_pypi_uv|out] => ${result}"
-  [[ ! "$result" -eq "0" ]] && info "$msg" && exit 1
+  [[ ! "$result" -eq "0" ]] && info "$msg" && return 1
   info "$msg"
 }
 
@@ -2139,22 +2443,24 @@ publish_pypi_uv(){
 #   name: poetry_add_supplemental_source_repo
 #   purpose: registers a supplemental (low-priority) private package source in the project's poetry config with authentication
 #   parameters: $1 (repository alias/name), $2 (repository URL), $3 (username), $4 (access token)
+#   returns: 0 if the source is configured, 1 if an argument or poetry command fails
 #   requires: poetry, this_folder
 ############################
 
 poetry_add_supplemental_source_repo(){
-  info "[poetry_add_supplemental_source_repo|in]"
-  _pwd=`pwd`
-  cd "$this_folder"
+  info "[poetry_add_supplemental_source_repo|in] ($1, $2, $3, $4)"
+  local _pwd=$(pwd)
 
-  [ -z $1 ] && err "[poetry_add_supplemental_source_repo] missing argument REPO_NAME" && exit 1
+  [ -z $1 ] && err "[poetry_add_supplemental_source_repo] missing argument REPO_NAME" && return 1
   local REPO_NAME="$1"
-  [ -z $2 ] && err "[poetry_add_supplemental_source_repo] missing argument REPO_URL" && exit 1
+  [ -z $2 ] && err "[poetry_add_supplemental_source_repo] missing argument REPO_URL" && return 1
   local REPO_URL="$2"
-  [ -z $3 ] && err "[poetry_add_supplemental_source_repo] missing argument REPO_USR" && exit 1
+  [ -z $3 ] && err "[poetry_add_supplemental_source_repo] missing argument REPO_USR" && return 1
   local REPO_USR="$3"
-  [ -z $4 ] && err "[poetry_add_supplemental_source_repo] missing argument REPO_TOKEN" && exit 1
+  [ -z $4 ] && err "[poetry_add_supplemental_source_repo] missing argument REPO_TOKEN" && return 1
   local REPO_TOKEN="$4"
+
+  cd "$this_folder"
 
   poetry source add --priority=supplemental "$REPO_NAME" "$REPO_URL" && \
     poetry config "http-basic.${REPO_NAME}" "$REPO_USR" "$REPO_TOKEN"
@@ -2162,7 +2468,7 @@ poetry_add_supplemental_source_repo(){
 
   cd "$_pwd"
   local msg="[poetry_add_supplemental_source_repo|out] => ${result}"
-  [[ ! "$result" -eq "0" ]] && info "$msg" && exit 1
+  [[ ! "$result" -eq "0" ]] && info "$msg" && return 1
   info "$msg"
 }
 
@@ -2170,14 +2476,15 @@ poetry_add_supplemental_source_repo(){
 #   name: sca_check_safety
 #   purpose: runs a Software Composition Analysis (SCA) scan with the safety tool to detect known vulnerabilities in dependencies
 #   parameters: $1 (Safety CLI API key)
+#   returns: 0 if the scan passes, 1 if the key is missing or the scan reports failure
 #   requires: poetry (with safety), this_folder
 ############################
 
 sca_check_safety(){
   info "[sca_check_safety|in] (${1:0:3})"
-  _pwd=`pwd`
+  local _pwd=$(pwd)
 
-  [ -z $1 ] && err "[sca_check_safety] missing argument SAFETY_KEY" && exit 1
+  [ -z $1 ] && err "[sca_check_safety] missing argument SAFETY_KEY" && return 1
   local SAFETY_KEY="$1"
 
   cd "$this_folder"
@@ -2189,7 +2496,7 @@ sca_check_safety(){
   cd "$_pwd"
 
   local msg="[sca_check_safety|out] => ${result}"
-  [[ ! "$result" -eq "0" ]] && info "$msg" && exit 1
+  [[ ! "$result" -eq "0" ]] && info "$msg" && return 1
   info "$msg"
 }
 
@@ -2197,13 +2504,14 @@ sca_check_safety(){
 #   name: sca_check_safety_uv
 #   purpose: runs a Software Composition Analysis (SCA) scan with the safety tool via uv to detect known vulnerabilities in dependencies; continues even if vulnerabilities are found (--continue-on-error)
 #   parameters: $1 (Safety CLI API key)
+#   returns: 0 after running the scan, 1 if the key is missing
 #   requires: uv (with safety), this_folder
 ############################
 sca_check_safety_uv(){
   info "[sca_check_safety_uv|in] (${1:0:7})"
-  _pwd=`pwd`
+  local _pwd=$(pwd)
 
-  [ -z $1 ] && err "[sca_check_safety_uv] missing argument SAFETY_KEY" && exit 1
+  [ -z $1 ] && err "[sca_check_safety_uv] missing argument SAFETY_KEY" && return 1
   local SAFETY_KEY="$1"
 
   local result=0
@@ -2216,7 +2524,7 @@ sca_check_safety_uv(){
   cd "$_pwd"
 
   local msg="[sca_check_safety_uv|out] => ${result}"
-  [[ ! "$result" -eq "0" ]] && info "$msg" && exit 1
+  [[ ! "$result" -eq "0" ]] && info "$msg" && return 1
   info "$msg"
 }
 
@@ -2224,14 +2532,15 @@ sca_check_safety_uv(){
 #   name: sast_check_bandit
 #   purpose: runs a Static Application Security Testing (SAST) scan with bandit to detect common security issues in Python source code
 #   parameters: $1 (source directory to scan recursively)
+#   returns: 0 if the scan passes, 1 if the source directory is missing or the scan reports failure
 #   requires: poetry (with bandit), this_folder
 ############################
 
 sast_check_bandit(){
   info "[sast_check_bandit|in] ($1)"
-  _pwd=`pwd`
+  local _pwd=$(pwd)
 
-  [ -z $1 ] && err "[sast_check_bandit] missing argument SRC_DIR" && exit 1
+  [ -z $1 ] && err "[sast_check_bandit] missing argument SRC_DIR" && return 1
   local SRC_DIR="$1"
 
   cd "$this_folder"
@@ -2243,7 +2552,7 @@ sast_check_bandit(){
   cd "$_pwd"
 
   local msg="[sast_check_bandit|out] => ${result}"
-  [[ ! "$result" -eq "0" ]] && info "$msg" && exit 1
+  [[ ! "$result" -eq "0" ]] && info "$msg" && return 1
   info "$msg"
 }
 
@@ -2251,13 +2560,14 @@ sast_check_bandit(){
 #   name: sast_check_bandit_uv
 #   purpose: runs a Static Application Security Testing (SAST) scan with bandit via uv to detect common security issues in Python source code
 #   parameters: $1 (source directory to scan recursively)
+#   returns: 0 if the scan passes, 1 if the source directory is missing or the scan reports failure
 #   requires: uv (with bandit), this_folder
 ############################
 sast_check_bandit_uv(){
   info "[sast_check_bandit_uv|in] ($1)"
-  _pwd=`pwd`
+  local _pwd=$(pwd)
 
-  [ -z $1 ] && err "[sast_check_bandit_uv] missing argument SRC_DIR" && exit 1
+  [ -z $1 ] && err "[sast_check_bandit_uv] missing argument SRC_DIR" && return 1
   local SRC_DIR="$1"
 
   cd "$this_folder"
@@ -2269,7 +2579,7 @@ sast_check_bandit_uv(){
   cd "$_pwd"
 
   local msg="[sast_check_bandit_uv|out] => ${result}"
-  [[ ! "$result" -eq "0" ]] && info "$msg" && exit 1
+  [[ ! "$result" -eq "0" ]] && info "$msg" && return 1
   info "$msg"
 }
 
@@ -2277,18 +2587,19 @@ sast_check_bandit_uv(){
 #   name: poetry_publish_pip
 #   purpose: publishes the built package to PyPI using 'poetry publish' with explicit credentials
 #   parameters: $1 (PyPI username, use '__token__' for token auth), $2 (PyPI password or API token)
+#   returns: 0 if publishing succeeds, 1 if credentials are missing or poetry fails
 #   requires: poetry, this_folder
 ############################
 
 poetry_publish_pip(){
   info "[poetry_publish_pip|in] ($1, ${2:0:7})"
 
-  [ -z $1 ] && err "[poetry_publish_pip] missing argument PYPI_USER" && exit 1
+  [ -z $1 ] && err "[poetry_publish_pip] missing argument PYPI_USER" && return 1
   local PYPI_USER="$1"
-  [ -z $2 ] && err "[poetry_publish_pip] missing argument PYPI_TOKEN" && exit 1
+  [ -z $2 ] && err "[poetry_publish_pip] missing argument PYPI_TOKEN" && return 1
   local PYPI_TOKEN="$2"
   
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$this_folder"
 
   poetry publish -u "$PYPI_USER" -p "$PYPI_TOKEN"
@@ -2297,7 +2608,7 @@ poetry_publish_pip(){
 
   cd "$_pwd"
   local msg="[poetry_publish_pip|out] => ${result}"
-  [[ ! "$result" -eq "0" ]] && info "$msg" && exit 1
+  [[ ! "$result" -eq "0" ]] && info "$msg" && return 1
   info "$msg"
 }
 
@@ -2305,24 +2616,25 @@ poetry_publish_pip(){
 #   name: pyproj_report_header
 #   purpose: generates a markdown test report header with package name, version, timestamp, repository, branch, and commit ID read from pyproject.toml
 #   parameters: $1 (output markdown filename), $2 (repository name), $3 (branch name), $4 (commit ID)
+#   returns: 0 after writing the report header, 1 if a required argument is missing
 #   requires: uv (with tomllib), this_folder
 ############################
 pyproj_report_header(){
   info "[pyproj_report_header|in] ($1)"
 
-  [[ -z "$1" ]] && err "[pyproj_report_header] must provide DOCNAME" && exit 1
+  [[ -z "$1" ]] && err "[pyproj_report_header] must provide DOCNAME" && return 1
   local DOCNAME="$1"
 
-  [[ -z "$2" ]] && err "[pyproj_report_header] must provide REPO" && exit 1
+  [[ -z "$2" ]] && err "[pyproj_report_header] must provide REPO" && return 1
   local REPO="$2"
 
-  [[ -z "$3" ]] && err "[pyproj_report_header] must provide BRANCH" && exit 1
+  [[ -z "$3" ]] && err "[pyproj_report_header] must provide BRANCH" && return 1
   local BRANCH="$3"
 
-  [[ -z "$4" ]] && err "[pyproj_report_header] must provide COMMIT" && exit 1
+  [[ -z "$4" ]] && err "[pyproj_report_header] must provide COMMIT" && return 1
   local COMMIT="$4"
 
-  _pwd=`pwd`
+  local _pwd=$(pwd)
   cd "$this_folder"
 
   local version=$(uv run python -c "import tomllib; d=tomllib.load(open('pyproject.toml','rb')); print(d['project']['version'])")
@@ -2344,6 +2656,7 @@ pyproj_report_header(){
 #   name: generate_pr_approvals_pdf
 #   purpose: generates a PDF report of PR approvals for a given repository branch using tgedr_pycommons
 #   parameters: $1 (repository name), $2 (branch name), $3 (output PDF file path)
+#   returns: the exit status of the uv command, or 1 if a required argument is missing
 #   requires: uv (with tgedr_pycommons)
 ############################
 generate_pr_approvals_pdf() {
@@ -2352,7 +2665,7 @@ generate_pr_approvals_pdf() {
   local output_file="$3"
 
   if [ -z "$repo" ] || [ -z "$branch" ] || [ -z "$output_file" ]; then
-    err "[generate_pr_approvals_pdf] missing required arguments: repo, branch, output_file" && exit 1
+    err "[generate_pr_approvals_pdf] missing required arguments: repo, branch, output_file" && return 1
   fi
 
   uv run python -c "from tgedr_pycommons.cicd.pr_approvals_github import generate_pr_approvals_pdf; generate_pr_approvals_pdf('$repo', '$branch', '$output_file')"
@@ -2362,6 +2675,7 @@ generate_pr_approvals_pdf() {
 #   name: generate_quality_report_pdf
 #   purpose: converts a markdown quality report to a PDF file using tgedr_pycommons
 #   parameters: $1 (input markdown file path), $2 (output PDF file path)
+#   returns: the exit status of the uv command, or 1 if a required argument is missing
 #   requires: uv (with tgedr_pycommons)
 ############################
 generate_quality_report_pdf() {
@@ -2369,7 +2683,7 @@ generate_quality_report_pdf() {
   local output_pdf="$2"
 
   if [ -z "$input_md" ] || [ -z "$output_pdf" ]; then
-    err "[generate_quality_report_pdf] missing required arguments: input_md, output_pdf" && exit 1
+    err "[generate_quality_report_pdf] missing required arguments: input_md, output_pdf" && return 1
   fi
 
   uv run python -c "from tgedr_pycommons.cicd.create_release_report import generate_report; generate_report('$input_md', '$output_pdf')"
@@ -2383,6 +2697,7 @@ generate_quality_report_pdf() {
 #   name: terraform_autodeploy
 #   purpose: runs a full Terraform deployment (init → plan → apply --auto-approve) in the given folder
 #   parameters: $1 (path to the folder containing Terraform configuration files)
+#   returns: 0 if init, plan, and apply succeed, 1 if a required command or Terraform step fails
 #   requires: terraform
 ############################
 terraform_autodeploy(){
@@ -2398,7 +2713,9 @@ terraform_autodeploy(){
   cd "$folder"
 
   terraform init
+  if [ ! "$?" -eq "0" ]; then err "[terraform_autodeploy] could not init" && cd "$_pwd" && return 1; fi
   terraform plan
+  if [ ! "$?" -eq "0" ]; then err "[terraform_autodeploy] could not plan" && cd "$_pwd" && return 1; fi
   terraform apply -auto-approve -lock=true -lock-timeout=10m
   if [ ! "$?" -eq "0" ]; then err "[terraform_autodeploy] could not apply" && cd "$_pwd" && return 1; fi
   cd "$_pwd"
@@ -2409,6 +2726,7 @@ terraform_autodeploy(){
 #   name: terraform_autodestroy
 #   purpose: runs 'terraform destroy --auto-approve' in the given folder to tear down all managed infrastructure
 #   parameters: $1 (path to the folder containing Terraform configuration files)
+#   returns: 0 if destroy succeeds, 1 if the folder, required command, or Terraform step fails
 #   requires: terraform
 ############################
 

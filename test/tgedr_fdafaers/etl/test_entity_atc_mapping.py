@@ -148,7 +148,8 @@ def test_load_saves_result(etl: EntityAtcMapping, mock_metrics: MagicMock) -> No
     etl.load()
 
     etl._store.save.assert_called_once_with(
-        df=etl._result, key="s/entity_atc", split="train", append=True
+        df=etl._result, key="s/entity_atc", split="train", append=True,
+        data_contract=etl.contract_path("entity_atc")
     )
     mock_metrics.add_to_gauge.assert_called_once()
 

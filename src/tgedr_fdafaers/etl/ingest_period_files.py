@@ -2,29 +2,22 @@
 
 from typing import Any
 import pandas as pd
-import logging
 from pathlib import Path
+import logging
 
 from tgedr_dataops.store.contracted_store import ContractedHFDatasetFileBasedStore
 from tgedr_dataops_abs.etl4gh import Etl4GH
 from tgedr_fdafaers.constants import Constants
+from tgedr_fdafaers.utils.common_etl import CommonEtl
 from tgedr_fdafaers.raw_data_ingestion import RawDataIngestion
 from tgedr_observability.metrics import Metrics
 from tgedr_fdafaers.entity_mapping.drug_ingredient_term import DrugIngredientTerm
 
 
-logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
-ODCS_DIR = Path(__file__).resolve().parents[1] / "odcs"
 
-
-def _contract_path(table: str) -> Path:
-    """Return the path to the ODCS data contract file for ``table``."""
-    return ODCS_DIR / f"{table}.odcs.yaml"
-
-
-class IngestPeriodFiles(Etl4GH):
+class IngestPeriodFiles(CommonEtl):
     """ETL workflow for extracting, correcting, and loading FAERS period files."""
 
     def __init__(self, configuration: dict[str, Any] | None = None) -> None:
@@ -81,7 +74,7 @@ class IngestPeriodFiles(Etl4GH):
         for table, df in self._data.items():
             periods.update(df["period"].unique().tolist())
             dataset_table = f"{dataset_prefix}{table}"
-            store.save(df=df, key=dataset_table, split="train", append=True, data_contract=_contract_path(table))
+            store.save(df=df, key=dataset_table, split="train", append=True, data_contract=self.contract_path(table))
             logger.info(f"[load] new data on table: {table} | df.shape: {df.shape}")
             Metrics.instance().add_to_gauge("fda_faers.ingest_period_files.new_rows", df.shape[0], {"table": table})  # pyright: ignore[reportOptionalMemberAccess]
 
