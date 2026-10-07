@@ -64,7 +64,7 @@ class TermEntityMapping(CommonEtl):
             Metrics.instance().add_to_gauge(
                 name="fda_faers.term_entity_mapping.rows",
                 value=df_mapped_terms.shape[0],
-                attributes={"type": "term_entity"},
+                attributes={"type": "term_mapped"},
             )
             logger.info(f"[extract] mapped terms shape: {df_mapped_terms.shape}")
         except NoStoreException as nse:
@@ -123,6 +123,6 @@ class TermEntityMapping(CommonEtl):
             Metrics.instance().add_to_gauge(
                 name="fda_faers.term_entity_mapping.rows",
                 value=self._result.shape[0],
-                attributes={"type": "term_entity_new"},
+                attributes={"type": "term_mapped_new"},
             )
         logger.info("[load|out]")
