@@ -80,9 +80,16 @@ class TermEntityMapping(CommonEtl):
             )
             df_terms_to_map = (df_terms_to_map[df_terms_to_map["_merge"] == "left_only"])[["term"]].drop_duplicates()
 
-        sample_size = min(sample_size, df_terms_to_map.shape[0])
-        self._data["terms_to_map"] = df_terms_to_map.sample(n=sample_size)
-        logger.info(f"[extract|out] terms to map shape: {self._data['terms_to_map'].shape}")
+        df_sample: pd.DataFrame | None = None
+        if df_terms_to_map.empty:
+            logger.warning("[extract] no terms to map after filtering mapped terms")
+        else:
+            sample_size = min(sample_size, df_terms_to_map.shape[0])
+            df_sample = df_terms_to_map.sample(n=sample_size)
+
+        if df_sample is not None:
+            self._data["terms_to_map"] = df_sample
+        logger.info(f"[extract|out] terms to map shape: {df_sample.shape if df_sample is not None else (0, 0)}")
 
     def transform(self) -> Any:
         """Transforms the terms to map into term-entity mappings.
@@ -92,7 +99,7 @@ class TermEntityMapping(CommonEtl):
         """
         logger.info("[transform|in]")
         entity_mapper = TermEntity()
-        if not (self._data["terms_to_map"]).empty:
+        if "terms_to_map" in self._data and not (self._data["terms_to_map"]).empty:
             df_mapped = entity_mapper.process(context={"dataframe": self._data["terms_to_map"]})
             df_mapped = df_mapped[df_mapped["entity"].notna()]
             if not df_mapped.empty:

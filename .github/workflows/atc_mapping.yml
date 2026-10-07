@@ -1,9 +1,8 @@
 name: atc_mapping
 
 on:
-  workflow_run:
-    workflows: ["fdafiles"]
-    types: [completed]
+  schedule:
+    - cron: '0 */4 * * *'  # every 4 hours
   workflow_dispatch:
 
 concurrency:

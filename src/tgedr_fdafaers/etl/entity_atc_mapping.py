@@ -78,7 +78,7 @@ class EntityAtcMapping(CommonEtl):
             logger.warning(f"[extract] silver table {entity_atc_table} not found: {nse}")
 
         df_entities_to_map: pd.DataFrame = df_entity
-        if df_mapped_entities is not None:
+        if df_mapped_entities is not None and not df_mapped_entities.empty:
             df_entities_to_map = df_entities_to_map.merge(
                 df_mapped_entities,
                 on="entity",
@@ -89,10 +89,12 @@ class EntityAtcMapping(CommonEtl):
                 ["entity"]
             ].drop_duplicates()
 
+        entities_to_map_size: int = 0
         if not df_entities_to_map.empty:
             sample_size = min(sample_size, df_entities_to_map.shape[0])
             self._data["df_entities_to_map"] = df_entities_to_map.sample(n=sample_size)
-        logger.info(f"[extract|out] entities to map shape: {self._data['df_entities_to_map'].shape}")
+            entities_to_map_size = self._data["df_entities_to_map"].shape[0]
+        logger.info(f"[extract|out] entities to map size: {entities_to_map_size}")
 
     def transform(self) -> Any:
         """Maps the extracted entities to ATC codes using the NLM mapping.

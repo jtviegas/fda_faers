@@ -65,6 +65,17 @@ def test_extract_excludes_terms_already_mapped(etl: TermEntityMapping, mock_metr
     assert set(etl._data["terms_to_map"]["term"]) == {"c", "d"}
 
 
+def test_extract_skips_when_all_terms_already_mapped(etl: TermEntityMapping, mock_metrics: MagicMock) -> None:
+    """extract should not store a sample when every bronze term is already mapped."""
+    df_terms = pd.DataFrame({"term": ["a", "b"]})
+    df_mapped = pd.DataFrame({"term": ["a", "b"]})
+    etl._store.get.side_effect = [MagicMock(train=df_terms), MagicMock(train=df_mapped)]
+
+    etl.extract()
+
+    assert "terms_to_map" not in etl._data
+
+
 def test_extract_caps_sample_size(etl: TermEntityMapping, mock_metrics: MagicMock) -> None:
     """extract should cap the sampling to sample_size."""
     df_terms = pd.DataFrame({"term": [f"t{i}" for i in range(100)]})
