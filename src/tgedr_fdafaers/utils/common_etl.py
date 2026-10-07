@@ -8,7 +8,7 @@ from tgedr_dataops_abs.etl4gh import Etl4GH
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s [%(name)s] %(message)s")
 logging.getLogger("httpx").setLevel(logging.WARNING)
-logging.getLogger("great_expectations").setLevel(logging.WARNING)
+logging.getLogger("great_expectations._docs_decorators").setLevel(logging.WARNING)
 
 
 class CommonEtl(Etl4GH):
