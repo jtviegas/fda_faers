@@ -9,6 +9,7 @@ This module provides:
 from typing import Any
 import pandas as pd
 import logging
+import atexit
 from tgedr_dataops_abs.etl4gh import Etl4GH
 from tgedr_dataops.store.contracted_store import ContractedHFDatasetFileBasedStore, NoStoreException
 from tgedr_observability.metrics import Metrics
@@ -38,9 +39,10 @@ class EntityAtcMapping(CommonEtl):
         self._store: ContractedHFDatasetFileBasedStore = ContractedHFDatasetFileBasedStore(
             config={"visibility": "public"}
         )
+        atexit.register(Metrics.app_shutdown)
 
     @Etl4GH.inject_configuration
-    def extract(self, silver_dataset_prefix: str, sample_size: int = 50000) -> Any:
+    def extract(self, silver_dataset_prefix: str, sample_size: int = 10000) -> Any:
         """Extracts unmapped entities from the silver dataset.
 
         Reads the silver ``term_entity`` table, removes entities already present
@@ -50,7 +52,7 @@ class EntityAtcMapping(CommonEtl):
 
         Args:
             silver_dataset_prefix: Prefix of the silver dataset tables.
-            sample_size: Maximum number of entities to sample for mapping.
+            sample_size: Maximum number of entities to sample for mapping (default is 10000).
         """
         logger.info(f"[extract|in] ({silver_dataset_prefix}, {sample_size})")
 
@@ -109,14 +111,14 @@ class EntityAtcMapping(CommonEtl):
         logger.info(f"[transform|out] result shape: {self._result.shape if self._result is not None else (0, 0)}")
 
     @Etl4GH.inject_configuration
-    def load(self, silver_dataset_prefix: str) -> str:
+    def load(self, silver_dataset_prefix: str) -> None:
         """Loads the mapped entities back into the silver entity_atc table.
 
         Args:
             silver_dataset_prefix: Prefix of the silver dataset tables.
 
         Returns:
-            The name of the entity_atc table that was loaded.
+            None.
         """
         logger.info(f"[load|in] ({silver_dataset_prefix})")
         entity_atc_table = f"{silver_dataset_prefix}entity_atc"

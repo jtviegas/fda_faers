@@ -5,6 +5,7 @@ This module provides:
   maps them to entities, and loads the resulting mappings into silver.
 """
 
+import atexit
 from typing import Any
 import pandas as pd
 import logging
@@ -32,15 +33,16 @@ class TermEntityMapping(CommonEtl):
         self._store: ContractedHFDatasetFileBasedStore = ContractedHFDatasetFileBasedStore(
             config={"visibility": "public"}
         )
+        atexit.register(Metrics.app_shutdown)
 
     @Etl4GH.inject_configuration
-    def extract(self, bronze_dataset_prefix: str, silver_dataset_prefix: str, sample_size: int = 100000) -> Any:
+    def extract(self, bronze_dataset_prefix: str, silver_dataset_prefix: str, sample_size: int = 50000) -> Any:
         """Extracts terms to map from the bronze dataset, excluding already mapped terms.
 
         Args:
             bronze_dataset_prefix: Prefix of the bronze dataset tables to read from.
             silver_dataset_prefix: Prefix of the silver dataset tables to read from.
-            sample_size: Maximum number of terms to sample for mapping.
+            sample_size: Maximum number of terms to sample for mapping (default is 50000).
 
         Returns:
             None.
@@ -51,7 +53,7 @@ class TermEntityMapping(CommonEtl):
         df_terms = (self._store.get(key=drug_table).train)[["term"]].drop_duplicates()
         logger.info(f"[extract] bronze terms shape: {df_terms.shape}")
         Metrics.instance().add_to_gauge(
-            name="fda_faers.drug_term_entity_mapping.rows", value=df_terms.shape[0], attributes={"type": "term"}
+            name="fda_faers.term_entity_mapping.rows", value=df_terms.shape[0], attributes={"type": "term"}
         )
 
         term_entity_table = f"{silver_dataset_prefix}term_entity"
@@ -60,7 +62,7 @@ class TermEntityMapping(CommonEtl):
             ds_term_entity = self._store.get(key=term_entity_table)
             df_mapped_terms = (ds_term_entity.train)[["term"]].drop_duplicates()
             Metrics.instance().add_to_gauge(
-                name="fda_faers.drug_term_entity_mapping.rows",
+                name="fda_faers.term_entity_mapping.rows",
                 value=df_mapped_terms.shape[0],
                 attributes={"type": "term_entity"},
             )
@@ -119,7 +121,7 @@ class TermEntityMapping(CommonEtl):
                 data_contract=self.contract_path("term_entity"),
             )
             Metrics.instance().add_to_gauge(
-                name="fda_faers.drug_term_entity_mapping.rows",
+                name="fda_faers.term_entity_mapping.rows",
                 value=self._result.shape[0],
                 attributes={"type": "term_entity_new"},
             )
