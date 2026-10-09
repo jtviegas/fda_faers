@@ -1,5 +1,6 @@
 """Process and load corrected FAERS period files."""
 
+import atexit
 from typing import Any
 import pandas as pd
 from pathlib import Path
@@ -25,6 +26,7 @@ class IngestPeriodFiles(CommonEtl):
         super().__init__(configuration=configuration)
         self._data: dict[str, pd.DataFrame] = {}
         self._constants = Constants()
+        atexit.register(Metrics.app_shutdown)
 
     def __handle_file(self, filepath: str) -> None:
         """Handle the ingestion of a single FAERS text file."""

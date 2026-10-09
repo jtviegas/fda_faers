@@ -1,5 +1,6 @@
 """Compute and report the total rows per period and table from the bronze datasets."""
 
+import atexit
 from typing import Any
 import logging
 import pandas as pd
@@ -26,6 +27,7 @@ class ComputeRowsMetrics(Etl4GH):
         self._data: dict[str, pd.DataFrame] = {}
         self._rows: dict[str, dict[str, int]] = {}
         self._constants = Constants()
+        atexit.register(Metrics.app_shutdown)
 
     @Etl4GH.inject_configuration
     def extract(self, dataset_prefix: str) -> Any:
