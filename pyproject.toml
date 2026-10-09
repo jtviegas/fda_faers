@@ -1,6 +1,6 @@
 [project]
 name = "tgedr-fdafaers"
-version = "0.0.36"
+version = "0.0.37"
 description = "this is a template for a python package"
 authors = [
     {name = "developer",email = "developer@email.com"}
@@ -12,7 +12,7 @@ requires-python = ">=3.12,<3.13"
 dependencies = [
     "tgedr-pycommons>=1.2.3",
     "tgedr-dataops>=1.3.2",
-    "tgedr-observability>=0.0.9",
+    "tgedr-observability>=0.0.10",
     "scispacy>=0.6.2",
     "pip>=26.2.1",
     "spacy==3.7.4",

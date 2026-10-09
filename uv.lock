@@ -1,5 +1,5 @@
 version = 1
-revision = 5
+revision = 3
 requires-python = "==3.12.*"
 
 [[package]]
@@ -2881,7 +2881,7 @@ wheels = [
 
 [[package]]
 name = "tgedr-fdafaers"
-version = "0.0.35"
+version = "0.0.37"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp" },
@@ -2919,7 +2919,7 @@ requires-dist = [
     { name = "scispacy", specifier = ">=0.6.2" },
     { name = "spacy", specifier = "==3.7.4" },
     { name = "tgedr-dataops", specifier = ">=1.3.2" },
-    { name = "tgedr-observability", specifier = ">=0.0.9" },
+    { name = "tgedr-observability", specifier = ">=0.0.10" },
     { name = "tgedr-pycommons", specifier = ">=1.2.3" },
 ]
 
@@ -2944,7 +2944,7 @@ dev = [
 
 [[package]]
 name = "tgedr-observability"
-version = "0.0.9"
+version = "0.0.10"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "matplotlib" },
@@ -2954,9 +2954,9 @@ dependencies = [
     { name = "pandas" },
     { name = "tgedr-pycommons" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a8/bb/f76bc83a1489521b4b439141026242e87a502cb9cc7b2d3d0d4099c3ce6f/tgedr_observability-0.0.9.tar.gz", hash = "sha256:53cb660e71e1f01ef2b29afba958273fa625cef196aba3e330d557570da18322", size = 14364, upload-time = "2026-09-14T23:49:52.363Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/3b/87/e6adf5f07ee914981854f6a94da8e28f847ea74fdf6d2ecb39dccaa64622/tgedr_observability-0.0.10.tar.gz", hash = "sha256:68834397e00401a0d1629ddbd0d03c7631cf571dbeae0039d7fa9807c3bd484c", size = 14559, upload-time = "2026-10-09T05:10:30.716Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/25/d6/af02dcb0e43f3c705d1afe8c0ef515eaecfc6cc3df6456536407c8df400b/tgedr_observability-0.0.9-py3-none-any.whl", hash = "sha256:5f10327bb56fe54a5ebd3999f01fb2bd18dd081a1fbaf723961b7173c06d7192", size = 15832, upload-time = "2026-09-14T23:49:51.347Z" },
+    { url = "https://files.pythonhosted.org/packages/5c/fd/fb2f3c5775321414e97b2b352af3f1b19278ede44e7cb734de1a8db56c38/tgedr_observability-0.0.10-py3-none-any.whl", hash = "sha256:8102eaf067b14089fbf37aaad22a9d401c01a3091d1a49bc90a026d8fa191af5", size = 16031, upload-time = "2026-10-09T05:10:29.801Z" },
 ]
 
 [[package]]
