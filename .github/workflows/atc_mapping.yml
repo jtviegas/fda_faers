@@ -16,6 +16,7 @@ env:
   TGEDR_OBSERVABILITY_EXPORTER_METRICS_FILE: otel/metrics
   TGEDR_OBSERVABILITY_SERVICE: fda_faers
   ENTITY_MAPPING_SAMPLE_SIZE: "10000"
+  TERM_MAPPING_SAMPLE_SIZE: "200000"
 
 jobs:
   execute_pipeline:
@@ -39,7 +40,7 @@ jobs:
         uv run run --module tgedr_fdafaers.etl.term_entity_mapping \
           --classname TermEntityMapping \
           --callable run \
-          --classparams "{\"configuration\": {\"bronze_dataset_prefix\": \"${{ env.HF_DATASET_BRONZE_PREFIX }}\", \"silver_dataset_prefix\": \"${{ env.HF_DATASET_SILVER_PREFIX }}\"}}"
+          --classparams "{\"configuration\": {\"bronze_dataset_prefix\": \"${{ env.HF_DATASET_BRONZE_PREFIX }}\", \"silver_dataset_prefix\": \"${{ env.HF_DATASET_SILVER_PREFIX }}\", \"sample_size\": ${{ env.TERM_MAPPING_SAMPLE_SIZE }} }}"
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
     - name: 'map drug entity to ATC codes'
