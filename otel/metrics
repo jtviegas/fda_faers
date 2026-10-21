@@ -414001,3 +414001,4239 @@
         }
     ]
 }
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "69b862c9-c000-4be5-ac4c-810ad666ab62",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.term_entity_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.term_entity_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "term"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792598985846095816,
+                                        "value": 747860,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "term_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792598985846095816,
+                                        "value": 747858,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "69b862c9-c000-4be5-ac4c-810ad666ab62",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.term_entity_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.term_entity_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "term"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792598985849198240,
+                                        "value": 747860,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "term_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792598985849198240,
+                                        "value": 747858,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599063744124457,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599063744124457,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599123744710162,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599123744710162,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599183788805934,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599183788805934,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599243790103535,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599243790103535,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599303790594368,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599303790594368,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599363791157978,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599363791157978,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599423791706856,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599423791706856,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599483792297755,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599483792297755,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599543793679484,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599543793679484,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599603794156763,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599603794156763,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599663795153031,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599663795153031,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599723795683049,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599723795683049,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599783796186355,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599783796186355,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599843796758674,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599843796758674,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599903797269471,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599903797269471,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599963798160438,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792599963798160438,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600023799047152,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600023799047152,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600083800354064,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600083800354064,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600143801001066,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600143801001066,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600203801891121,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600203801891121,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600263802371520,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600263802371520,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600323803332013,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600323803332013,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600383804614624,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600383804614624,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600443805380647,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600443805380647,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600503806553810,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600503806553810,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600563807022553,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600563807022553,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600623808157391,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600623808157391,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600683809262959,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600683809262959,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600743810198015,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600743810198015,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600803811545447,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600803811545447,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600863812071550,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600863812071550,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600923813084325,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600923813084325,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600983814097431,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792600983814097431,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601043815172713,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601043815172713,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601103816499313,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601103816499313,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601163817331804,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601163817331804,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601223819145710,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601223819145710,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601283819675016,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601283819675016,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601343820225341,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601343820225341,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601403820919702,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601403820919702,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601463821457820,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601463821457820,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601523822234189,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601523822234189,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601583822748388,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601583822748388,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601643823410455,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601643823410455,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601703824010839,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601703824010839,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601763825743836,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601763825743836,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601823826135781,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601823826135781,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601883826628917,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601883826628917,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601943827124246,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792601943827124246,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602003827752897,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602003827752897,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602063828158813,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602063828158813,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602123828602739,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602123828602739,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602183829016003,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602183829016003,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602243829494775,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602243829494775,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602303829911098,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602303829911098,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602363830375309,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602363830375309,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602423831077305,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602423831077305,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602483831809104,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602483831809104,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602543832331318,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602543832331318,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602603832872395,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602603832872395,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602663833608253,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602663833608253,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602723834211650,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602723834211650,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602783835004554,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602783835004554,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602843835715702,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602843835715702,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602903836096887,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602903836096887,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602963836591380,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792602963836591380,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792603023837303707,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792603023837303707,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792603083837802405,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792603083837802405,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792603143838660760,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792603143838660760,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792603203839997342,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792603203839997342,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792603215689012310,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792603215689012310,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped_new"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792603215689012310,
+                                        "value": 191,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.45.0",
+                    "service.instance.id": "bb4ee6d5-489c-4a86-a98a-7bcb5df88f9d",
+                    "service.name": "fda_faers"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "fda_faers.entity_atc_mapping",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "rows",
+                            "description": "Gauge metric for fda_faers.entity_atc_mapping.rows",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "type": "entity"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792603215690028843,
+                                        "value": 349124,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792603215690028843,
+                                        "value": 160116,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "type": "entity_mapped_new"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1792603215690028843,
+                                        "value": 191,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}
