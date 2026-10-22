@@ -2849,7 +2849,7 @@ wheels = [
 
 [[package]]
 name = "tgedr-dataops"
-version = "1.3.2"
+version = "1.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boto3" },
@@ -2862,9 +2862,9 @@ dependencies = [
     { name = "s3fs" },
     { name = "tgedr-dataops-abs" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/43/16/81ef76b2e35e1578d9313b9c6a1f5204781a4d13fb6baacfd424ad63d6e4/tgedr_dataops-1.3.2.tar.gz", hash = "sha256:a2a300ba683fc767f7e071ef3b4e644fd69a48e6d3847621dfa0cffae4068b0f", size = 22627, upload-time = "2026-09-24T23:53:56.691Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/97/57/d81a8d1256a7ae1b9da9e1e2abc8519152e3acd23065c530135a0dd79a0d/tgedr_dataops-1.4.0.tar.gz", hash = "sha256:cedb1277f1922b3cb15e5024c02ee0094a39db07762a3d8ed87598808aea6461", size = 24128, upload-time = "2026-10-22T21:17:22.611Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/fb/7d/b27822ffb56d562bba68671ccee075e9dd3f5b9b45126105bf47d94bdedc/tgedr_dataops-1.3.2-py3-none-any.whl", hash = "sha256:317eda3ddb21778c97d0bacc0446e6c478134b747924a095289f34b2b0e37d1f", size = 35508, upload-time = "2026-09-24T23:53:55.628Z" },
+    { url = "https://files.pythonhosted.org/packages/2b/06/620148632958ae986a6e249882bf06e1593a93785b4dc58f38880d4e8e94/tgedr_dataops-1.4.0-py3-none-any.whl", hash = "sha256:6d64864e5169cb857fd06ca417232f917997200d2ce9af1af4794dd82ca12b27", size = 35578, upload-time = "2026-10-22T21:17:21.553Z" },
 ]
 
 [[package]]
@@ -2881,7 +2881,7 @@ wheels = [
 
 [[package]]
 name = "tgedr-fdafaers"
-version = "0.0.38"
+version = "0.0.39"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp" },
@@ -2918,7 +2918,7 @@ requires-dist = [
     { name = "pip", specifier = ">=26.2.1" },
     { name = "scispacy", specifier = ">=0.6.2" },
     { name = "spacy", specifier = "==3.7.4" },
-    { name = "tgedr-dataops", specifier = ">=1.3.2" },
+    { name = "tgedr-dataops", specifier = ">=1.4.0" },
     { name = "tgedr-observability", specifier = ">=0.0.10" },
     { name = "tgedr-pycommons", specifier = ">=1.2.3" },
 ]
