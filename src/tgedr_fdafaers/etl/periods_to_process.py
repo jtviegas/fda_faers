@@ -34,7 +34,7 @@ class Periods2Process(Etl4GH):
         for table in constants.TABLES:
             dataset_table = f"{dataset_prefix}{table}"
             try:
-                df_data = store.get(key=dataset_table).train
+                df_data = store.get(key=dataset_table, columns=["period"]).train
                 if df_data is not None and not df_data.empty:
                     data_periods = df_data["period"].dropna().unique().tolist()
                     periods = data_periods if len(periods) == 0 else list(set(periods).intersection(data_periods))
