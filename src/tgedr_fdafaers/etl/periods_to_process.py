@@ -3,8 +3,10 @@
 from typing import Any
 import logging
 
+from datasets import load_dataset
+from datasets.exceptions import DatasetNotFoundError
 from tgedr_dataops_abs.etl4gh import Etl4GH
-from tgedr_dataops.store.hf_dataset import HuggingFaceDatasetStore, NoStoreException
+from tgedr_dataops.store.hf_dataset import NoStoreException
 
 from tgedr_fdafaers.constants import Constants
 from tgedr_fdafaers.utils.faers_period import UtilsFaersPeriod
@@ -28,19 +30,18 @@ class Periods2Process(Etl4GH):
         logger.info(f"[__find_periods_in_bronze_dataset|in] ({dataset_prefix})")
 
         constants: Constants = Constants()
-        store: HuggingFaceDatasetStore = HuggingFaceDatasetStore()
         periods: list[str] = []
 
         for table in constants.TABLES:
             dataset_table = f"{dataset_prefix}{table}"
             try:
-                df_data = store.get(key=dataset_table, columns=["period"]).train
-                if df_data is not None and not df_data.empty:
-                    data_periods = df_data["period"].dropna().unique().tolist()
+                dataset = load_dataset(dataset_table, split="train", streaming=True).select_columns(["period"])
+                data_periods: list[str] = list({row["period"] for row in dataset if row.get("period") is not None})
+                if 0 < len(data_periods):
                     periods = data_periods if len(periods) == 0 else list(set(periods).intersection(data_periods))
-            except NoStoreException as e:
+            except (DatasetNotFoundError, NoStoreException) as e:
                 logger.warning(
-                    f"[__find_periods_in_bronze_dataset] failed to get bronze dataset: {dataset_prefix} - {e}"
+                    f"[__find_periods_in_bronze_dataset] failed to get bronze dataset: {dataset_table} - {e}"
                 )
 
         logger.info(f"[__find_periods_in_bronze_dataset|out] => {periods}")
