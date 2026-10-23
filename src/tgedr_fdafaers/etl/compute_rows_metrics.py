@@ -1,13 +1,16 @@
 """Compute and report the total rows per period and table from the bronze datasets."""
 
 import atexit
-from typing import Any
+from collections import Counter
 import logging
-import pandas as pd
+from typing import Any
+
+from datasets import load_dataset
+from datasets.exceptions import DatasetNotFoundError
 
 from tgedr_dataops_abs.etl import EtlException
 from tgedr_dataops_abs.etl4gh import Etl4GH
-from tgedr_dataops.store.hf_dataset import HuggingFaceDatasetStore, NoStoreException
+from tgedr_dataops.store.hf_dataset import NoStoreException
 from tgedr_observability.metrics import Metrics
 from tgedr_fdafaers.constants import Constants
 
@@ -24,7 +27,7 @@ class ComputeRowsMetrics(Etl4GH):
     def __init__(self, configuration: dict[str, Any] | None = None) -> None:
         """Initialise the ETL with runtime configuration."""
         super().__init__(configuration=configuration)
-        self._data: dict[str, pd.DataFrame] = {}
+        self._data: dict[str, list[Any]] = {}
         self._rows: dict[str, dict[str, int]] = {}
         self._constants = Constants()
         atexit.register(Metrics.app_shutdown)
@@ -34,19 +37,20 @@ class ComputeRowsMetrics(Etl4GH):
         """Read each table's bronze dataset from HuggingFace."""
         logger.info(f"[extract|in] (dataset_prefix={dataset_prefix})")
 
-        store: HuggingFaceDatasetStore = HuggingFaceDatasetStore()
         for table in self._constants.TABLES:
             dataset_name = f"{dataset_prefix}{table}"
+            periods: list[Any] = []
             try:
-                splits = store.get(key=dataset_name)
-            except NoStoreException as e:
+                dataset = load_dataset(dataset_name, split="train", streaming=True).select_columns(["period"])
+                periods = [row["period"] for row in dataset if row.get("period") is not None]
+            except (DatasetNotFoundError, NoStoreException) as e:
                 msg = f"[extract] required dataset not found: {dataset_name}"
                 raise EtlException(msg) from e
-            df: pd.DataFrame | None = splits.train
-            if df is None or df.empty:
-                msg = f"[extract] required dataset is empty: {dataset_name}"
+
+            if 0 == len(periods):
+                msg = f"[extract] no periods for dataset: {dataset_name}"
                 raise EtlException(msg)
-            self._data[table] = df
+            self._data[table] = periods
 
         logger.info(f"[extract|out] tables loaded: {sorted(self._data.keys())}")
 
@@ -54,8 +58,8 @@ class ComputeRowsMetrics(Etl4GH):
         """Compute the row count per period for each table."""
         logger.info(f"[transform|in] (tables={sorted(self._data.keys())})")
 
-        for table, df in self._data.items():
-            counts: pd.Series = df.groupby("period").size()
+        for table, periods in self._data.items():
+            counts: Counter[Any] = Counter(periods)
             self._rows[table] = {str(period): int(rows) for period, rows in counts.items()}
 
         logger.info(f"[transform|out] rows computed: {self._rows}")
