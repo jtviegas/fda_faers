@@ -2,7 +2,8 @@
 
 from unittest.mock import patch, MagicMock
 
-import pandas as pd
+from datasets.exceptions import DatasetNotFoundError
+from tgedr_dataops.store.hf_dataset import NoStoreException
 
 from tgedr_fdafaers.etl.periods_to_process import Periods2Process
 from tgedr_fdafaers.utils.faers_period import FaersPeriod, UtilsFaersPeriod
@@ -13,42 +14,38 @@ from tgedr_fdafaers.utils.faers_period import FaersPeriod, UtilsFaersPeriod
 # --------------------------------------------------------------------------- #
 
 
-@patch("tgedr_fdafaers.etl.periods_to_process.HuggingFaceDatasetStore")
-def test_extract_loads_existing_periods_from_bronze_dataset(mock_store_cls) -> None:
-    """extract should populate _existing_periods with the intersection of periods across all tables."""
-    mock_store = MagicMock()
-    mock_store_cls.return_value = mock_store
+def _streaming_dataset(rows: list[dict[str, str | None]]) -> MagicMock:
+    dataset = MagicMock()
+    dataset.select_columns.return_value = dataset
+    dataset.__iter__.return_value = iter(rows)
+    return dataset
 
-    # All tables share the same periods -> intersection is the full set
-    df = pd.DataFrame({"period": ["12q4", "13q1", "13q2"]})
-    mock_result = MagicMock()
-    mock_result.train = df
-    mock_store.get.return_value = mock_result
+
+@patch("tgedr_fdafaers.etl.periods_to_process.load_dataset")
+def test_extract_loads_existing_periods_from_bronze_dataset(mock_load_dataset) -> None:
+    """extract should stream every table and collect its available periods."""
+    mock_load_dataset.return_value = _streaming_dataset(
+        [{"period": "12q4"}, {"period": "13q1"}, {"period": "13q2"}]
+    )
 
     etl = Periods2Process(configuration={"dataset_prefix": "org/bronze_"})
     etl.extract()
 
-    assert mock_store.get.call_count == len(("demo", "drug", "indi", "outc", "reac", "rpsr", "ther"))
+    assert mock_load_dataset.call_count == 7
     assert sorted(etl._existing_periods) == ["12q4", "13q1", "13q2"]
+    assert mock_load_dataset.call_args.kwargs == {"split": "train", "streaming": True}
+    assert mock_load_dataset.return_value.select_columns.call_args.args == (["period"],)
 
 
-@patch("tgedr_fdafaers.etl.periods_to_process.HuggingFaceDatasetStore")
-def test_extract_intersects_periods_across_tables(mock_store_cls) -> None:
+@patch("tgedr_fdafaers.etl.periods_to_process.load_dataset")
+def test_extract_intersects_periods_across_tables(mock_load_dataset) -> None:
     """extract should return only periods present in every table."""
-    mock_store = MagicMock()
-    mock_store_cls.return_value = mock_store
-
-    # First table has all periods, second table only has a subset
-    df_all = pd.DataFrame({"period": ["12q4", "13q1", "13q2"]})
-    df_subset = pd.DataFrame({"period": ["12q4", "13q1"]})
-    mock_store.get.side_effect = [
-        MagicMock(train=df_all),  # demo
-        MagicMock(train=df_subset),  # drug
-        MagicMock(train=df_all),  # indi
-        MagicMock(train=df_all),  # outc
-        MagicMock(train=df_all),  # reac
-        MagicMock(train=df_all),  # rpsr
-        MagicMock(train=df_all),  # ther
+    rows_all = [{"period": "12q4"}, {"period": "13q1"}, {"period": "13q2"}]
+    rows_subset = [{"period": "12q4"}, {"period": "13q1"}]
+    mock_load_dataset.side_effect = [
+        _streaming_dataset(rows_all),
+        _streaming_dataset(rows_subset),
+        *[_streaming_dataset(rows_all) for _ in range(5)],
     ]
 
     etl = Periods2Process(configuration={"dataset_prefix": "org/bronze_"})
@@ -57,23 +54,18 @@ def test_extract_intersects_periods_across_tables(mock_store_cls) -> None:
     assert sorted(etl._existing_periods) == ["12q4", "13q1"]
 
 
-@patch("tgedr_fdafaers.etl.periods_to_process.HuggingFaceDatasetStore")
-def test_extract_handles_missing_dataset_gracefully(mock_store_cls) -> None:
-    """extract should skip tables that raise NoStoreException."""
-    from tgedr_dataops.store.hf_dataset import NoStoreException
-
-    mock_store = MagicMock()
-    mock_store_cls.return_value = mock_store
-
-    df = pd.DataFrame({"period": ["12q4", "13q1"]})
-    mock_store.get.side_effect = [
-        NoStoreException("not found"),  # demo missing
-        MagicMock(train=df),  # drug
-        MagicMock(train=df),  # indi
-        MagicMock(train=df),  # outc
-        MagicMock(train=df),  # reac
-        MagicMock(train=df),  # rpsr
-        MagicMock(train=df),  # ther
+@patch("tgedr_fdafaers.etl.periods_to_process.load_dataset")
+def test_extract_skips_missing_datasets(mock_load_dataset) -> None:
+    """extract should skip datasets that raise known not-found exceptions."""
+    rows = [{"period": "12q4"}, {"period": "13q1"}]
+    mock_load_dataset.side_effect = [
+        DatasetNotFoundError("not found"),
+        _streaming_dataset(rows),
+        _streaming_dataset(rows),
+        _streaming_dataset(rows),
+        _streaming_dataset(rows),
+        _streaming_dataset(rows),
+        _streaming_dataset(rows),
     ]
 
     etl = Periods2Process(configuration={"dataset_prefix": "org/bronze_"})
@@ -82,15 +74,25 @@ def test_extract_handles_missing_dataset_gracefully(mock_store_cls) -> None:
     assert sorted(etl._existing_periods) == ["12q4", "13q1"]
 
 
-@patch("tgedr_fdafaers.etl.periods_to_process.HuggingFaceDatasetStore")
-def test_extract_handles_empty_dataframe(mock_store_cls) -> None:
-    """extract should leave _existing_periods empty when all datasets are empty."""
-    mock_store = MagicMock()
-    mock_store_cls.return_value = mock_store
+@patch("tgedr_fdafaers.etl.periods_to_process.load_dataset")
+def test_extract_skips_legacy_store_not_found_exception(mock_load_dataset) -> None:
+    """extract should continue to tolerate the store's not-found exception."""
+    rows = [{"period": "12q4"}]
+    mock_load_dataset.side_effect = [
+        NoStoreException("not found"),
+        *[_streaming_dataset(rows) for _ in range(6)],
+    ]
 
-    mock_result = MagicMock()
-    mock_result.train = pd.DataFrame()
-    mock_store.get.return_value = mock_result
+    etl = Periods2Process(configuration={"dataset_prefix": "org/bronze_"})
+    etl.extract()
+
+    assert etl._existing_periods == ["12q4"]
+
+
+@patch("tgedr_fdafaers.etl.periods_to_process.load_dataset")
+def test_extract_handles_empty_datasets(mock_load_dataset) -> None:
+    """extract should leave _existing_periods empty when every dataset is empty."""
+    mock_load_dataset.return_value = _streaming_dataset([])
 
     etl = Periods2Process(configuration={"dataset_prefix": "org/bronze_"})
     etl.extract()
@@ -98,16 +100,12 @@ def test_extract_handles_empty_dataframe(mock_store_cls) -> None:
     assert etl._existing_periods == []
 
 
-@patch("tgedr_fdafaers.etl.periods_to_process.HuggingFaceDatasetStore")
-def test_extract_deduplicates_periods(mock_store_cls) -> None:
-    """extract should return unique periods even when the dataset has duplicates."""
-    mock_store = MagicMock()
-    mock_store_cls.return_value = mock_store
-
-    df = pd.DataFrame({"period": ["12q4", "12q4", "13q1"]})
-    mock_result = MagicMock()
-    mock_result.train = df
-    mock_store.get.return_value = mock_result
+@patch("tgedr_fdafaers.etl.periods_to_process.load_dataset")
+def test_extract_ignores_null_and_deduplicates_periods(mock_load_dataset) -> None:
+    """extract should ignore null period values and deduplicate the rest."""
+    mock_load_dataset.return_value = _streaming_dataset(
+        [{"period": "12q4"}, {"period": "12q4"}, {"period": None}, {"period": "13q1"}]
+    )
 
     etl = Periods2Process(configuration={"dataset_prefix": "org/bronze_"})
     etl.extract()
@@ -115,22 +113,16 @@ def test_extract_deduplicates_periods(mock_store_cls) -> None:
     assert sorted(etl._existing_periods) == ["12q4", "13q1"]
 
 
-@patch("tgedr_fdafaers.etl.periods_to_process.HuggingFaceDatasetStore")
-def test_extract_uses_dataset_prefix_per_table(mock_store_cls) -> None:
-    """extract should call store.get with '{prefix}{table}' for each table."""
-    mock_store = MagicMock()
-    mock_store_cls.return_value = mock_store
-
-    df = pd.DataFrame({"period": ["12q4"]})
-    mock_result = MagicMock()
-    mock_result.train = df
-    mock_store.get.return_value = mock_result
+@patch("tgedr_fdafaers.etl.periods_to_process.load_dataset")
+def test_extract_uses_dataset_prefix_per_table(mock_load_dataset) -> None:
+    """extract should load each table using the configured prefix and train split."""
+    mock_load_dataset.return_value = _streaming_dataset([{"period": "12q4"}])
 
     etl = Periods2Process(configuration={"dataset_prefix": "org/bronze_"})
     etl.extract()
 
-    keys = [call.kwargs["key"] for call in mock_store.get.call_args_list]
-    assert keys == [
+    dataset_ids = [call.args[0] for call in mock_load_dataset.call_args_list]
+    assert dataset_ids == [
         "org/bronze_demo",
         "org/bronze_drug",
         "org/bronze_indi",
@@ -139,6 +131,7 @@ def test_extract_uses_dataset_prefix_per_table(mock_store_cls) -> None:
         "org/bronze_rpsr",
         "org/bronze_ther",
     ]
+    assert all(call.kwargs == {"split": "train", "streaming": True} for call in mock_load_dataset.call_args_list)
 
 
 # --------------------------------------------------------------------------- #
@@ -234,16 +227,10 @@ def test_load_returns_single_period_without_comma() -> None:
 
 
 @patch.object(UtilsFaersPeriod, "get_all_faers_periods")
-@patch("tgedr_fdafaers.etl.periods_to_process.HuggingFaceDatasetStore")
-def test_full_etl_pipeline(mock_store_cls, mock_get_all) -> None:
+@patch("tgedr_fdafaers.etl.periods_to_process.load_dataset")
+def test_full_etl_pipeline(mock_load_dataset, mock_get_all) -> None:
     """Full pipeline should extract existing, compute missing, and return sorted string."""
-    mock_store = MagicMock()
-    mock_store_cls.return_value = mock_store
-
-    df = pd.DataFrame({"period": ["12q4", "13q2"]})
-    mock_result = MagicMock()
-    mock_result.train = df
-    mock_store.get.return_value = mock_result
+    mock_load_dataset.return_value = _streaming_dataset([{"period": "12q4"}, {"period": "13q2"}])
 
     mock_get_all.return_value = [
         FaersPeriod(2012, 4),
