@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pandas as pd
 import pytest
+from datasets import Dataset
 
 from tgedr_dataops.store.contracted_store import NoStoreException
 
@@ -155,7 +156,7 @@ def test_transform_skips_when_all_entities_null(etl: TermEntityMapping, mock_met
 
 def test_load_saves_result(etl: TermEntityMapping, mock_metrics: MagicMock) -> None:
     """load should save the result and record the new rows metric."""
-    etl._result = pd.DataFrame({"term": ["aspirin"], "entity": ["aspirin"]})
+    etl._result = Dataset.from_pandas(pd.DataFrame({"term": ["aspirin"], "entity": ["aspirin"]}))
 
     etl.load()
 
@@ -177,7 +178,7 @@ def test_load_skips_save_without_result(etl: TermEntityMapping, mock_metrics: Ma
 
 def test_load_skips_save_with_empty_result(etl: TermEntityMapping, mock_metrics: MagicMock) -> None:
     """load should not save when the result is empty."""
-    etl._result = pd.DataFrame({"term": [], "entity": []})
+    etl._result = Dataset.from_pandas(pd.DataFrame({"term": [], "entity": []}))
 
     etl.load()
 

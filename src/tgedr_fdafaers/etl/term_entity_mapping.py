@@ -10,6 +10,7 @@ from typing import Any
 import pandas as pd
 import logging
 import random
+from datasets import Dataset
 from tgedr_dataops_abs.etl4gh import Etl4GH
 from tgedr_dataops.store.hf_dataset_file_arrow_based import HuggingFaceDatasetFileArrowBasedStore
 from tgedr_dataops.store.contracted_store import NoStoreException
@@ -30,7 +31,7 @@ class TermEntityMapping(CommonEtl):
             configuration: Optional configuration dictionary passed to the parent ETL class.
         """
         super().__init__(configuration=configuration)
-        self._data: dict[str, pd.DataFrame] = {}
+        self._data: dict[str, list[str]] = {}
         self._result: pd.DataFrame | None = None
         self._store: HuggingFaceDatasetFileArrowBasedStore = HuggingFaceDatasetFileArrowBasedStore(
             config={"visibility": "public"}
@@ -69,10 +70,10 @@ class TermEntityMapping(CommonEtl):
         except NoStoreException as nse:
             logger.warning(f"[extract] silver table {term_entity_data_url} not found: {nse}")
 
-        terms_to_map = list(set(terms) - set(mapped_terms))
+        terms_to_map: list[str] = list(set(terms) - set(mapped_terms))
 
         # sample up to sample_size elements (without replacement)
-        sample_terms = random.sample(terms_to_map, min(sample_size, len(terms_to_map)))
+        sample_terms: list[str] = random.sample(terms_to_map, min(sample_size, len(terms_to_map)))
 
         if sample_terms:
             self._data["terms_to_map"] = sample_terms
@@ -93,7 +94,7 @@ class TermEntityMapping(CommonEtl):
             df_mapped = entity_mapper.process(context={"dataframe": df_terms_to_map})
             df_mapped = df_mapped[df_mapped["entity"].notna()]
             if not df_mapped.empty:
-                self._result = df_mapped
+                self._result = Dataset.from_pandas(df_mapped)
 
         logger.info(f"[transform|out] result shape: {self._result.shape if self._result is not None else (0, 0)}")
 
@@ -109,7 +110,7 @@ class TermEntityMapping(CommonEtl):
         """
         logger.info(f"[load|in] ({term_entity_data_url})")
 
-        if (self._result is not None) and (not self._result.empty):
+        if (self._result is not None) and (0 < self._result.num_rows):
             self._store.save(
                 df=self._result,
                 key=term_entity_data_url,

@@ -2881,7 +2881,7 @@ wheels = [
 
 [[package]]
 name = "tgedr-fdafaers"
-version = "0.0.43"
+version = "0.0.44"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp" },
