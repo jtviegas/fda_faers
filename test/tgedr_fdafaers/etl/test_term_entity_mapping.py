@@ -13,13 +13,13 @@ from tgedr_fdafaers.etl.term_entity_mapping import TermEntityMapping
 @pytest.fixture()
 def etl() -> TermEntityMapping:
     """Return a TermEntityMapping instance with a mocked store."""
-    with patch("tgedr_fdafaers.etl.term_entity_mapping.ContractedHFDatasetFileBasedStore") as mock_store_cls:
+    with patch("tgedr_fdafaers.etl.term_entity_mapping.HuggingFaceDatasetFileArrowBasedStore") as mock_store_cls:
         mock_store = MagicMock()
         mock_store_cls.return_value = mock_store
         etl = TermEntityMapping(
             configuration={
-                "bronze_dataset_prefix": "b/",
-                "silver_dataset_prefix": "s/",
+                "drug_data_url": "b/drug",
+                "term_entity_data_url": "s/term_entity",
                 "sample_size": 10,
             }
         )
@@ -43,33 +43,38 @@ def mock_metrics() -> MagicMock:
 
 def test_extract_reads_bronze_terms(etl: TermEntityMapping, mock_metrics: MagicMock) -> None:
     """extract should read bronze drug terms and store a sample of them."""
-    df_terms = pd.DataFrame({"term": ["a", "b", "c"]})
-    etl._store.get.side_effect = [MagicMock(train=df_terms), NoStoreException("missing")]
+    mock_terms = MagicMock()
+    mock_terms.train.unique.return_value = ["a", "b", "c"]
+    etl._store.get.side_effect = [mock_terms, NoStoreException("missing")]
 
     etl.extract()
 
     assert etl._store.get.call_args_list[0].kwargs["key"] == "b/drug"
     assert etl._store.get.call_args_list[1].kwargs["key"] == "s/term_entity"
-    assert set(etl._data["terms_to_map"]["term"]) == {"a", "b", "c"}
+    assert set(etl._data["terms_to_map"]) == {"a", "b", "c"}
     mock_metrics.add_to_gauge.assert_called()
 
 
 def test_extract_excludes_terms_already_mapped(etl: TermEntityMapping, mock_metrics: MagicMock) -> None:
     """extract should exclude terms already present in the silver term_entity table."""
-    df_terms = pd.DataFrame({"term": ["a", "b", "c", "d"]})
-    df_mapped = pd.DataFrame({"term": ["a", "b"]})
-    etl._store.get.side_effect = [MagicMock(train=df_terms), MagicMock(train=df_mapped)]
+    mock_terms = MagicMock()
+    mock_terms.train.unique.return_value = ["a", "b", "c", "d"]
+    mock_mapped = MagicMock()
+    mock_mapped.unique.return_value = ["a", "b"]
+    etl._store.get.side_effect = [mock_terms, mock_mapped]
 
     etl.extract()
 
-    assert set(etl._data["terms_to_map"]["term"]) == {"c", "d"}
+    assert set(etl._data["terms_to_map"]) == {"c", "d"}
 
 
 def test_extract_skips_when_all_terms_already_mapped(etl: TermEntityMapping, mock_metrics: MagicMock) -> None:
     """extract should not store a sample when every bronze term is already mapped."""
-    df_terms = pd.DataFrame({"term": ["a", "b"]})
-    df_mapped = pd.DataFrame({"term": ["a", "b"]})
-    etl._store.get.side_effect = [MagicMock(train=df_terms), MagicMock(train=df_mapped)]
+    mock_terms = MagicMock()
+    mock_terms.train.unique.return_value = ["a", "b"]
+    mock_mapped = MagicMock()
+    mock_mapped.unique.return_value = ["a", "b"]
+    etl._store.get.side_effect = [mock_terms, mock_mapped]
 
     etl.extract()
 
@@ -78,22 +83,24 @@ def test_extract_skips_when_all_terms_already_mapped(etl: TermEntityMapping, moc
 
 def test_extract_caps_sample_size(etl: TermEntityMapping, mock_metrics: MagicMock) -> None:
     """extract should cap the sampling to sample_size."""
-    df_terms = pd.DataFrame({"term": [f"t{i}" for i in range(100)]})
-    etl._store.get.side_effect = [MagicMock(train=df_terms), NoStoreException("missing")]
+    mock_terms = MagicMock()
+    mock_terms.train.unique.return_value = [f"t{i}" for i in range(100)]
+    etl._store.get.side_effect = [mock_terms, NoStoreException("missing")]
 
     etl.extract()
 
-    assert etl._data["terms_to_map"].shape[0] == 10
+    assert len(etl._data["terms_to_map"]) == 10
 
 
 def test_extract_handles_missing_silver_table(etl: TermEntityMapping, mock_metrics: MagicMock) -> None:
     """extract should map all bronze terms when the silver table does not exist."""
-    df_terms = pd.DataFrame({"term": ["a", "b"]})
-    etl._store.get.side_effect = [MagicMock(train=df_terms), NoStoreException("missing")]
+    mock_terms = MagicMock()
+    mock_terms.train.unique.return_value = ["a", "b"]
+    etl._store.get.side_effect = [mock_terms, NoStoreException("missing")]
 
     etl.extract()
 
-    assert set(etl._data["terms_to_map"]["term"]) == {"a", "b"}
+    assert set(etl._data["terms_to_map"]) == {"a", "b"}
 
 
 # --------------------------------------------------------------------------- #
@@ -103,7 +110,7 @@ def test_extract_handles_missing_silver_table(etl: TermEntityMapping, mock_metri
 
 def test_transform_maps_terms_to_entities(etl: TermEntityMapping, mock_metrics: MagicMock) -> None:
     """transform should map terms to entities and keep only non-null entities."""
-    etl._data["terms_to_map"] = pd.DataFrame({"term": ["aspirin", "unknown"]})
+    etl._data["terms_to_map"] = ["aspirin", "unknown"]
 
     with patch("tgedr_fdafaers.etl.term_entity_mapping.TermEntity") as mock_term_entity_cls:
         mock_term_entity = MagicMock()
@@ -120,7 +127,7 @@ def test_transform_maps_terms_to_entities(etl: TermEntityMapping, mock_metrics: 
 
 def test_transform_skips_when_no_terms(etl: TermEntityMapping, mock_metrics: MagicMock) -> None:
     """transform should not set a result when there are no terms to map."""
-    etl._data["terms_to_map"] = pd.DataFrame({"term": []})
+    etl._data["terms_to_map"] = []
 
     etl.transform()
 
@@ -129,7 +136,7 @@ def test_transform_skips_when_no_terms(etl: TermEntityMapping, mock_metrics: Mag
 
 def test_transform_skips_when_all_entities_null(etl: TermEntityMapping, mock_metrics: MagicMock) -> None:
     """transform should not set a result when all mapped entities are null."""
-    etl._data["terms_to_map"] = pd.DataFrame({"term": ["a", "b"]})
+    etl._data["terms_to_map"] = ["a", "b"]
 
     with patch("tgedr_fdafaers.etl.term_entity_mapping.TermEntity") as mock_term_entity_cls:
         mock_term_entity = MagicMock()

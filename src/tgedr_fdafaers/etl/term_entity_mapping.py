@@ -9,8 +9,10 @@ import atexit
 from typing import Any
 import pandas as pd
 import logging
+import random
 from tgedr_dataops_abs.etl4gh import Etl4GH
-from tgedr_dataops.store.contracted_store import ContractedHFDatasetFileBasedStore, NoStoreException
+from tgedr_dataops.store.hf_dataset_file_arrow_based import HuggingFaceDatasetFileArrowBasedStore
+from tgedr_dataops.store.contracted_store import NoStoreException
 from tgedr_fdafaers.entity_mapping.term_entity import TermEntity
 from tgedr_fdafaers.utils.common_etl import CommonEtl
 from tgedr_observability.metrics import Metrics
@@ -19,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class TermEntityMapping(CommonEtl):
-    """ETL step that maps drug terms to entities, extracting unmapped terms from bronze and loading mappings into silver."""
+    """ETL step that maps drug terms to entities."""
 
     def __init__(self, configuration: dict[str, Any] | None = None) -> None:
         """Initializes the TermEntityMapping ETL step.
@@ -30,77 +32,65 @@ class TermEntityMapping(CommonEtl):
         super().__init__(configuration=configuration)
         self._data: dict[str, pd.DataFrame] = {}
         self._result: pd.DataFrame | None = None
-        self._store: ContractedHFDatasetFileBasedStore = ContractedHFDatasetFileBasedStore(
+        self._store: HuggingFaceDatasetFileArrowBasedStore = HuggingFaceDatasetFileArrowBasedStore(
             config={"visibility": "public"}
         )
         atexit.register(Metrics.app_shutdown)
 
     @Etl4GH.inject_configuration
-    def extract(self, bronze_dataset_prefix: str, silver_dataset_prefix: str, sample_size: int = 50000) -> Any:
+    def extract(self, drug_data_url: str, term_entity_data_url: str, sample_size: int = 50000) -> Any:
         """Extracts terms to map from the bronze dataset, excluding already mapped terms.
 
         Args:
-            bronze_dataset_prefix: Prefix of the bronze dataset tables to read from.
-            silver_dataset_prefix: Prefix of the silver dataset tables to read from.
+            drug_data_url: Prefix of the bronze dataset tables to read from.
+            term_entity_data_url: Prefix of the silver dataset tables to read from.
             sample_size: Maximum number of terms to sample for mapping (default is 50000).
 
         Returns:
             None.
         """
-        logger.info(f"[extract|in] ({bronze_dataset_prefix}, {silver_dataset_prefix}, {sample_size})")
+        logger.info(f"[extract|in] ({drug_data_url}, {term_entity_data_url}, {sample_size})")
 
-        drug_table = f"{bronze_dataset_prefix}drug"
-        df_terms = (self._store.get(key=drug_table).train)[["term"]].drop_duplicates()
-        logger.info(f"[extract] bronze terms shape: {df_terms.shape}")
+        terms: list[str] = (self._store.get(key=drug_data_url, columns=["term"]).train).unique("term")
+        logger.info(f"[extract] bronze terms count: {len(terms)}")
         Metrics.instance().add_to_gauge(
-            name="fda_faers.term_entity_mapping.rows", value=df_terms.shape[0], attributes={"type": "term"}
+            name="fda_faers.term_entity_mapping.rows", value=len(terms), attributes={"type": "term"}
         )
 
-        term_entity_table = f"{silver_dataset_prefix}term_entity"
-        df_mapped_terms: pd.DataFrame | None = None
+        mapped_terms: list[str] = []
         try:
-            ds_term_entity = self._store.get(key=term_entity_table)
-            df_mapped_terms = (ds_term_entity.train)[["term"]].drop_duplicates()
+            mapped_terms = self._store.get(key=term_entity_data_url, columns=["term"]).unique("term")
             Metrics.instance().add_to_gauge(
                 name="fda_faers.term_entity_mapping.rows",
-                value=df_mapped_terms.shape[0],
+                value=len(mapped_terms),
                 attributes={"type": "term_mapped"},
             )
-            logger.info(f"[extract] mapped terms shape: {df_mapped_terms.shape}")
+            logger.info(f"[extract] mapped terms count: {len(mapped_terms)}")
         except NoStoreException as nse:
-            logger.warning(f"[extract] silver table {term_entity_table} not found: {nse}")
+            logger.warning(f"[extract] silver table {term_entity_data_url} not found: {nse}")
 
-        df_terms_to_map: pd.DataFrame = df_terms
-        if df_mapped_terms is not None:
-            df_terms_to_map = df_terms_to_map.merge(
-                df_mapped_terms,
-                on="term",
-                how="left",
-                indicator=True,
-            )
-            df_terms_to_map = (df_terms_to_map[df_terms_to_map["_merge"] == "left_only"])[["term"]].drop_duplicates()
+        terms_to_map = list(set(terms) - set(mapped_terms))
 
-        df_sample: pd.DataFrame | None = None
-        if df_terms_to_map.empty:
-            logger.warning("[extract] no terms to map after filtering mapped terms")
-        else:
-            sample_size = min(sample_size, df_terms_to_map.shape[0])
-            df_sample = df_terms_to_map.sample(n=sample_size)
+        # sample up to sample_size elements (without replacement)
+        sample_terms = random.sample(terms_to_map, min(sample_size, len(terms_to_map)))
 
-        if df_sample is not None:
-            self._data["terms_to_map"] = df_sample
-        logger.info(f"[extract|out] terms to map shape: {df_sample.shape if df_sample is not None else (0, 0)}")
+        if sample_terms:
+            self._data["terms_to_map"] = sample_terms
+        logger.info(f"[extract|out] terms to map count: {len(sample_terms) if sample_terms is not None else 0}")
 
     def transform(self) -> Any:
         """Transforms the terms to map into term-entity mappings.
 
         Returns:
-            The transformed dataframe with non-null entity mappings.
+            None.
         """
         logger.info("[transform|in]")
         entity_mapper = TermEntity()
-        if "terms_to_map" in self._data and not (self._data["terms_to_map"]).empty:
-            df_mapped = entity_mapper.process(context={"dataframe": self._data["terms_to_map"]})
+        if "terms_to_map" in self._data and 0 < len(self._data["terms_to_map"]):
+            terms_to_map = self._data["terms_to_map"]
+            df_terms_to_map = pd.DataFrame({"term": terms_to_map})
+
+            df_mapped = entity_mapper.process(context={"dataframe": df_terms_to_map})
             df_mapped = df_mapped[df_mapped["entity"].notna()]
             if not df_mapped.empty:
                 self._result = df_mapped
@@ -108,21 +98,21 @@ class TermEntityMapping(CommonEtl):
         logger.info(f"[transform|out] result shape: {self._result.shape if self._result is not None else (0, 0)}")
 
     @Etl4GH.inject_configuration
-    def load(self, silver_dataset_prefix: str) -> str:
+    def load(self, term_entity_data_url: str) -> str:
         """Loads the transformed term-entity mapping into the silver dataset store.
 
         Args:
-            silver_dataset_prefix: Prefix of the silver dataset table to save to.
+            term_entity_data_url: Prefix of the silver dataset table to save to.
 
         Returns:
-            The name of the table where the data was saved.
+            None.
         """
-        logger.info(f"[load|in] ({silver_dataset_prefix})")
-        term_entity_table = f"{silver_dataset_prefix}term_entity"
+        logger.info(f"[load|in] ({term_entity_data_url})")
+
         if (self._result is not None) and (not self._result.empty):
             self._store.save(
                 df=self._result,
-                key=term_entity_table,
+                key=term_entity_data_url,
                 split="train",
                 append=True,
                 data_contract=self.contract_path("term_entity"),
