@@ -59,7 +59,7 @@ class TermEntityMapping(CommonEtl):
 
         mapped_terms: list[str] = []
         try:
-            mapped_terms = self._store.get(key=term_entity_data_url, columns=["term"]).unique("term")
+            mapped_terms = (self._store.get(key=term_entity_data_url, columns=["term"]).train).unique("term")
             Metrics.instance().add_to_gauge(
                 name="fda_faers.term_entity_mapping.rows",
                 value=len(mapped_terms),

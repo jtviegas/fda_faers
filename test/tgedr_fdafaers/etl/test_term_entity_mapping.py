@@ -60,7 +60,7 @@ def test_extract_excludes_terms_already_mapped(etl: TermEntityMapping, mock_metr
     mock_terms = MagicMock()
     mock_terms.train.unique.return_value = ["a", "b", "c", "d"]
     mock_mapped = MagicMock()
-    mock_mapped.unique.return_value = ["a", "b"]
+    mock_mapped.train.unique.return_value = ["a", "b"]
     etl._store.get.side_effect = [mock_terms, mock_mapped]
 
     etl.extract()
@@ -73,7 +73,7 @@ def test_extract_skips_when_all_terms_already_mapped(etl: TermEntityMapping, moc
     mock_terms = MagicMock()
     mock_terms.train.unique.return_value = ["a", "b"]
     mock_mapped = MagicMock()
-    mock_mapped.unique.return_value = ["a", "b"]
+    mock_mapped.train.unique.return_value = ["a", "b"]
     etl._store.get.side_effect = [mock_terms, mock_mapped]
 
     etl.extract()
