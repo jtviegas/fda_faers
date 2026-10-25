@@ -94,6 +94,8 @@ class TermEntityMapping(CommonEtl):
             df_mapped = entity_mapper.process(context={"dataframe": df_terms_to_map})
             df_mapped = df_mapped[df_mapped["entity"].notna()]
             if not df_mapped.empty:
+                if "__index_level_0__" in df_mapped.columns:
+                    df_mapped = df_mapped.drop(columns=["__index_level_0__"])
                 self._result = Dataset.from_pandas(df_mapped)
 
         logger.info(f"[transform|out] result shape: {self._result.shape if self._result is not None else (0, 0)}")

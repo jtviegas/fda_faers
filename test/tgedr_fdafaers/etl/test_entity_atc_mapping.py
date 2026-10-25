@@ -136,6 +136,27 @@ def test_transform_skips_when_all_unmapped(etl: EntityAtcMapping, mock_metrics: 
     assert etl._result is None
 
 
+def test_transform_drops_index_level_0_column(etl: EntityAtcMapping, mock_metrics: MagicMock) -> None:
+    """transform should drop the __index_level_0__ column from mapped results."""
+    etl._data["df_entities_to_map"] = pd.DataFrame({"entity": ["aspirin"]})
+
+    with patch("tgedr_fdafaers.etl.entity_atc_mapping.NLMMapping") as mock_nlm_cls:
+        mock_nlm = MagicMock()
+        mock_nlm_cls.return_value = mock_nlm
+        mock_nlm.decorate.return_value = pd.DataFrame(
+            {
+                "entity": ["aspirin"],
+                "atc_codes": [[{"id": "A01A"}]],
+                "__index_level_0__": [7],
+            }
+        )
+
+        etl.transform()
+
+    assert etl._result is not None
+    assert "__index_level_0__" not in etl._result.columns
+
+
 # --------------------------------------------------------------------------- #
 # load
 # --------------------------------------------------------------------------- #

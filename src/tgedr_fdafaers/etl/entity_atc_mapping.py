@@ -108,6 +108,8 @@ class EntityAtcMapping(CommonEtl):
             df_mapped = atc_mapper.decorate(df=self._data["df_entities_to_map"])
             df_mapped = df_mapped[df_mapped["atc_codes"].notna()]
             if not df_mapped.empty:
+                if "__index_level_0__" in df_mapped.columns:
+                    df_mapped = df_mapped.drop(columns=["__index_level_0__"])
                 self._result = df_mapped
 
         logger.info(f"[transform|out] result shape: {self._result.shape if self._result is not None else (0, 0)}")

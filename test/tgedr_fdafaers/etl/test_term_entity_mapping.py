@@ -149,6 +149,27 @@ def test_transform_skips_when_all_entities_null(etl: TermEntityMapping, mock_met
     assert etl._result is None
 
 
+def test_transform_drops_index_level_0_column(etl: TermEntityMapping, mock_metrics: MagicMock) -> None:
+    """transform should drop the __index_level_0__ column from mapped results."""
+    etl._data["terms_to_map"] = ["aspirin"]
+
+    with patch("tgedr_fdafaers.etl.term_entity_mapping.TermEntity") as mock_term_entity_cls:
+        mock_term_entity = MagicMock()
+        mock_term_entity_cls.return_value = mock_term_entity
+        mock_term_entity.process.return_value = pd.DataFrame(
+            {
+                "term": ["aspirin"],
+                "entity": ["aspirin"],
+                "__index_level_0__": [7],
+            }
+        )
+
+        etl.transform()
+
+    assert etl._result is not None
+    assert "__index_level_0__" not in etl._result.column_names
+
+
 # --------------------------------------------------------------------------- #
 # load
 # --------------------------------------------------------------------------- #
