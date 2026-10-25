@@ -14,38 +14,35 @@ from tgedr_fdafaers.utils.faers_period import FaersPeriod, UtilsFaersPeriod
 # --------------------------------------------------------------------------- #
 
 
-def _streaming_dataset(rows: list[dict[str, str | None]]) -> MagicMock:
+def _dataset(periods: list[str | None]) -> MagicMock:
     dataset = MagicMock()
-    dataset.select_columns.return_value = dataset
-    dataset.__iter__.return_value = iter(rows)
+    dataset.unique.return_value = periods
     return dataset
 
 
 @patch("tgedr_fdafaers.etl.periods_to_process.load_dataset")
 def test_extract_loads_existing_periods_from_bronze_dataset(mock_load_dataset) -> None:
-    """extract should stream every table and collect its available periods."""
-    mock_load_dataset.return_value = _streaming_dataset(
-        [{"period": "12q4"}, {"period": "13q1"}, {"period": "13q2"}]
-    )
+    """extract should load every table and collect its available periods."""
+    mock_load_dataset.return_value = _dataset(["12q4", "13q1", "13q2"])
 
     etl = Periods2Process(configuration={"dataset_prefix": "org/bronze_"})
     etl.extract()
 
     assert mock_load_dataset.call_count == 7
     assert sorted(etl._existing_periods) == ["12q4", "13q1", "13q2"]
-    assert mock_load_dataset.call_args.kwargs == {"split": "train", "streaming": True}
-    assert mock_load_dataset.return_value.select_columns.call_args.args == (["period"],)
+    assert mock_load_dataset.call_args.kwargs == {"split": "train"}
+    assert mock_load_dataset.return_value.unique.call_args.args == ("period",)
 
 
 @patch("tgedr_fdafaers.etl.periods_to_process.load_dataset")
 def test_extract_intersects_periods_across_tables(mock_load_dataset) -> None:
     """extract should return only periods present in every table."""
-    rows_all = [{"period": "12q4"}, {"period": "13q1"}, {"period": "13q2"}]
-    rows_subset = [{"period": "12q4"}, {"period": "13q1"}]
+    rows_all = ["12q4", "13q1", "13q2"]
+    rows_subset = ["12q4", "13q1"]
     mock_load_dataset.side_effect = [
-        _streaming_dataset(rows_all),
-        _streaming_dataset(rows_subset),
-        *[_streaming_dataset(rows_all) for _ in range(5)],
+        _dataset(rows_all),
+        _dataset(rows_subset),
+        *[_dataset(rows_all) for _ in range(5)],
     ]
 
     etl = Periods2Process(configuration={"dataset_prefix": "org/bronze_"})
@@ -57,15 +54,15 @@ def test_extract_intersects_periods_across_tables(mock_load_dataset) -> None:
 @patch("tgedr_fdafaers.etl.periods_to_process.load_dataset")
 def test_extract_skips_missing_datasets(mock_load_dataset) -> None:
     """extract should skip datasets that raise known not-found exceptions."""
-    rows = [{"period": "12q4"}, {"period": "13q1"}]
+    rows = ["12q4", "13q1"]
     mock_load_dataset.side_effect = [
         DatasetNotFoundError("not found"),
-        _streaming_dataset(rows),
-        _streaming_dataset(rows),
-        _streaming_dataset(rows),
-        _streaming_dataset(rows),
-        _streaming_dataset(rows),
-        _streaming_dataset(rows),
+        _dataset(rows),
+        _dataset(rows),
+        _dataset(rows),
+        _dataset(rows),
+        _dataset(rows),
+        _dataset(rows),
     ]
 
     etl = Periods2Process(configuration={"dataset_prefix": "org/bronze_"})
@@ -77,10 +74,10 @@ def test_extract_skips_missing_datasets(mock_load_dataset) -> None:
 @patch("tgedr_fdafaers.etl.periods_to_process.load_dataset")
 def test_extract_skips_legacy_store_not_found_exception(mock_load_dataset) -> None:
     """extract should continue to tolerate the store's not-found exception."""
-    rows = [{"period": "12q4"}]
+    rows = ["12q4"]
     mock_load_dataset.side_effect = [
         NoStoreException("not found"),
-        *[_streaming_dataset(rows) for _ in range(6)],
+        *[_dataset(rows) for _ in range(6)],
     ]
 
     etl = Periods2Process(configuration={"dataset_prefix": "org/bronze_"})
@@ -92,7 +89,7 @@ def test_extract_skips_legacy_store_not_found_exception(mock_load_dataset) -> No
 @patch("tgedr_fdafaers.etl.periods_to_process.load_dataset")
 def test_extract_handles_empty_datasets(mock_load_dataset) -> None:
     """extract should leave _existing_periods empty when every dataset is empty."""
-    mock_load_dataset.return_value = _streaming_dataset([])
+    mock_load_dataset.return_value = _dataset([])
 
     etl = Periods2Process(configuration={"dataset_prefix": "org/bronze_"})
     etl.extract()
@@ -103,9 +100,7 @@ def test_extract_handles_empty_datasets(mock_load_dataset) -> None:
 @patch("tgedr_fdafaers.etl.periods_to_process.load_dataset")
 def test_extract_ignores_null_and_deduplicates_periods(mock_load_dataset) -> None:
     """extract should ignore null period values and deduplicate the rest."""
-    mock_load_dataset.return_value = _streaming_dataset(
-        [{"period": "12q4"}, {"period": "12q4"}, {"period": None}, {"period": "13q1"}]
-    )
+    mock_load_dataset.return_value = _dataset(["12q4", "12q4", None, "13q1"])
 
     etl = Periods2Process(configuration={"dataset_prefix": "org/bronze_"})
     etl.extract()
@@ -116,7 +111,7 @@ def test_extract_ignores_null_and_deduplicates_periods(mock_load_dataset) -> Non
 @patch("tgedr_fdafaers.etl.periods_to_process.load_dataset")
 def test_extract_uses_dataset_prefix_per_table(mock_load_dataset) -> None:
     """extract should load each table using the configured prefix and train split."""
-    mock_load_dataset.return_value = _streaming_dataset([{"period": "12q4"}])
+    mock_load_dataset.return_value = _dataset(["12q4"])
 
     etl = Periods2Process(configuration={"dataset_prefix": "org/bronze_"})
     etl.extract()
@@ -131,7 +126,7 @@ def test_extract_uses_dataset_prefix_per_table(mock_load_dataset) -> None:
         "org/bronze_rpsr",
         "org/bronze_ther",
     ]
-    assert all(call.kwargs == {"split": "train", "streaming": True} for call in mock_load_dataset.call_args_list)
+    assert all(call.kwargs == {"split": "train"} for call in mock_load_dataset.call_args_list)
 
 
 # --------------------------------------------------------------------------- #
@@ -230,7 +225,7 @@ def test_load_returns_single_period_without_comma() -> None:
 @patch("tgedr_fdafaers.etl.periods_to_process.load_dataset")
 def test_full_etl_pipeline(mock_load_dataset, mock_get_all) -> None:
     """Full pipeline should extract existing, compute missing, and return sorted string."""
-    mock_load_dataset.return_value = _streaming_dataset([{"period": "12q4"}, {"period": "13q2"}])
+    mock_load_dataset.return_value = _dataset(["12q4", "13q2"])
 
     mock_get_all.return_value = [
         FaersPeriod(2012, 4),

@@ -35,8 +35,8 @@ class Periods2Process(Etl4GH):
         for table in constants.TABLES:
             dataset_table = f"{dataset_prefix}{table}"
             try:
-                dataset = load_dataset(dataset_table, split="train", streaming=True).select_columns(["period"])
-                data_periods: list[str] = list({row["period"] for row in dataset if row.get("period") is not None})
+                table_periods = load_dataset(dataset_table, split="train").unique("period")
+                data_periods: list[str] = sorted({p for p in table_periods if p is not None})
                 if 0 < len(data_periods):
                     periods = data_periods if len(periods) == 0 else list(set(periods).intersection(data_periods))
             except (DatasetNotFoundError, NoStoreException) as e:
