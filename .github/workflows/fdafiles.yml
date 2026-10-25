@@ -71,6 +71,7 @@ jobs:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
     - name: 'compute rows metrics'
       if: steps.ingest_period_files.outputs.result != ''
+      id: compute_rows_metrics
       run: |
         uv run run --module tgedr_fdafaers.etl.compute_rows_metrics \
           --classname ComputeRowsMetrics \
@@ -79,6 +80,7 @@ jobs:
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
     - name: 'plot metrics'
+      if: steps.compute_rows_metrics.outputs.result != ''
       run: |
         uv run python -c "from tgedr_observability.plot import plot_metric; \
           plot_metric(path='./otel/metrics', metric_name='rows', attr_key='table', save_path='./plots/rows_by_period.png', x_attr_key='period', latest_only=True)"
