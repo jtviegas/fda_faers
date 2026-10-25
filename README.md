@@ -6,10 +6,6 @@
 
 ## data pipeline metrics
 
-### new rows
-
-![new_rows](./plots/new_rows.png)
-
 ### rows per period
 
 ![rows_by_period](./plots/rows_by_period.png)
