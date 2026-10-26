@@ -32,7 +32,7 @@ class TermEntityMapping(CommonEtl):
         """
         super().__init__(configuration=configuration)
         self._data: dict[str, list[str]] = {}
-        self._result: pd.DataFrame | None = None
+        self._result: Dataset | None = None
         self._store: HuggingFaceDatasetFileArrowBasedStore = HuggingFaceDatasetFileArrowBasedStore(
             config={"visibility": "public"}
         )
@@ -94,9 +94,7 @@ class TermEntityMapping(CommonEtl):
             df_mapped = entity_mapper.process(context={"dataframe": df_terms_to_map})
             df_mapped = df_mapped[df_mapped["entity"].notna()]
             if not df_mapped.empty:
-                if "__index_level_0__" in df_mapped.columns:
-                    df_mapped = df_mapped.drop(columns=["__index_level_0__"])
-                self._result = Dataset.from_pandas(df_mapped)
+                self._result = Dataset.from_pandas(df_mapped.reset_index(drop=True))
 
         logger.info(f"[transform|out] result shape: {self._result.shape if self._result is not None else (0, 0)}")
 

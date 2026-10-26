@@ -52,7 +52,7 @@ class TermEntity(Processor):
             df.assign(parsed_entities=df[term_column].apply(parse_entities))
             .explode("parsed_entities", ignore_index=True)
             .rename(columns={"parsed_entities": entity_column})
-            .drop_duplicates()
+            .drop_duplicates(ignore_index=True)  # <-- keeps index contiguous
         )
 
         logger.info(f"[process|out] => {result.shape}")
