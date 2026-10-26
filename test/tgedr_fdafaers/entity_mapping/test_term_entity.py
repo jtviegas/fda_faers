@@ -62,6 +62,25 @@ def test_process_dedupes_fully_duplicate_rows(mock_parse_entities) -> None:
 
 
 @patch.object(term_entity_module, "parse_entities")
+def test_process_keeps_index_contiguous_after_dedup(mock_parse_entities) -> None:
+    """process should reset the index after dedup so from_pandas never materializes __index_level_0__."""
+
+    def fake_parse(text):  # noqa: ANN001, ANN202
+        if text == "aspirin":
+            return ["aspirin", "acetylsalicylic"]
+        return ["zzz"]
+
+    with patch.object(term_entity_module, "parse_entities", fake_parse):
+        # the duplicate (aspirin, aspirin) row is NOT at the end, so a plain
+        # drop_duplicates() would leave a non-contiguous index [0, 1, 4]
+        df = pd.DataFrame({"term": ["aspirin", "aspirin", "zzz"]})
+        result = TermEntity().process(context={"dataframe": df})
+
+    assert result["entity"].tolist() == ["aspirin", "acetylsalicylic", "zzz"]
+    assert list(result.index) == [0, 1, 2]
+
+
+@patch.object(term_entity_module, "parse_entities")
 def test_process_uses_custom_column_names(mock_parse_entities) -> None:
     """process should use the custom term and entity column names."""
 
