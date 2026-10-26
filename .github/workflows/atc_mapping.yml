@@ -52,6 +52,15 @@ jobs:
           --classparams "{\"configuration\": {\"bronze_dataset_prefix\": \"${{ env.HF_DATASET_BRONZE_PREFIX }}\", \"silver_dataset_prefix\": \"${{ env.HF_DATASET_SILVER_PREFIX }}\", \"sample_size\": ${{ env.ENTITY_MAPPING_SAMPLE_SIZE }} }}"
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
+    - name: 'create silver layer'
+      id: create_silver_layer
+      run: |
+        uv run run --module tgedr_fdafaers.etl.silver_layer \
+          --classname SilverLayer \
+          --callable run \
+          --classparams "{\"configuration\": {\"bronze_dataset_prefix\": \"${{ env.HF_DATASET_BRONZE_PREFIX }}\", \"silver_dataset_prefix\": \"${{ env.HF_DATASET_SILVER_PREFIX }}\" }}"
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
     - name: 'plot metrics'
       run: |
         uv run python -c "from tgedr_observability.plot import plot_metric; \
