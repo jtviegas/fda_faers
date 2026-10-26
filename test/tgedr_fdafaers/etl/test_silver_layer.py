@@ -78,7 +78,7 @@ def test_transform_fills_missing_atc_codes(etl: SilverLayer, mock_metrics: Magic
 
 
 def test_transform_records_mapped_rows_metric(etl: SilverLayer, mock_metrics: MagicMock) -> None:
-    """transform should record the number of rows with atc_codes as a metric."""
+    """transform should record the input row count and the mapped row count as metrics."""
     etl._data["drug"] = _dataset([{"term": "aspirin"}, {"term": "unknown"}])
 
     etl._store.get.side_effect = [
@@ -88,11 +88,17 @@ def test_transform_records_mapped_rows_metric(etl: SilverLayer, mock_metrics: Ma
 
     etl.transform()
 
-    mock_metrics.add_to_gauge.assert_called_once_with(
+    mock_metrics.add_to_gauge.assert_any_call(
+        name="fda_faers.silver_layer.rows",
+        value=2,
+        attributes={"type": "drug"},
+    )
+    mock_metrics.add_to_gauge.assert_any_call(
         name="fda_faers.silver_layer.rows",
         value=1,
         attributes={"type": "drug_mapped"},
     )
+    assert mock_metrics.add_to_gauge.call_count == 2
 
 
 def test_transform_keeps_existing_atc_codes(etl: SilverLayer) -> None:

@@ -33,6 +33,11 @@ class SilverLayer(CommonEtl):
         ds_term_entity_url = f"{silver_ds_prefix}term_entity"
         ds_entity_atc_url = f"{silver_ds_prefix}entity_atc"
 
+        Metrics.instance().add_to_gauge(
+            name="fda_faers.silver_layer.rows",
+            value=ds.num_rows,
+            attributes={"type": "drug"},
+        )
         ds_term_entity = self._store.get(ds_term_entity_url).train
         term_entity_map: dict[str, list[str]] = defaultdict(list)
         for row in ds_term_entity:
