@@ -183,6 +183,5 @@ CHANGELOG
 .vscode
 .bashutils.last_check
 deprecated/
-test.ipynb
+# test.ipynb
 bashutils.checksum
-

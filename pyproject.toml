@@ -112,7 +112,8 @@ exclude = [
     "typings/",
     "deprecated/",
     "src/tgedr_fdafaers/faers_narrative.py",
-    "src/tgedr_fdafaers/etl/faers_structured_content.py"
+    "src/tgedr_fdafaers/etl/faers_structured_content.py",
+    "test.ipynb"
 ]
 
 line-length = 120
