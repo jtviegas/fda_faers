@@ -3,7 +3,8 @@ name: fdafiles
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 3 20 * *'  # daily at 03:00 UTC
+    # on the 20th of each month at 03:00 UTC
+    - cron: '0 3 20 * *'
 
 concurrency:
   group: fdafiles

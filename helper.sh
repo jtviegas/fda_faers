@@ -238,6 +238,7 @@ case "$1" in
     sca_check_safety_uv "$SAFETY_KEY"
     ;;
   test)
+    TEST_DIR="${2:-$TEST_DIR}"
     pytest_uv "$TEST_DIR" && uv run genbadge coverage -i coverage.xml -o coverage.svg
     ;;
   test_coverage)

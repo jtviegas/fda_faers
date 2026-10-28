@@ -1,4 +1,4 @@
-name: atc_mapping
+name: silver
 
 on:
   schedule:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: atc_mapping
+  group: silver
   cancel-in-progress: false
 
 env:
@@ -50,6 +50,15 @@ jobs:
           --classname EntityAtcMapping \
           --callable run \
           --classparams "{\"configuration\": {\"bronze_dataset_prefix\": \"${{ env.HF_DATASET_BRONZE_PREFIX }}\", \"silver_dataset_prefix\": \"${{ env.HF_DATASET_SILVER_PREFIX }}\", \"sample_size\": ${{ env.ENTITY_MAPPING_SAMPLE_SIZE }} }}"
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+    - name: 'map drug term to ATC codes'
+      id: map_term_atc
+      run: |
+        uv run run --module tgedr_fdafaers.etl.term_atc_mapping \
+          --classname TermAtcMapping \
+          --callable run \
+          --classparams "{\"configuration\": {\"silver_dataset_prefix\": \"${{ env.HF_DATASET_SILVER_PREFIX }}\" }}"
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
     - name: 'create silver layer'

@@ -1,5 +1,7 @@
 """Unit tests for the SilverLayer ETL."""
 
+# ruff: noqa: SLF001
+
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -8,7 +10,7 @@ from datasets import Dataset
 from tgedr_fdafaers.etl.silver_layer import SilverLayer
 
 
-@pytest.fixture()
+@pytest.fixture
 def etl() -> SilverLayer:
     """Return a SilverLayer instance with a mocked store."""
     with patch("tgedr_fdafaers.etl.silver_layer.HuggingFaceDatasetFileArrowBasedStore") as mock_store_cls:
@@ -24,7 +26,7 @@ def etl() -> SilverLayer:
         yield etl
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_metrics() -> MagicMock:
     """Return a mocked Metrics.instance()."""
     with patch("tgedr_fdafaers.etl.silver_layer.Metrics") as mock_metrics_cls:
@@ -61,100 +63,79 @@ def test_extract_reads_bronze_tables(etl: SilverLayer) -> None:
 # --------------------------------------------------------------------------- #
 
 
-def test_transform_fills_missing_atc_codes(etl: SilverLayer, mock_metrics: MagicMock) -> None:
-    """transform should fill atc_codes from the term->atc map when missing."""
+def test_transform_maps_known_terms_and_preserves_unmapped_rows(etl: SilverLayer) -> None:
+    """Enrich terms found in term_atc and retain other rows with null codes."""
     etl._data["drug"] = _dataset([{"term": "aspirin"}, {"term": "unknown"}])
+    etl._store.get.return_value = MagicMock(
+        train=_dataset([{"term": "aspirin", "atc_codes": [{"id": "A01A"}]}])
+    )
 
-    etl._store.get.side_effect = [
-        MagicMock(train=_dataset([{"term": "aspirin", "entity": "aspirin"}])),
-        MagicMock(train=_dataset([{"entity": "aspirin", "atc_codes": [{"id": "A01A"}]}])),
+    etl.transform()
+
+    result = list(etl._result["drug"])
+    assert result == [
+        {"term": "aspirin", "atc_codes": [{"id": "A01A"}]},
+        {"term": "unknown", "atc_codes": None},
     ]
+    etl._store.get.assert_called_once_with("s/term_atc")
+
+
+def test_transform_records_total_mapped_and_unmapped_metrics(
+    etl: SilverLayer, mock_metrics: MagicMock
+) -> None:
+    """Record row-count metrics for the input, mapped and unmapped rows."""
+    etl._data["drug"] = _dataset([{"term": "aspirin"}, {"term": "unknown"}])
+    etl._store.get.return_value = MagicMock(
+        train=_dataset([{"term": "aspirin", "atc_codes": [{"id": "A01A"}]}])
+    )
+
+    etl.transform()
+
+    assert mock_metrics.add_to_gauge.call_count == 3
+    mock_metrics.add_to_gauge.assert_any_call(
+        name="fda_faers.silver_layer.rows", value=2, attributes={"type": "silver_term"}
+    )
+    mock_metrics.add_to_gauge.assert_any_call(
+        name="fda_faers.silver_layer.rows", value=1, attributes={"type": "silver_term_mapped"}
+    )
+    mock_metrics.add_to_gauge.assert_any_call(
+        name="fda_faers.silver_layer.rows", value=1, attributes={"type": "silver_term_unmapped"}
+    )
+
+
+def test_transform_handles_missing_term_atc_dataset(etl: SilverLayer) -> None:
+    """Preserve all source terms with null ATC codes if the mapping dataset is absent."""
+    from tgedr_dataops.store.hf_dataset_file_arrow_based import NoStoreException
+
+    etl._data["drug"] = _dataset([{"term": "aspirin"}, {"term": "unknown"}])
+    etl._store.get.side_effect = NoStoreException("missing mapping dataset")
+
+    etl.transform()
+
+    assert [row["atc_codes"] for row in etl._result["drug"]] == [None, None]
+
+
+def test_transform_handles_empty_input_dataset(etl: SilverLayer) -> None:
+    """Return an empty dataset with the added ATC-code column for empty input."""
+    etl._data["drug"] = _dataset([])
+    etl._store.get.return_value = MagicMock(train=_dataset([]))
 
     etl.transform()
 
     result = etl._result["drug"]
-    assert result[0]["atc_codes"] == [{"id": "A01A"}]
-    assert result[1]["atc_codes"] == []
+    assert result.num_rows == 0
+    assert result.column_names == ["atc_codes"]
 
 
-def test_transform_records_mapped_rows_metric(etl: SilverLayer, mock_metrics: MagicMock) -> None:
-    """transform should record the input row count and the mapped row count as metrics."""
-    etl._data["drug"] = _dataset([{"term": "aspirin"}, {"term": "unknown"}])
-
-    etl._store.get.side_effect = [
-        MagicMock(train=_dataset([{"term": "aspirin", "entity": "aspirin"}])),
-        MagicMock(train=_dataset([{"entity": "aspirin", "atc_codes": [{"id": "A01A"}]}])),
-    ]
-
-    etl.transform()
-
-    mock_metrics.add_to_gauge.assert_any_call(
-        name="fda_faers.silver_layer.rows",
-        value=2,
-        attributes={"type": "drug"},
-    )
-    mock_metrics.add_to_gauge.assert_any_call(
-        name="fda_faers.silver_layer.rows",
-        value=1,
-        attributes={"type": "drug_mapped"},
-    )
-    assert mock_metrics.add_to_gauge.call_count == 2
-
-
-def test_transform_keeps_existing_atc_codes(etl: SilverLayer) -> None:
-    """transform should not overwrite rows that already have atc_codes."""
-    etl._data["drug"] = _dataset([{"term": "aspirin", "atc_codes": [{"id": "B01A"}]}])
-
-    etl._store.get.side_effect = [
-        MagicMock(train=_dataset([{"term": "aspirin", "entity": "aspirin"}])),
-        MagicMock(train=_dataset([{"entity": "aspirin", "atc_codes": [{"id": "A01A"}]}])),
-    ]
-
-    etl.transform()
-
-    assert etl._result["drug"][0]["atc_codes"] == [{"id": "B01A"}]
-
-
-def test_transform_fills_none_atc_codes(etl: SilverLayer) -> None:
-    """transform should treat None atc_codes as missing and fill from the map."""
-    etl._data["drug"] = _dataset([{"term": "aspirin", "atc_codes": None}])
-
-    etl._store.get.side_effect = [
-        MagicMock(train=_dataset([{"term": "aspirin", "entity": "aspirin"}])),
-        MagicMock(train=_dataset([{"entity": "aspirin", "atc_codes": [{"id": "A01A"}]}])),
-    ]
-
-    etl.transform()
-
-    assert etl._result["drug"][0]["atc_codes"] == [{"id": "A01A"}]
-
-
-def test_transform_aggregates_multiple_entities_and_atc(etl: SilverLayer) -> None:
-    """transform should aggregate atc codes across all entities of a term."""
+def test_transform_preserves_duplicate_mapping_codes(etl: SilverLayer) -> None:
+    """Attach the ATC-code list stored for the matching term without altering it."""
+    codes = [{"id": "A01A"}, {"id": "B01A"}]
     etl._data["drug"] = _dataset([{"term": "aspirin"}])
-
-    etl._store.get.side_effect = [
-        MagicMock(
-            train=_dataset(
-                [
-                    {"term": "aspirin", "entity": "aspirin"},
-                    {"term": "aspirin", "entity": "acetylsalicylic"},
-                ]
-            )
-        ),
-        MagicMock(
-            train=_dataset(
-                [
-                    {"entity": "aspirin", "atc_codes": [{"id": "A01A"}]},
-                    {"entity": "acetylsalicylic", "atc_codes": [{"id": "B01A"}]},
-                ]
-            )
-        ),
-    ]
+    etl._store.get.return_value = MagicMock(train=_dataset([{"term": "aspirin", "atc_codes": codes}]))
 
     etl.transform()
 
-    assert etl._result["drug"][0]["atc_codes"] == [{"id": "A01A"}, {"id": "B01A"}]
+    assert etl._result["drug"][0]["atc_codes"] == codes
 
 
 # --------------------------------------------------------------------------- #
