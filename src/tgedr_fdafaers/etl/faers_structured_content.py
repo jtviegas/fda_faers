@@ -73,38 +73,3 @@ class FaersStructuredContent(CommonEtl):
         logger.info("[load|out]")
 
 
-def main() -> None:
-    """Run the FaersStructuredContent ETL end-to-end from the CLI."""
-    import argparse
-
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--bronze-dataset-prefix",
-        default="b/",
-        help="Prefix used to resolve the bronze input datasets (default: %(default)s)",
-    )
-    parser.add_argument(
-        "--silver-dataset-prefix",
-        default="s/",
-        help="Prefix used to name the silver output datasets (default: %(default)s)",
-    )
-    args = parser.parse_args()
-
-    etl = FaersStructuredContent(
-        configuration={
-            "bronze_dataset_prefix": args.bronze_dataset_prefix,
-            "silver_dataset_prefix": args.silver_dataset_prefix,
-        }
-    )
-    etl.extract()
-    etl.transform()
-    # etl.load()
-
-
-if __name__ == "__main__":
-    main()
-
-
-
-# uv run -m cProfile -s cumulative src/tgedr_fdafaers/etl/faers_structured_content.py \
-#       --bronze-dataset-prefix "jtviegas/faers_bronze_" --silver-dataset-prefix "jtviegas/faers_silver_"
