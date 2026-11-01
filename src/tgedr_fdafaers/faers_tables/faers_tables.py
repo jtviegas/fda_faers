@@ -1,4 +1,3 @@
-
 """Define the standardized FAERS table bundle and mapping conversion helpers.
 
 This module provides :class:`FaersTables`, which groups the seven FAERS

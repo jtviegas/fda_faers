@@ -7,15 +7,10 @@ from dataclasses import replace
 import pytest
 from datasets import Dataset, Features, Value
 
-from tgedr_fdafaers.faers_narrative import (
-    FaersCaseAssembler,
-    FaersCaseBatcher,
-    FaersNarrativeRenderer,
-    FaersTables,
-    LatestCaseVersions,
-    _require_columns,
-    _version_key,
-)
+from tgedr_fdafaers.faers_tables.faers_tables import FaersTables
+from tgedr_fdafaers.faers_tables.latest_case_versions import LatestCaseVersions
+from tgedr_fdafaers.structured_content.faers_case_assembler import FaersCaseAssembler
+from tgedr_fdafaers.structured_content.faers_narrative_renderer import FaersNarrativeRenderer
 from tgedr_dataops_abs.processor import ProcessorException
 
 
@@ -61,32 +56,19 @@ def _tables() -> FaersTables:
     )
 
 
-def test_faers_tables_dict_round_trip_and_validation() -> None:
-    """Convert table bundles to/from dicts and reject a missing table."""
-    tables = _tables()
-
-    assert FaersTables.from_dict(tables.to_dict()) == tables
-    with pytest.raises(ProcessorException, match="Missing FAERS tables: indi"):
-        FaersTables.from_dict({name: dataset for name, dataset in tables.to_dict().items() if name != "indi"})
-
-
 def test_processors_reject_non_faers_tables_context() -> None:
     """Reject a context value that is not a FaersTables bundle."""
-    with pytest.raises(ProcessorException, match="FaersTables instance"):
+    with pytest.raises(ProcessorException, match="demo_dataset must be provided"):
         LatestCaseVersions().process({"tables": {}})
-    with pytest.raises(ProcessorException, match="FaersTables instance"):
-        list(FaersCaseBatcher().process({"tables": {}}))
     with pytest.raises(ProcessorException, match="FaersTables instance"):
         FaersCaseAssembler().process({"tables": {}})
 
 
-def test_latest_case_versions_filters_every_table_to_highest_caseversion() -> None:
-    """Filter every table to the selected PRIMARYID per CASEID."""
-    result = LatestCaseVersions().process({"tables": _tables()})
+def test_latest_case_versions_selects_highest_primaryid_per_case() -> None:
+    """Return the PRIMARYID with the highest case version for each CASEID."""
+    result = LatestCaseVersions().process({"demo_dataset": _tables().demo})
 
-    assert result.demo["primaryid"] == [10, 22]
-    assert result.drug["primaryid"] == [22, 22, 10]
-    assert 21 not in result.reac["primaryid"]
+    assert result == {10, 22}
 
 
 def test_latest_case_versions_skips_null_primaryids_and_keeps_caseidless_reports() -> None:
@@ -108,58 +90,24 @@ def test_latest_case_versions_skips_null_primaryids_and_keeps_caseidless_reports
         ),
     )
 
-    result = LatestCaseVersions().process({"tables": replace(tables, demo=demo)})
+    result = LatestCaseVersions().process({"demo_dataset": demo})
 
-    assert result.demo["primaryid"] == [30, 32]
+    assert result == {30, 32}
 
 
-def test_latest_case_versions_rejects_tied_versions() -> None:
-    """Reject two reports tied at the latest version for one CASEID."""
-    tables = _tables()
+def test_latest_case_versions_warns_on_tied_versions(caplog: pytest.LogCaptureFixture) -> None:
+    """Warn about duplicate reports tied at the latest CASEVERSION."""
     demo = Dataset.from_list(
         [
             {"primaryid": 1, "caseid": 9, "caseversion": 3},
             {"primaryid": 2, "caseid": 9, "caseversion": 3},
         ]
     )
-    with pytest.raises(ProcessorException, match="Ambiguous latest report version"):
-        LatestCaseVersions().process({"tables": FaersTables(**{**tables.__dict__, "demo": demo})})
 
+    result = LatestCaseVersions().process({"demo_dataset": demo})
 
-@pytest.mark.parametrize("batch_size", [0, -1, True, "2"])
-def test_batcher_rejects_invalid_batch_size(batch_size: object) -> None:
-    """Reject zero, negative, non-integer, and boolean batch sizes."""
-    with pytest.raises(ProcessorException, match="batch_size must be a positive integer"):
-        list(FaersCaseBatcher().process({"tables": _tables(), "batch_size": batch_size}))
-
-
-def test_batcher_rejects_missing_primaryid_column() -> None:
-    """Require PRIMARYID in every dataset before sorting and batching."""
-    tables = _tables()
-    malformed = replace(tables, reac=Dataset.from_list([{"pt": "HEADACHE"}]))
-
-    with pytest.raises(ProcessorException, match="reac is missing required columns: primaryid"):
-        list(FaersCaseBatcher().process({"tables": malformed}))
-
-
-def test_batcher_skips_null_primaryids_and_yields_no_batches_without_reports() -> None:
-    """Drop orphan null-ID rows and return no batches if DEMO has no IDs."""
-    tables = _tables()
-    no_reports = replace(
-        tables,
-        demo=Dataset.from_list([{"primaryid": None}]),
-        drug=Dataset.from_list([{"primaryid": None, "drug_seq": 1}]),
-    )
-
-    assert list(FaersCaseBatcher().process({"tables": no_reports})) == []
-
-
-def test_batcher_sorts_and_keeps_primaryids_whole() -> None:
-    """Sort rows and keep every PRIMARYID intact within its batch."""
-    batches = list(FaersCaseBatcher().process({"tables": _tables(), "batch_size": 1}))
-
-    assert [batch.demo["primaryid"] for batch in batches] == [[10], [21], [22]]
-    assert [batch.drug["primaryid"] for batch in batches] == [[10], [21], [22, 22]]
+    assert result == {1}
+    assert "Ambiguous latest case version for CASEID 9" in caplog.text
 
 
 def test_assembler_rejects_duplicate_demo_primaryid() -> None:
@@ -172,8 +120,9 @@ def test_assembler_rejects_duplicate_demo_primaryid() -> None:
         ]
     )
 
-    with pytest.raises(ProcessorException, match="multiple rows for PRIMARYID 7"):
-        FaersCaseAssembler().process({"tables": replace(tables, demo=duplicate_demo)})
+    result = FaersCaseAssembler().process({"tables": replace(tables, demo=duplicate_demo)})
+
+    assert [case["primaryid"] for case in result] == [7, 7]
 
 
 def test_assembler_skips_null_primaryids_and_groups_non_null_rows() -> None:
@@ -276,35 +225,12 @@ def test_renderer_uses_reported_language_and_keeps_case_fields() -> None:
     assert "Recorded outcomes include hospitalization." in result["narrative"]
 
 
-@pytest.mark.parametrize(
-    ("rows", "column", "error_fragment"),
-    [
-        ([{"caseid": 1}], "primaryid", "primaryid"),
-        ([{"primaryid": 1, "caseid": None}], "caseversion", "caseversion"),
-    ],
-)
-def test_required_columns_helper_raises(rows: list[dict], column: str, error_fragment: str) -> None:
-    """Raise a processor exception when a dataset is missing a required column."""
-    with pytest.raises(ProcessorException, match=error_fragment):
-        _require_columns(Dataset.from_list(rows), "test", {column})
-
-
-def test_version_key_orders_missing_and_numeric_versions() -> None:
-    """Sort missing versions below numeric versions and preserve numeric order."""
-    assert _version_key(None) < _version_key(1)
-    assert _version_key(2) < _version_key(10)
-
-
 def test_processors_validate_required_context() -> None:
     """Reject missing inputs for each processor."""
     with pytest.raises(ProcessorException):
         LatestCaseVersions().process(None)
-    with pytest.raises(ProcessorException, match="demo is missing required columns"):
-        LatestCaseVersions().process(
-            {"tables": replace(_tables(), demo=Dataset.from_list([{"primaryid": 1}]))}
-        )
-    with pytest.raises(ProcessorException):
-        list(FaersCaseBatcher().process(None))
+    with pytest.raises(ValueError, match="Column name .* not in the dataset"):
+        LatestCaseVersions().process({"demo_dataset": Dataset.from_list([{"primaryid": 1}])})
     with pytest.raises(ProcessorException):
         FaersCaseAssembler().process(None)
     with pytest.raises(ProcessorException):

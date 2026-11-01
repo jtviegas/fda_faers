@@ -1,6 +1,6 @@
 [project]
 name = "tgedr-fdafaers"
-version = "0.0.52"
+version = "0.0.53"
 description = "this is a template for a python package"
 authors = [
     {name = "developer",email = "developer@email.com"}
@@ -111,8 +111,6 @@ exclude = [
     "test/",
     "typings/",
     "deprecated/",
-    "src/tgedr_fdafaers/faers_narrative.py",
-    "src/tgedr_fdafaers/etl/faers_structured_content.py",
     "test.ipynb"
 ]
 

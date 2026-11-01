@@ -8,13 +8,13 @@ from datasets import Dataset
 
 from tgedr_dataops.store.contracted_store import NoStoreException
 
-from tgedr_fdafaers.etl.term_entity_mapping import TermEntityMapping
+from tgedr_fdafaers.etl.mapping.term_entity_mapping import TermEntityMapping
 
 
 @pytest.fixture()
 def etl() -> TermEntityMapping:
     """Return a TermEntityMapping instance with a mocked store."""
-    with patch("tgedr_fdafaers.etl.term_entity_mapping.HuggingFaceDatasetFileArrowBasedStore") as mock_store_cls:
+    with patch("tgedr_fdafaers.etl.mapping.term_entity_mapping.HuggingFaceDatasetFileArrowBasedStore") as mock_store_cls:
         mock_store = MagicMock()
         mock_store_cls.return_value = mock_store
         etl = TermEntityMapping(
@@ -31,7 +31,7 @@ def etl() -> TermEntityMapping:
 @pytest.fixture()
 def mock_metrics() -> MagicMock:
     """Return a mocked Metrics.instance()."""
-    with patch("tgedr_fdafaers.etl.term_entity_mapping.Metrics") as mock_metrics_cls:
+    with patch("tgedr_fdafaers.etl.mapping.term_entity_mapping.Metrics") as mock_metrics_cls:
         mock_metrics = MagicMock()
         mock_metrics_cls.instance.return_value = mock_metrics
         yield mock_metrics
@@ -113,7 +113,7 @@ def test_transform_maps_terms_to_entities(etl: TermEntityMapping, mock_metrics: 
     """transform should map terms to entities and keep only non-null entities."""
     etl._data["terms_to_map"] = ["aspirin", "unknown"]
 
-    with patch("tgedr_fdafaers.etl.term_entity_mapping.TermEntity") as mock_term_entity_cls:
+    with patch("tgedr_fdafaers.etl.mapping.term_entity_mapping.TermEntity") as mock_term_entity_cls:
         mock_term_entity = MagicMock()
         mock_term_entity_cls.return_value = mock_term_entity
         mock_term_entity.process.return_value = pd.DataFrame(
@@ -139,7 +139,7 @@ def test_transform_skips_when_all_entities_null(etl: TermEntityMapping, mock_met
     """transform should not set a result when all mapped entities are null."""
     etl._data["terms_to_map"] = ["a", "b"]
 
-    with patch("tgedr_fdafaers.etl.term_entity_mapping.TermEntity") as mock_term_entity_cls:
+    with patch("tgedr_fdafaers.etl.mapping.term_entity_mapping.TermEntity") as mock_term_entity_cls:
         mock_term_entity = MagicMock()
         mock_term_entity_cls.return_value = mock_term_entity
         mock_term_entity.process.return_value = pd.DataFrame({"term": ["a", "b"], "entity": [None, None]})
@@ -153,7 +153,7 @@ def test_transform_drops_index_level_0_column(etl: TermEntityMapping, mock_metri
     """transform should reset a non-contiguous index so no __index_level_0__ column is materialized."""
     etl._data["terms_to_map"] = ["aspirin", "zzz"]
 
-    with patch("tgedr_fdafaers.etl.term_entity_mapping.TermEntity") as mock_term_entity_cls:
+    with patch("tgedr_fdafaers.etl.mapping.term_entity_mapping.TermEntity") as mock_term_entity_cls:
         mock_term_entity = MagicMock()
         mock_term_entity_cls.return_value = mock_term_entity
         # process returns a df whose index is non-contiguous after the notna() filter
@@ -180,8 +180,7 @@ def test_load_saves_result(etl: TermEntityMapping, mock_metrics: MagicMock) -> N
     etl.load()
 
     etl._store.save.assert_called_once_with(
-        df=etl._result, key="s/term_entity", split="train", append=True,
-        data_contract=etl.contract_path("term_entity")
+        df=etl._result, key="s/term_entity", split="train", append=True
     )
     mock_metrics.add_to_gauge.assert_called_once()
 

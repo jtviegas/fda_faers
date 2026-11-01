@@ -5,7 +5,6 @@ This module provides:
   maps them to entities, and loads the resulting mappings into silver.
 """
 
-import atexit
 from typing import Any
 import pandas as pd
 import logging
@@ -36,7 +35,6 @@ class TermEntityMapping(CommonEtl):
         self._store: HuggingFaceDatasetFileArrowBasedStore = HuggingFaceDatasetFileArrowBasedStore(
             config={"visibility": "public"}
         )
-        atexit.register(Metrics.app_shutdown)
 
     @Etl4GH.inject_configuration
     def extract(self, drug_data_url: str, term_entity_data_url: str, sample_size: int = 50000) -> Any:
@@ -116,7 +114,6 @@ class TermEntityMapping(CommonEtl):
                 key=term_entity_data_url,
                 split="train",
                 append=True,
-                data_contract=self.contract_path("term_entity"),
             )
             Metrics.instance().add_to_gauge(
                 name="fda_faers.term_entity_mapping.rows",

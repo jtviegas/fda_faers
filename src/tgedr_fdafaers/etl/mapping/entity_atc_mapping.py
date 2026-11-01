@@ -9,9 +9,8 @@ This module provides:
 from typing import Any
 import pandas as pd
 import logging
-import atexit
 from tgedr_dataops_abs.etl4gh import Etl4GH
-from tgedr_dataops.store.contracted_store import ContractedHFDatasetFileBasedStore, NoStoreException
+from tgedr_dataops.store.hf_dataset_file_based import HuggingFaceDatasetFileBasedStore, NoStoreException
 from tgedr_observability.metrics import Metrics
 from tgedr_fdafaers.atc_mapping.nlm_mapping import NLMMapping
 from tgedr_fdafaers.utils.common_etl import CommonEtl
@@ -36,10 +35,9 @@ class EntityAtcMapping(CommonEtl):
         super().__init__(configuration=configuration)
         self._data: dict[str, pd.DataFrame] = {}
         self._result: pd.DataFrame | None = None
-        self._store: ContractedHFDatasetFileBasedStore = ContractedHFDatasetFileBasedStore(
+        self._store: HuggingFaceDatasetFileBasedStore = HuggingFaceDatasetFileBasedStore(
             config={"visibility": "public"}
         )
-        atexit.register(Metrics.app_shutdown)
 
     @Etl4GH.inject_configuration
     def extract(self, silver_dataset_prefix: str, sample_size: int = 20000) -> Any:
@@ -65,17 +63,20 @@ class EntityAtcMapping(CommonEtl):
 
         entity_atc_table = f"{silver_dataset_prefix}entity_atc"
         df_mapped_entities: pd.DataFrame | None = None
+        n_mapped_entities: int = 0
         try:
             ds_entity_atc = self._store.get(key=entity_atc_table)
             df_mapped_entities = (ds_entity_atc.train)[["entity"]].drop_duplicates()
             logger.info(f"[extract] mapped entities shape: {df_mapped_entities.shape}")
-            Metrics.instance().add_to_gauge(
-                name="fda_faers.entity_atc_mapping.rows",
-                value=df_mapped_entities.shape[0],
-                attributes={"type": "entity_mapped"},
-            )
+            n_mapped_entities = df_mapped_entities.shape[0]
         except NoStoreException as nse:
             logger.warning(f"[extract] silver table {entity_atc_table} not found: {nse}")
+
+        Metrics.instance().add_to_gauge(
+            name="fda_faers.entity_atc_mapping.rows",
+            value=n_mapped_entities,
+            attributes={"type": "entity_mapped"},
+        )
 
         df_entities_to_map: pd.DataFrame = df_entity
         if df_mapped_entities is not None and not df_mapped_entities.empty:

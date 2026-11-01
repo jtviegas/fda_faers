@@ -7,13 +7,13 @@ import pytest
 
 from tgedr_dataops.store.contracted_store import NoStoreException
 
-from tgedr_fdafaers.etl.entity_atc_mapping import EntityAtcMapping
+from tgedr_fdafaers.etl.mapping.entity_atc_mapping import EntityAtcMapping
 
 
 @pytest.fixture()
 def etl() -> EntityAtcMapping:
     """Return an EntityAtcMapping instance with a mocked store."""
-    with patch("tgedr_fdafaers.etl.entity_atc_mapping.ContractedHFDatasetFileBasedStore") as mock_store_cls:
+    with patch("tgedr_fdafaers.etl.mapping.entity_atc_mapping.HuggingFaceDatasetFileBasedStore") as mock_store_cls:
         mock_store = MagicMock()
         mock_store_cls.return_value = mock_store
         etl = EntityAtcMapping(
@@ -29,7 +29,7 @@ def etl() -> EntityAtcMapping:
 @pytest.fixture()
 def mock_metrics() -> MagicMock:
     """Return a mocked Metrics.instance()."""
-    with patch("tgedr_fdafaers.etl.entity_atc_mapping.Metrics") as mock_metrics_cls:
+    with patch("tgedr_fdafaers.etl.mapping.entity_atc_mapping.Metrics") as mock_metrics_cls:
         mock_metrics = MagicMock()
         mock_metrics_cls.instance.return_value = mock_metrics
         yield mock_metrics
@@ -93,7 +93,7 @@ def test_transform_maps_entities_to_atc(etl: EntityAtcMapping, mock_metrics: Mag
     """transform should decorate entities with ATC codes and keep only mapped ones."""
     etl._data["df_entities_to_map"] = pd.DataFrame({"entity": ["aspirin", "zzz"]})
 
-    with patch("tgedr_fdafaers.etl.entity_atc_mapping.NLMMapping") as mock_nlm_cls:
+    with patch("tgedr_fdafaers.etl.mapping.entity_atc_mapping.NLMMapping") as mock_nlm_cls:
         mock_nlm = MagicMock()
         mock_nlm_cls.return_value = mock_nlm
         mock_nlm.decorate.return_value = pd.DataFrame(
@@ -124,7 +124,7 @@ def test_transform_skips_when_all_unmapped(etl: EntityAtcMapping, mock_metrics: 
     """transform should not set a result when no entity got mapped."""
     etl._data["df_entities_to_map"] = pd.DataFrame({"entity": ["zzz"]})
 
-    with patch("tgedr_fdafaers.etl.entity_atc_mapping.NLMMapping") as mock_nlm_cls:
+    with patch("tgedr_fdafaers.etl.mapping.entity_atc_mapping.NLMMapping") as mock_nlm_cls:
         mock_nlm = MagicMock()
         mock_nlm_cls.return_value = mock_nlm
         mock_nlm.decorate.return_value = pd.DataFrame(
@@ -140,7 +140,7 @@ def test_transform_drops_index_level_0_column(etl: EntityAtcMapping, mock_metric
     """transform should reset a non-contiguous index so no __index_level_0__ column is materialized."""
     etl._data["df_entities_to_map"] = pd.DataFrame({"entity": ["aspirin", "zzz"]})
 
-    with patch("tgedr_fdafaers.etl.entity_atc_mapping.NLMMapping") as mock_nlm_cls:
+    with patch("tgedr_fdafaers.etl.mapping.entity_atc_mapping.NLMMapping") as mock_nlm_cls:
         mock_nlm = MagicMock()
         mock_nlm_cls.return_value = mock_nlm
         # decorate returns a df whose index is non-contiguous after the notna() filter

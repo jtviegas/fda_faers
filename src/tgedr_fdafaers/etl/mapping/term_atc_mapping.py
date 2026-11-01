@@ -2,7 +2,6 @@
 
 from typing import Any
 import logging
-import atexit
 from datasets import Dataset
 from tgedr_dataops.store.hf_dataset_file_arrow_based import HuggingFaceDatasetFileArrowBasedStore, NoStoreException
 from tgedr_observability.metrics import Metrics
@@ -24,7 +23,6 @@ class TermAtcMapping(CommonEtl):
         self._data: dict[str, Dataset] = {}
         self._result: Dataset | None = None
         self._store: HuggingFaceDatasetFileArrowBasedStore = HuggingFaceDatasetFileArrowBasedStore()
-        atexit.register(Metrics.app_shutdown)
 
     @CommonEtl.inject_configuration
     def extract(self, silver_dataset_prefix: str) -> Any:
@@ -42,15 +40,17 @@ class TermAtcMapping(CommonEtl):
         logger.info(f"[extract|in] ({silver_dataset_prefix})")
 
         term_atc_dataset = f"{silver_dataset_prefix}term_atc"
+        n_mapped_terms: int = 0
         try:
             mapped_terms: set[str] = set(self._store.get(key=term_atc_dataset, streaming=False).train.unique("term"))
+            n_mapped_terms = len(mapped_terms)
         except NoStoreException as nse:
             logger.warning(f"[extract] dataset '{term_atc_dataset}' not found on Hugging Face Hub: {nse}")
             mapped_terms = set()
 
         Metrics.instance().add_to_gauge(
             name="fda_faers.term_atc_mapping.rows",
-            value=len(mapped_terms),
+            value=n_mapped_terms,
             attributes={"type": "term_atc_mapped"},
         )
 
@@ -61,7 +61,7 @@ class TermAtcMapping(CommonEtl):
         self._data["term_entity"] = ds_term_entity
         Metrics.instance().add_to_gauge(
             name="fda_faers.term_atc_mapping.rows",
-            value=len(ds_term_entity),
+            value=ds_term_entity.num_rows,
             attributes={"type": "term_atc_unmapped"},
         )
         entities: set[str] = set(ds_term_entity.unique("entity"))

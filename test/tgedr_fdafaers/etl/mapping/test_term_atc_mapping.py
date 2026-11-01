@@ -8,13 +8,13 @@ import pytest
 from datasets import Dataset
 
 from tgedr_dataops.store.hf_dataset_file_arrow_based import NoStoreException
-from tgedr_fdafaers.etl.term_atc_mapping import TermAtcMapping
+from tgedr_fdafaers.etl.mapping.term_atc_mapping import TermAtcMapping
 
 
 @pytest.fixture
 def etl() -> TermAtcMapping:
     """Create a TermAtcMapping instance with a mocked dataset store."""
-    with patch("tgedr_fdafaers.etl.term_atc_mapping.HuggingFaceDatasetFileArrowBasedStore") as store_class:
+    with patch("tgedr_fdafaers.etl.mapping.term_atc_mapping.HuggingFaceDatasetFileArrowBasedStore") as store_class:
         store = MagicMock()
         store_class.return_value = store
         instance = TermAtcMapping(configuration={"silver_dataset_prefix": "silver/"})
@@ -25,7 +25,7 @@ def etl() -> TermAtcMapping:
 @pytest.fixture
 def metrics() -> MagicMock:
     """Mock metric recording for the ETL."""
-    with patch("tgedr_fdafaers.etl.term_atc_mapping.Metrics") as metrics_class:
+    with patch("tgedr_fdafaers.etl.mapping.term_atc_mapping.Metrics") as metrics_class:
         instance = MagicMock()
         metrics_class.instance.return_value = instance
         yield instance
