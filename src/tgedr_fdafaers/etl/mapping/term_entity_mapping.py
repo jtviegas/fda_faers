@@ -17,6 +17,7 @@ from tgedr_fdafaers.entity_mapping.term_entity import TermEntity
 from tgedr_fdafaers.utils.common_etl import CommonEtl
 from tgedr_observability.metrics import Metrics
 
+logging.getLogger("great_expectations._docs_decorators").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
