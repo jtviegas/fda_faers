@@ -70,11 +70,8 @@ def test_extract_treats_missing_existing_mapping_as_no_terms_mapped(
 
     assert list(etl._data["term_entity"]) == list(term_entity)
     assert list(etl._data["entity_atc"]) == list(entity_atc)
-    assert metrics.add_to_gauge.call_count == 2
-    metrics.add_to_gauge.assert_any_call(
-        name="fda_faers.term_atc_mapping.rows", value=0, attributes={"type": "term_atc_mapped"}
-    )
-    metrics.add_to_gauge.assert_any_call(
+    assert etl._mapped_terms == 0
+    metrics.add_to_gauge.assert_called_once_with(
         name="fda_faers.term_atc_mapping.rows", value=2, attributes={"type": "term_atc_unmapped"}
     )
 
@@ -105,7 +102,10 @@ def test_extract_excludes_terms_already_mapped(etl: TermAtcMapping, metrics: Mag
 
     assert etl._data["term_entity"]["term"] == ["new term"]
     assert etl._data["entity_atc"]["entity"] == ["new entity"]
-    assert metrics.add_to_gauge.call_count == 2
+    assert etl._mapped_terms == 1
+    metrics.add_to_gauge.assert_called_once_with(
+        name="fda_faers.term_atc_mapping.rows", value=1, attributes={"type": "term_atc_unmapped"}
+    )
 
 
 def test_transform_maps_and_accumulates_atc_codes(etl: TermAtcMapping, metrics: MagicMock) -> None:
@@ -131,11 +131,11 @@ def test_transform_maps_and_accumulates_atc_codes(etl: TermAtcMapping, metrics: 
     assert etl._result is not None
     rows = {row["term"]: row["atc_codes"] for row in etl._result}
     assert rows == {"headache": [{"id": "N02"}, {"id": "N02B"}]}
-    assert metrics.add_to_gauge.call_count == 1
+    assert etl._mapped_terms == 1
     metrics.add_to_gauge.assert_called_once_with(
         name="fda_faers.term_atc_mapping.rows",
         value=1,
-        attributes={"type": "term_atc_mapped_new"},
+        attributes={"type": "term_atc_mapped"},
     )
 
 
@@ -149,7 +149,12 @@ def test_transform_leaves_result_unset_when_no_terms(etl: TermAtcMapping, metric
     etl.transform()
 
     assert etl._result is None
-    metrics.add_to_gauge.assert_not_called()
+    assert etl._mapped_terms == 0
+    metrics.add_to_gauge.assert_called_once_with(
+        name="fda_faers.term_atc_mapping.rows",
+        value=0,
+        attributes={"type": "term_atc_mapped"},
+    )
 
 
 def test_load_saves_nonempty_result(etl: TermAtcMapping) -> None:

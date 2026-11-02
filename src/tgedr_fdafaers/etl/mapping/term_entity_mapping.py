@@ -15,7 +15,6 @@ from tgedr_dataops.store.hf_dataset_file_arrow_based import HuggingFaceDatasetFi
 from tgedr_dataops.store.contracted_store import NoStoreException
 from tgedr_fdafaers.entity_mapping.term_entity import TermEntity
 from tgedr_fdafaers.utils.common_etl import CommonEtl
-from tgedr_observability.metrics import Metrics
 
 logging.getLogger("great_expectations._docs_decorators").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
@@ -50,21 +49,12 @@ class TermEntityMapping(CommonEtl):
             None.
         """
         logger.info(f"[extract|in] ({drug_data_url}, {term_entity_data_url}, {sample_size})")
-
         terms: list[str] = (self._store.get(key=drug_data_url, columns=["term"]).train).unique("term")
         logger.info(f"[extract] bronze terms count: {len(terms)}")
-        Metrics.instance().add_to_gauge(
-            name="fda_faers.term_entity_mapping.rows", value=len(terms), attributes={"type": "term"}
-        )
 
         mapped_terms: list[str] = []
         try:
             mapped_terms = (self._store.get(key=term_entity_data_url, columns=["term"]).train).unique("term")
-            Metrics.instance().add_to_gauge(
-                name="fda_faers.term_entity_mapping.rows",
-                value=len(mapped_terms),
-                attributes={"type": "term_mapped"},
-            )
             logger.info(f"[extract] mapped terms count: {len(mapped_terms)}")
         except NoStoreException as nse:
             logger.warning(f"[extract] silver table {term_entity_data_url} not found: {nse}")
@@ -115,10 +105,5 @@ class TermEntityMapping(CommonEtl):
                 key=term_entity_data_url,
                 split="train",
                 append=True,
-            )
-            Metrics.instance().add_to_gauge(
-                name="fda_faers.term_entity_mapping.rows",
-                value=self._result.shape[0],
-                attributes={"type": "term_mapped_new"},
             )
         logger.info("[load|out]")

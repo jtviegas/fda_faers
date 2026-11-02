@@ -50,7 +50,10 @@ def test_extract_reads_entities_to_map(etl: EntityAtcMapping, mock_metrics: Magi
     assert etl._store.get.call_args_list[0].kwargs["key"] == "s/term_entity"
     assert etl._store.get.call_args_list[1].kwargs["key"] == "s/entity_atc"
     assert set(etl._data["df_entities_to_map"]["entity"]) == {"a", "b", "c"}
-    mock_metrics.add_to_gauge.assert_called()
+    assert etl._mapped_entities == 0
+    mock_metrics.add_to_gauge.assert_called_once_with(
+        name="fda_faers.entity_atc_mapping.rows", value=3, attributes={"type": "entity"}
+    )
 
 
 def test_extract_excludes_already_mapped_entities(etl: EntityAtcMapping, mock_metrics: MagicMock) -> None:
@@ -62,6 +65,10 @@ def test_extract_excludes_already_mapped_entities(etl: EntityAtcMapping, mock_me
     etl.extract()
 
     assert set(etl._data["df_entities_to_map"]["entity"]) == {"c", "d"}
+    assert etl._mapped_entities == 2
+    mock_metrics.add_to_gauge.assert_called_once_with(
+        name="fda_faers.entity_atc_mapping.rows", value=4, attributes={"type": "entity"}
+    )
 
 
 def test_extract_caps_sample_size(etl: EntityAtcMapping, mock_metrics: MagicMock) -> None:
@@ -72,6 +79,10 @@ def test_extract_caps_sample_size(etl: EntityAtcMapping, mock_metrics: MagicMock
     etl.extract()
 
     assert etl._data["df_entities_to_map"].shape[0] == 10
+    assert etl._mapped_entities == 0
+    mock_metrics.add_to_gauge.assert_called_once_with(
+        name="fda_faers.entity_atc_mapping.rows", value=100, attributes={"type": "entity"}
+    )
 
 
 def test_extract_handles_missing_entity_atc_table(etl: EntityAtcMapping, mock_metrics: MagicMock) -> None:
@@ -82,6 +93,10 @@ def test_extract_handles_missing_entity_atc_table(etl: EntityAtcMapping, mock_me
     etl.extract()
 
     assert set(etl._data["df_entities_to_map"]["entity"]) == {"a", "b"}
+    assert etl._mapped_entities == 0
+    mock_metrics.add_to_gauge.assert_called_once_with(
+        name="fda_faers.entity_atc_mapping.rows", value=2, attributes={"type": "entity"}
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -109,6 +124,10 @@ def test_transform_maps_entities_to_atc(etl: EntityAtcMapping, mock_metrics: Mag
     mock_nlm_cls.assert_called_once_with(term_col="entity")
     assert etl._result is not None
     assert list(etl._result["entity"]) == ["aspirin"]
+    assert etl._mapped_entities == 1
+    mock_metrics.add_to_gauge.assert_called_once_with(
+        name="fda_faers.entity_atc_mapping.rows", value=1, attributes={"type": "entity_mapped"}
+    )
 
 
 def test_transform_skips_when_no_entities(etl: EntityAtcMapping, mock_metrics: MagicMock) -> None:
@@ -118,6 +137,10 @@ def test_transform_skips_when_no_entities(etl: EntityAtcMapping, mock_metrics: M
     etl.transform()
 
     assert etl._result is None
+    assert etl._mapped_entities == 0
+    mock_metrics.add_to_gauge.assert_called_once_with(
+        name="fda_faers.entity_atc_mapping.rows", value=0, attributes={"type": "entity_mapped"}
+    )
 
 
 def test_transform_skips_when_all_unmapped(etl: EntityAtcMapping, mock_metrics: MagicMock) -> None:
@@ -134,6 +157,10 @@ def test_transform_skips_when_all_unmapped(etl: EntityAtcMapping, mock_metrics: 
         etl.transform()
 
     assert etl._result is None
+    assert etl._mapped_entities == 0
+    mock_metrics.add_to_gauge.assert_called_once_with(
+        name="fda_faers.entity_atc_mapping.rows", value=0, attributes={"type": "entity_mapped"}
+    )
 
 
 def test_transform_drops_index_level_0_column(etl: EntityAtcMapping, mock_metrics: MagicMock) -> None:
@@ -158,6 +185,10 @@ def test_transform_drops_index_level_0_column(etl: EntityAtcMapping, mock_metric
     assert etl._result is not None
     assert "__index_level_0__" not in etl._result.columns
     assert list(etl._result.index) == [0]
+    assert etl._mapped_entities == 1
+    mock_metrics.add_to_gauge.assert_called_once_with(
+        name="fda_faers.entity_atc_mapping.rows", value=1, attributes={"type": "entity_mapped"}
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -175,7 +206,7 @@ def test_load_saves_result(etl: EntityAtcMapping, mock_metrics: MagicMock) -> No
         df=etl._result, key="s/entity_atc", split="train", append=True,
         data_contract=etl.contract_path("entity_atc")
     )
-    mock_metrics.add_to_gauge.assert_called_once()
+    mock_metrics.add_to_gauge.assert_not_called()
 
 
 def test_load_skips_save_without_result(etl: EntityAtcMapping, mock_metrics: MagicMock) -> None:

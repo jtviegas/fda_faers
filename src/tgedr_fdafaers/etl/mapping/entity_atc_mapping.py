@@ -38,6 +38,7 @@ class EntityAtcMapping(CommonEtl):
         self._store: HuggingFaceDatasetFileBasedStore = HuggingFaceDatasetFileBasedStore(
             config={"visibility": "public"}
         )
+        self._mapped_entities: int = 0
 
     @Etl4GH.inject_configuration
     def extract(self, silver_dataset_prefix: str, sample_size: int = 20000) -> Any:
@@ -63,20 +64,13 @@ class EntityAtcMapping(CommonEtl):
 
         entity_atc_table = f"{silver_dataset_prefix}entity_atc"
         df_mapped_entities: pd.DataFrame | None = None
-        n_mapped_entities: int = 0
         try:
             ds_entity_atc = self._store.get(key=entity_atc_table)
             df_mapped_entities = (ds_entity_atc.train)[["entity"]].drop_duplicates()
             logger.info(f"[extract] mapped entities shape: {df_mapped_entities.shape}")
-            n_mapped_entities = df_mapped_entities.shape[0]
+            self._mapped_entities = df_mapped_entities.shape[0]
         except NoStoreException as nse:
             logger.warning(f"[extract] silver table {entity_atc_table} not found: {nse}")
-
-        Metrics.instance().add_to_gauge(
-            name="fda_faers.entity_atc_mapping.rows",
-            value=n_mapped_entities,
-            attributes={"type": "entity_mapped"},
-        )
 
         df_entities_to_map: pd.DataFrame = df_entity
         if df_mapped_entities is not None and not df_mapped_entities.empty:
@@ -108,6 +102,13 @@ class EntityAtcMapping(CommonEtl):
             df_mapped = df_mapped[df_mapped["atc_codes"].notna()]
             if not df_mapped.empty:
                 self._result = df_mapped.reset_index(drop=True)
+                self._mapped_entities += df_mapped.shape[0]
+
+        Metrics.instance().add_to_gauge(
+            name="fda_faers.entity_atc_mapping.rows",
+            value=self._mapped_entities,
+            attributes={"type": "entity_mapped"},
+        )
 
         logger.info(f"[transform|out] result shape: {self._result.shape if self._result is not None else (0, 0)}")
 
@@ -130,10 +131,5 @@ class EntityAtcMapping(CommonEtl):
                 split="train",
                 append=True,
                 data_contract=self.contract_path("entity_atc"),
-            )
-            Metrics.instance().add_to_gauge(
-                name="fda_faers.entity_atc_mapping.rows",
-                value=self._result.shape[0],
-                attributes={"type": "entity_mapped_new"},
             )
         logger.info("[load|out]")

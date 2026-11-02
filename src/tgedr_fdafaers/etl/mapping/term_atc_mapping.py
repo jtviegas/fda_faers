@@ -23,6 +23,7 @@ class TermAtcMapping(CommonEtl):
         self._data: dict[str, Dataset] = {}
         self._result: Dataset | None = None
         self._store: HuggingFaceDatasetFileArrowBasedStore = HuggingFaceDatasetFileArrowBasedStore()
+        self._mapped_terms: int = 0
 
     @CommonEtl.inject_configuration
     def extract(self, silver_dataset_prefix: str) -> Any:
@@ -40,19 +41,12 @@ class TermAtcMapping(CommonEtl):
         logger.info(f"[extract|in] ({silver_dataset_prefix})")
 
         term_atc_dataset = f"{silver_dataset_prefix}term_atc"
-        n_mapped_terms: int = 0
         try:
             mapped_terms: set[str] = set(self._store.get(key=term_atc_dataset, streaming=False).train.unique("term"))
-            n_mapped_terms = len(mapped_terms)
+            self._mapped_terms = len(mapped_terms)
         except NoStoreException as nse:
             logger.warning(f"[extract] dataset '{term_atc_dataset}' not found on Hugging Face Hub: {nse}")
             mapped_terms = set()
-
-        Metrics.instance().add_to_gauge(
-            name="fda_faers.term_atc_mapping.rows",
-            value=n_mapped_terms,
-            attributes={"type": "term_atc_mapped"},
-        )
 
         term_entity_table = f"{silver_dataset_prefix}term_entity"
         ds_term_entity = self._store.get(key=term_entity_table, streaming=False).train.filter(
@@ -103,11 +97,13 @@ class TermAtcMapping(CommonEtl):
         ]
         if 0 < len(new_rows):
             self._result = Dataset.from_list(new_rows)
-            Metrics.instance().add_to_gauge(
-                name="fda_faers.term_atc_mapping.rows",
-                value=self._result.num_rows,
-                attributes={"type": "term_atc_mapped_new"},
-            )
+            self._mapped_terms += self._result.num_rows
+
+        Metrics.instance().add_to_gauge(
+            name="fda_faers.term_atc_mapping.rows",
+            value=self._mapped_terms,
+            attributes={"type": "term_atc_mapped"},
+        )
 
         logger.info(f"[transform|out] => {self._result}")
 
