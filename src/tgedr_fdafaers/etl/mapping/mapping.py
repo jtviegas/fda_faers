@@ -67,9 +67,9 @@ class Mapping(CommonEtl):
     def _get_drug(self, bronze_dataset_prefix: str, silver_dataset_prefix: str, batch_size: int) -> Dataset:
         logger.info(f"[_get_drug|in] ({bronze_dataset_prefix}, {silver_dataset_prefix}, {batch_size})")
 
-        ids: list[int] = []
+        ids: set[int] = set()
         try:
-            ids = self._store.get(f"{silver_dataset_prefix}drug").train.unique("primaryid")
+            ids = set(self._store.get(f"{silver_dataset_prefix}drug").train.unique("primaryid"))
         except NoStoreException:
             logger.warning("[_get_drug] no silver dataset for drug")
 
