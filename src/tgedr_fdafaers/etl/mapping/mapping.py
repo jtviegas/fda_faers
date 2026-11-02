@@ -74,7 +74,7 @@ class Mapping(CommonEtl):
             logger.warning("[_get_drug] no silver dataset for drug")
 
         dataset_stream = self._store.get(f"{bronze_dataset_prefix}drug", streaming=False).train
-        result: Dataset = dataset_stream.filter(lambda row: row["primaryid"] not in ids).take(batch_size) # type: ignore
+        result: Dataset = dataset_stream.filter(lambda row: row["primaryid"] not in ids).take(batch_size) # type: ignore  # noqa: PGH003
 
         logger.info(f"[_get_drug|out] Retrieved {result.num_rows} rows from bronze dataset")
         return result
