@@ -6,6 +6,16 @@
 ![Coverage](./coverage.svg)
 [![PyPI](https://img.shields.io/pypi/v/tgedr-fdafaers)](https://pypi.org/project/tgedr-fdafaers/)
 
+## FAERS tables (in HuggingFace)
+
+- [demo](https://huggingface.co/datasets/jtviegas/faers_bronze_demo)
+- [drug](https://huggingface.co/datasets/jtviegas/faers_silver_drug)
+- [outc](https://huggingface.co/datasets/jtviegas/faers_bronze_outc)
+- [indi](https://huggingface.co/datasets/jtviegas/faers_bronze_indi)
+- [reac](https://huggingface.co/datasets/jtviegas/faers_bronze_reac)
+- [ther](https://huggingface.co/datasets/jtviegas/faers_bronze_ther)
+- [rpsr](https://huggingface.co/datasets/jtviegas/faers_bronze_rpsr)
+
 
 ## data pipeline metrics
 
