@@ -73,10 +73,10 @@ class Mapping(CommonEtl):
         except NoStoreException:
             logger.warning("[_get_drug] no silver dataset for drug")
 
-        dataset_stream = self._store.get(f"{bronze_dataset_prefix}drug", streaming=True).train
-        subset = dataset_stream.filter(lambda row: row["primaryid"] not in ids).take(batch_size)
-        result: Dataset = Dataset.from_list(subset)
-        logger.info(f"[_get_drug|out] Retrieved {len(subset)} rows from bronze dataset")
+        dataset_stream = self._store.get(f"{bronze_dataset_prefix}drug", streaming=False).train
+        result: Dataset = dataset_stream.filter(lambda row: row["primaryid"] not in ids).take(batch_size) # type: ignore
+
+        logger.info(f"[_get_drug|out] Retrieved {result.num_rows} rows from bronze dataset")
         return result
 
     def _do_drug(self, ds: Dataset, silver_dataset_prefix: str) -> Dataset:
@@ -99,7 +99,7 @@ class Mapping(CommonEtl):
         ds_term_atc_url = f"{silver_dataset_prefix}term_atc"
         term_atc_map: dict[str, list[str]] = {}
         try:
-            ds_term_atc = self._store.get(ds_term_atc_url).train
+            ds_term_atc: Dataset = self._store.get(ds_term_atc_url).train
             for row in ds_term_atc:
                 term_atc_map[row["term"]] = row["atc_codes"]
         except NoStoreException as nse:

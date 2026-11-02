@@ -41,7 +41,7 @@ def _dataset(rows: list[dict]) -> Dataset:
 def test_extract_reads_unprocessed_bronze_drug_rows(etl: Mapping, silver_missing: bool) -> None:
     """Extract bronze drug rows whether or not the silver drug dataset exists."""
     stream = MagicMock()
-    stream.filter.return_value.take.return_value = [{"primaryid": 2, "term": "aspirin"}]
+    stream.filter.return_value.take.return_value = _dataset([{"primaryid": 2, "term": "aspirin"}])
     bronze = MagicMock(train=stream)
     if silver_missing:
         etl._store.get.side_effect = [NoStoreException("missing silver drug dataset"), bronze]
@@ -50,7 +50,7 @@ def test_extract_reads_unprocessed_bronze_drug_rows(etl: Mapping, silver_missing
 
     etl.extract()
 
-    etl._store.get.assert_any_call("b/drug", streaming=True)
+    etl._store.get.assert_any_call("b/drug", streaming=False)
     assert etl._data["drug"][0]["term"] == "aspirin"
 
 
