@@ -97,7 +97,7 @@ class EntityAtcMapping(CommonEtl):
         logger.info("[transform|in]")
 
         if "df_entities_to_map" in self._data:
-            atc_mapper = NLMMapping(term_col="entity")
+            atc_mapper = NLMMapping(entity_col="entity")
             df_mapped = atc_mapper.decorate(df=self._data["df_entities_to_map"])
             df_mapped = df_mapped[df_mapped["atc_codes"].notna()]
             if not df_mapped.empty:

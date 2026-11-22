@@ -130,7 +130,7 @@ def test_nlm_mapping_init_defaults() -> None:
 
 def test_nlm_mapping_init_custom_columns() -> None:
     """Custom column names should be honoured."""
-    mapping = NLMMapping(term_col="drug", output_col="codes")
+    mapping = NLMMapping(entity_col="drug", output_col="codes")
 
     assert mapping._term_col == "drug"
     assert mapping._output_col == "codes"

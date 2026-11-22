@@ -9,6 +9,9 @@ from typing import Any
 import logging
 
 import pandas as pd
+from pyspark.sql import DataFrame
+from pyspark.sql import functions as F  # noqa: N812
+from pyspark.sql.types import ArrayType, MapType, StringType
 
 from tgedr_fdafaers.atc_mapping.nlm_rxnav_api.facade import NLMRxNavApiFacade
 from tgedr_fdafaers.atc_mapping.mapping import AtcClass, AtcMapping
@@ -17,40 +20,30 @@ logger = logging.getLogger(__name__)
 
 
 class NLMMapping(AtcMapping):
-    """DataFrame-level ATC mapping using the NLM RxNav API.
-
-    Unique terms are resolved first (deduplication) so that each distinct drug
-    name hits the NLM API exactly once. The mapped results are then joined
-    back to the original DataFrame.
-
-    Example::
-
-        mapping = NLMMapping(term_col="term", output_col="atc_codes")
-        decorated_df = mapping.decorate(drug_df)
-    """
+    """Map drug terms to ATC classes using the NLM RxNav API."""
 
     def __init__(
         self,
-        term_col: str = "term",
+        entity_col: str = "entity",
         output_col: str = "atc_codes",
         facade: NLMRxNavApiFacade | None = None,
     ) -> None:
         """Initialise with configurable column names and an optional facade.
 
         Args:
-            term_col: DataFrame column holding drug/ingredient term strings.
+            entity_col: DataFrame column holding drug/ingredient term strings.
             output_col: Name of the column added with the resolved ATC codes.
             facade: Optional NLMRxNavApiFacade instance; a new one is created
                 when not provided (useful for injecting mocks in tests).
         """
-        super().__init__(term_col=term_col, output_col=output_col)
+        super().__init__(term_col=entity_col, output_col=output_col)
         logger.info(
-            f"[__init__|in] term_col={term_col!r}, output_col={output_col!r}, facade_provided={facade is not None}"
+            f"[__init__|in] term_col={entity_col!r}, output_col={output_col!r}, facade_provided={facade is not None}"
         )
         self._facade = facade if facade is not None else NLMRxNavApiFacade()
         logger.info("[__init__|out]")
 
-    def map_atc_classes(self, term: str) -> list[AtcClass]:
+    def map_atc_classes(self, term: str) -> list[AtcClass] | None:
         """Map ATC classes for a given drug term using the NLM RxNav API.
 
         Args:
@@ -61,12 +54,12 @@ class NLMMapping(AtcMapping):
         """
         logger.debug(f"[map_atc_classes|in] ({term})")
         facade = self._facade
-        result: list[AtcClass] = []
+        result: list[AtcClass] | None = None
 
         rxnormid: str | None = facade.get_rxnormid(term)
         if rxnormid is None:
             logger.debug(f"[map_atc_classes] No RxNorm ID found for term: {term}")
-            return []
+            return None
 
         ingredients: list[Any] = facade.get_concepts(rxnormid, tty_filter=["IN", "PIN"])
         if len(ingredients) == 0:
@@ -75,14 +68,16 @@ class NLMMapping(AtcMapping):
 
         if len(ingredients) == 0:
             logger.debug(f"[map_atc_classes] No ingredients found for RxNorm ID: {rxnormid}")
-            return []
+            return None
 
+        atc_classes: list[AtcClass] = []
         for ingredient in ingredients:
             rxcui = ingredient["rxcui"]
             for atc_class in facade.get_atc_classes(rxcui):
-                result.append(  # noqa: PERF401
+                atc_classes.append(  # noqa: PERF401
                     AtcClass(id=atc_class["classId"], name=atc_class["className"], class_type=atc_class["classType"])
                 )
+        result = atc_classes if atc_classes else None
 
         logger.debug(f"[map_atc_classes|out] => {result}")
         return result
@@ -91,12 +86,12 @@ class NLMMapping(AtcMapping):
         """Decorate *df* with ATC codes resolved via the NLM RxNav API.
 
         Steps:
-        1. Select distinct values of ``term_col`` to avoid duplicate API calls.
+        1. Select distinct values of ``entity_col`` to avoid duplicate API calls.
         2. Apply ``map_atc_classes`` to each unique term.
         3. Left-join the results back to the original DataFrame.
 
         Args:
-            df: Input DataFrame. Must contain a string column named ``self._term_col``.
+            df: Input DataFrame. Must contain a string column named ``self._entity_col``.
 
         Returns:
             Original DataFrame with ``self._output_col`` appended.
@@ -109,13 +104,49 @@ class NLMMapping(AtcMapping):
             classes = self.map_atc_classes(term=term)
             return [c.to_dict() for c in classes] if classes else None
 
-        unique_terms = df[[self._term_col]].drop_duplicates()
+        unique_terms = df[[self._entity_col]].drop_duplicates()
         mapped = unique_terms.copy()
-        mapped[self._output_col] = mapped[self._term_col].apply(_resolve_atc)
+        mapped[self._output_col] = mapped[self._entity_col].apply(_resolve_atc)
         mapped["strategy"] = self.__class__.__name__
-        result = df.merge(mapped, on=self._term_col, how="left")
+        result = df.merge(mapped, on=self._entity_col, how="left")
         n_mapped = mapped[self._output_col].notna().sum()
-        logger.info(f"[decorate] number of terms successfully mapped: {n_mapped}")
+        logger.info(f"[decorate] number of new successfully mappings: {n_mapped}")
 
         logger.info(f"[decorate|out] => {result.shape}")
+        return result
+
+    def decorate_pyspark(self, df: DataFrame) -> DataFrame:
+        """Decorate a PySpark DataFrame with ATC codes resolved via the NLM RxNav API.
+
+        Steps:
+        1. Select distinct values of ``entity_col`` to avoid duplicate API calls.
+        2. Apply ``map_atc_classes`` to each unique term via a UDF.
+        3. Left-join the results back to the original DataFrame.
+
+        Args:
+            df: Input PySpark DataFrame. Must contain a string column named ``self._entity_col``.
+
+        Returns:
+            Original DataFrame with ``self._output_col`` appended.
+        """
+        logger.info(f"[decorate_pyspark|in] ({df})")
+
+        def _resolve_atc(term: str) -> list[dict] | None:
+            if not term:
+                return None
+            classes: list[AtcClass] | None = self.map_atc_classes(term=term)
+            return [c.to_dict() for c in classes] if classes else None
+
+        resolve_atc_udf = F.udf(_resolve_atc, ArrayType(MapType(StringType(), StringType())))
+
+        unique_entities = df.select(self._entity_col).dropDuplicates()
+        mapped = unique_entities.withColumn(self._output_col, resolve_atc_udf(F.col(self._entity_col))).withColumn(
+            "strategy", F.lit(self.__class__.__name__)
+        )
+        result = df.join(mapped, on=self._entity_col, how="left")
+
+        n_mapped = mapped.filter(F.col(self._output_col).isNotNull()).count()
+        logger.info(f"[decorate_pyspark] number of new successfully mappings: {n_mapped}")
+
+        logger.info("[decorate_pyspark|out]")
         return result
